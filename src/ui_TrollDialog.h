@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'TrollDialog.ui'
 **
-** Created by: Qt User Interface Compiler version 5.7.0
+** Created by: Qt User Interface Compiler version 5.8.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -40,8 +40,8 @@ public:
 
     void retranslateUi(QDialog *TrollDialog)
     {
-        TrollDialog->setWindowTitle(QApplication::translate("TrollDialog", "Dialog", 0));
-        label->setText(QApplication::translate("TrollDialog", ":(", 0));
+        TrollDialog->setWindowTitle(QApplication::translate("TrollDialog", "Dialog", Q_NULLPTR));
+        label->setText(QApplication::translate("TrollDialog", ":(", Q_NULLPTR));
     } // retranslateUi
 
 };

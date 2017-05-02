@@ -53,6 +53,7 @@ class Crypt : public QObject
         static EVP_PKEY* getPublicKeyFromCertificate(X509* cert);
         static RSA* getRSAFromEVP_PKEY(EVP_PKEY* pKey);
         static void init();
+        static bool paused;
 
     Q_SIGNALS:
         void aes_decrypt_updated(qint32 progress);

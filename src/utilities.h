@@ -6,6 +6,7 @@
 namespace utilities{
 
     bool checkFileExists(std::string const &filename);
+    QString speed_to_human(quint64 speed);
 
     int random(void *);
 

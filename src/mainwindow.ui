@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>589</width>
+    <width>734</width>
     <height>300</height>
    </rect>
   </property>
@@ -86,7 +86,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>589</width>
+     <width>734</width>
      <height>20</height>
     </rect>
    </property>
@@ -95,6 +95,7 @@
      <string>Options</string>
     </property>
     <addaction name="actionObtenir_la_cl"/>
+    <addaction name="actionParam_tres"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
@@ -102,6 +103,11 @@
   <action name="actionObtenir_la_cl">
    <property name="text">
     <string>Obtenir la clé</string>
+   </property>
+  </action>
+  <action name="actionParam_tres">
+   <property name="text">
+    <string>Paramètres</string>
    </property>
   </action>
  </widget>

@@ -1,20 +1,24 @@
-#include "FilesEncrypt.h"
 #include <QFile>
 #include <QFileInfo>
-#include "openssl/err.h"
-#include "openssl/aes.h"
-#include "openssl/rsa.h"
-#include "openssl/pem.h"
-#include "Logger.h"
 #include <iostream>
 #include <QtDebug>
 #include <QTemporaryFile>
 #include <QThread>
 #include <QTimer>
+#include "FilesEncrypt.h"
+#include "utilities.h"
+#include "openssl/err.h"
+#include "openssl/aes.h"
+#include "openssl/rsa.h"
+#include "openssl/pem.h"
+#include "Logger.h"
 
-#define TIME_MIN_REMOVE_AES 1
+#define TIME_MIN_REMOVE_AES 3
 
-const char compare[] = {'E', 0x31, 'N', 0x31, 'C', 0x31, 'R', 0x31, 'Y', 0x31, 'P', 0x31, 'T', 0x31, 'E', 0x31, 'D', 0x31};
+constexpr char compare[] = {'E', 0x31, 'N', 0x31, 'C', 0x31, 'R', 0x31, 'Y', 0x31, 'P', 0x31, 'T', 0x31, 'E', 0x31, 'D', 0x31};
+constexpr size_t COMPARE_SIZE = sizeof(compare)/sizeof(*compare);
+constexpr size_t SIZE_BEFORE_CONTENT = COMPARE_SIZE * 2 + AES_BLOCK_SIZE;
+
 
 // Current crpyts number
 unsigned FilesEncrypt::m_pendingCrypt = 0;
@@ -34,11 +38,17 @@ void FilesEncrypt::addPendingCrypt(){
 void FilesEncrypt::removePendingCrypt(){
     m_mutex.lock();
     --m_pendingCrypt;
+    emit file_done();
     m_mutex.unlock();
 }
 
 const unsigned char* FilesEncrypt::getAES() const{
     return m_aes_decrypted;
+}
+
+unsigned FilesEncrypt::getPendingCrypt()
+{
+    return m_pendingCrypt;
 }
 
 bool FilesEncrypt::genKey(QString const& file, QString const& password){
@@ -71,7 +81,7 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
         NULL
     );
 
-    const unsigned bufSize = 16;
+    constexpr unsigned bufSize = 16;
     rsaBuff = reinterpret_cast<char*>(malloc(bufSize + 1));
     std::string rsaStr;
     while(BIO_read(bio, reinterpret_cast<char*>(rsaBuff), bufSize) > 0){
@@ -88,7 +98,7 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
     aes_encrypted = reinterpret_cast<unsigned char*>(malloc(RSA_size(public_key)));
     Crypt::encrypt(public_key, aes, AESSIZE::S256, aes_encrypted);
 
-    const char sep = 0x10;
+    constexpr char sep = 0x10;
 
     QFile f(std::move(file));
     if(f.open(QFile::WriteOnly)){
@@ -259,6 +269,7 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
     unsigned char* iv = NULL;
 
     QTemporaryFile tmpFile;
+    tmpFile.setAutoRemove(true);
     tmpFile.open();
     QString name(file->fileName());
 
@@ -291,8 +302,8 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
 
         // Log final size
-        int futureSize = (file->size() / 16 + 1) * 16 + 18 + 18 + AES_BLOCK_SIZE;
-        Logger::info("Future file size will be " + QString::number(futureSize) + " bytes");
+        quint64 futureSize = (file->size() / 16 + 1) * 16 + SIZE_BEFORE_CONTENT;
+        Logger::info("Future file size will be " + utilities::speed_to_human(futureSize) + " bytes");
 
         // Crypt data
 
@@ -311,17 +322,26 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
             goto end;
         }
 
+	addPendingCrypt();
+
         // Gen IV
-        file->seek(18);
+	file->seek(COMPARE_SIZE);
         QByteArray ivB = file->read(AES_BLOCK_SIZE);
         iv = reinterpret_cast<unsigned char*>(ivB.data());
-        Logger::info("File's IV is " + QByteArray(reinterpret_cast<char*>(iv), 16));
+	QString msg = "";
+	msg += "File's IV is ";
+	for(quint8 i{0}; i < 16; ++i){
+	    msg += QString::number(*(iv + i)) + " ";
+	}
+	Logger::info(msg.trimmed());
 
-        file->seek(18 + 18 + AES_BLOCK_SIZE);
+
+	file->seek(SIZE_BEFORE_CONTENT);
         crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, iv);
 
         success = true;
         Logger::info("File " + filename + " decrypted");
+        removePendingCrypt();
 
     }
 
@@ -341,7 +361,7 @@ end:
 }
 
 EncryptDecrypt FilesEncrypt::guessEncrypted(QFile& file){
-    QByteArray content = file.read(18 + 18 + AES_BLOCK_SIZE);
+    QByteArray content = file.read(SIZE_BEFORE_CONTENT);
     return FilesEncrypt::guessEncrypted(content);
 }
 
@@ -358,7 +378,7 @@ EncryptDecrypt FilesEncrypt::guessEncrypted(QDir& dir){
             if(!file.open(QFile::ReadOnly)){
                 ;; // TODO MOTHERFUCKER
             }
-            if(FilesEncrypt::guessEncrypted(file.readAll()) == EncryptDecrypt::ENCRYPT){
+	    if(FilesEncrypt::guessEncrypted(file) == EncryptDecrypt::ENCRYPT){
                 crypted++;
             }else{
                 uncrypted++;
@@ -375,22 +395,29 @@ EncryptDecrypt FilesEncrypt::guessEncrypted(QDir& dir){
     }
 }
 
-QStringList FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
+FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
     QFileInfoList objects = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
     QStringList files;
+    quint64 size{0};
     foreach(auto object, objects){
         if(object.isDir()){
            //qDebug() << "Entering recursive " << object.absoluteFilePath();
-           files.append(getFilesFromDirRecursive(QDir(object.absoluteFilePath())));
+           FilesAndSize f_tmp{getFilesFromDirRecursive(QDir(object.absoluteFilePath()))};
+           size += f_tmp.size;
+           files.append(f_tmp.files);
         }else{
             files.append(object.absoluteFilePath());
+            size += object.size();
         }
     }
-    return files;
+    FilesAndSize f;
+    f.files = files;
+    f.size = size;
+    return f;
 }
 
 EncryptDecrypt FilesEncrypt::guessEncrypted(QByteArray const& content){
-    QByteArray header = content.mid(0, 18);
+    QByteArray header = content.mid(0, COMPARE_SIZE); // Be sure we check the right size
     if(strcmp(header.constData(), &compare[0]) == 0){
         return EncryptDecrypt::ENCRYPT;
     }

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'SettingsWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.7.0
+** Created by: Qt User Interface Compiler version 5.8.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -59,8 +59,8 @@ public:
 
     void retranslateUi(QWidget *SettingsWindow)
     {
-        SettingsWindow->setWindowTitle(QApplication::translate("SettingsWindow", "Form", 0));
-        checkBox->setText(QApplication::translate("SettingsWindow", "DO NO PUSH THIS", 0));
+        SettingsWindow->setWindowTitle(QApplication::translate("SettingsWindow", "Form", Q_NULLPTR));
+        checkBox->setText(QApplication::translate("SettingsWindow", "DO NO PUSH THIS", Q_NULLPTR));
     } // retranslateUi
 
 };

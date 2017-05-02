@@ -1,0 +1,11 @@
+src/*.pro.user*
+src/Makefile*
+src/debug
+src/release
+src/bin/*
+src/build
+src/.qmake.stash
+build-*
+Makefile*
+bin
+build

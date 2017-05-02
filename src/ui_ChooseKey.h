@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ChooseKey.ui'
 **
-** Created by: Qt User Interface Compiler version 5.7.0
+** Created by: Qt User Interface Compiler version 5.8.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -89,10 +89,10 @@ public:
 
     void retranslateUi(QWidget *ChooseKey)
     {
-        ChooseKey->setWindowTitle(QApplication::translate("ChooseKey", "S\303\251lectionner une cl\303\251", 0));
-        select->setText(QApplication::translate("ChooseKey", "S\303\251lectionner", 0));
-        newKey->setText(QApplication::translate("ChooseKey", "Cr\303\251er une nouvelle cl\303\251", 0));
-        choose->setText(QApplication::translate("ChooseKey", "Choisir", 0));
+        ChooseKey->setWindowTitle(QApplication::translate("ChooseKey", "S\303\251lectionner une cl\303\251", Q_NULLPTR));
+        select->setText(QApplication::translate("ChooseKey", "Parcourir", Q_NULLPTR));
+        newKey->setText(QApplication::translate("ChooseKey", "Cr\303\251er une nouvelle cl\303\251", Q_NULLPTR));
+        choose->setText(QApplication::translate("ChooseKey", "OK", Q_NULLPTR));
     } // retranslateUi
 
 };

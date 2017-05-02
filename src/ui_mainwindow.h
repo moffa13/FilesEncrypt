@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.7.0
+** Created by: Qt User Interface Compiler version 5.8.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -31,6 +31,7 @@ class Ui_MainWindow
 {
 public:
     QAction *actionObtenir_la_cl;
+    QAction *actionParam_tres;
     QWidget *centralwidget;
     QVBoxLayout *verticalLayout_4;
     QTableWidget *tableWidget;
@@ -50,10 +51,12 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(589, 300);
+        MainWindow->resize(734, 300);
         MainWindow->setMinimumSize(QSize(500, 300));
         actionObtenir_la_cl = new QAction(MainWindow);
         actionObtenir_la_cl->setObjectName(QStringLiteral("actionObtenir_la_cl"));
+        actionParam_tres = new QAction(MainWindow);
+        actionParam_tres->setObjectName(QStringLiteral("actionParam_tres"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         verticalLayout_4 = new QVBoxLayout(centralwidget);
@@ -105,7 +108,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 589, 20));
+        menubar->setGeometry(QRect(0, 0, 734, 20));
         menuOptions = new QMenu(menubar);
         menuOptions->setObjectName(QStringLiteral("menuOptions"));
         MainWindow->setMenuBar(menubar);
@@ -115,6 +118,7 @@ public:
 
         menubar->addAction(menuOptions->menuAction());
         menuOptions->addAction(actionObtenir_la_cl);
+        menuOptions->addAction(actionParam_tres);
 
         retranslateUi(MainWindow);
 
@@ -123,14 +127,15 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Encrypter", 0));
-        actionObtenir_la_cl->setText(QApplication::translate("MainWindow", "Obtenir la cl\303\251", 0));
-        importButton->setText(QApplication::translate("MainWindow", "Ajouter", 0));
-        invertAll->setText(QApplication::translate("MainWindow", "Intervertir", 0));
-        cryptAll->setText(QApplication::translate("MainWindow", "Crypter", 0));
-        decryptAll->setText(QApplication::translate("MainWindow", "D\303\251crypter", 0));
-        remove->setText(QApplication::translate("MainWindow", "Supprimer", 0));
-        menuOptions->setTitle(QApplication::translate("MainWindow", "Options", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Encrypter", Q_NULLPTR));
+        actionObtenir_la_cl->setText(QApplication::translate("MainWindow", "Obtenir la cl\303\251", Q_NULLPTR));
+        actionParam_tres->setText(QApplication::translate("MainWindow", "Param\303\250tres", Q_NULLPTR));
+        importButton->setText(QApplication::translate("MainWindow", "Ajouter", Q_NULLPTR));
+        invertAll->setText(QApplication::translate("MainWindow", "Intervertir", Q_NULLPTR));
+        cryptAll->setText(QApplication::translate("MainWindow", "Crypter", Q_NULLPTR));
+        decryptAll->setText(QApplication::translate("MainWindow", "D\303\251crypter", Q_NULLPTR));
+        remove->setText(QApplication::translate("MainWindow", "Supprimer", Q_NULLPTR));
+        menuOptions->setTitle(QApplication::translate("MainWindow", "Options", Q_NULLPTR));
     } // retranslateUi
 
 };

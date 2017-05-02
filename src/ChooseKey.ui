@@ -22,7 +22,7 @@
      <item>
       <widget class="QPushButton" name="select">
        <property name="text">
-        <string>Sélectionner</string>
+        <string>Parcourir</string>
        </property>
       </widget>
      </item>
@@ -66,7 +66,7 @@
      <item>
       <widget class="QPushButton" name="choose">
        <property name="text">
-        <string>Choisir</string>
+        <string>OK</string>
        </property>
       </widget>
      </item>

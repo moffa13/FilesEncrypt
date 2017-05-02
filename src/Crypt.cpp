@@ -26,6 +26,8 @@
 
 using namespace std;
 
+bool Crypt::paused = false;
+
 
 Crypt::Crypt()
 {
@@ -239,7 +241,7 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
     while((read = file->read(reinterpret_cast<char*>(buffer), 16)) > 0){
         EVP_EncryptUpdate(ctx, crypted, &lastLength, buffer, read);
         tmpFile->write(reinterpret_cast<char*>(crypted), lastLength);
-
+        while(paused) QThread::msleep(100);
         ++pass;
         readPass += read;
         if(pass >= 64){
@@ -282,7 +284,7 @@ void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, u
 
         EVP_DecryptUpdate(ctx, uncrypted, &lastLength, buffer, read);
         tmpFile->write(reinterpret_cast<char*>(uncrypted), lastLength);
-
+        while(paused) QThread::msleep(100);
         ++pass;
         readPass += read;
         if(pass >= 64){

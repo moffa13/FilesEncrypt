@@ -8,10 +8,16 @@
 #include <QMutex>
 
 enum EncryptDecrypt{
-    ENCRYPT,
-    DECRYPT,
-    PARTIAL
+    NOT_FINISHED = - 1,
+    ENCRYPT = 0,
+    DECRYPT = 1,
+    PARTIAL = 2
 };
+
+typedef struct{
+    QStringList files;
+    quint64 size;
+} FilesAndSize;
 
 class FilesEncrypt : public QObject
 {
@@ -28,10 +34,12 @@ public:
     static EncryptDecrypt guessEncrypted(QFile& f);
     static EncryptDecrypt guessEncrypted(QDir& dir);
     static EncryptDecrypt guessEncrypted(QByteArray const& content);
-    static QStringList getFilesFromDirRecursive(QDir const& dir);
+    static FilesAndSize getFilesFromDirRecursive(QDir const& dir);
     bool requestAesDecrypt(std::string const& password, bool* passOk = NULL);
     bool isAesUncrypted();
     const unsigned char* getAES() const;
+    static unsigned getPendingCrypt();
+
 private:
     std::string m_key_file;
     unsigned char* m_aes_crypted;
@@ -46,6 +54,7 @@ private:
 Q_SIGNALS:
     void encrypt_updated(qint32 progress);
     void decrypt_updated(qint32 progress);
+    void file_done();
 };
 
 #endif // FILESENCRYPT_H

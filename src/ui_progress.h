@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'progress.ui'
 **
-** Created by: Qt User Interface Compiler version 5.7.0
+** Created by: Qt User Interface Compiler version 5.8.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -15,6 +15,7 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
@@ -30,15 +31,19 @@ public:
     QProgressBar *progress;
     QSpacerItem *verticalSpacer;
     QHBoxLayout *horizontalLayout_4;
+    QVBoxLayout *verticalLayout_2;
+    QLabel *speed;
+    QLabel *file_out_of;
+    QLabel *threads_n;
     QSpacerItem *horizontalSpacer;
-    QPushButton *pushButton_2;
-    QPushButton *pushButton;
+    QPushButton *pause_button;
+    QPushButton *cancel_button;
 
     void setupUi(QWidget *Progress)
     {
         if (Progress->objectName().isEmpty())
             Progress->setObjectName(QStringLiteral("Progress"));
-        Progress->resize(400, 90);
+        Progress->resize(400, 105);
         verticalLayout = new QVBoxLayout(Progress);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         progress = new QProgressBar(Progress);
@@ -57,19 +62,39 @@ public:
         horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
         horizontalLayout_4->setSizeConstraint(QLayout::SetDefaultConstraint);
         horizontalLayout_4->setContentsMargins(-1, -1, -1, 0);
+        verticalLayout_2 = new QVBoxLayout();
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        speed = new QLabel(Progress);
+        speed->setObjectName(QStringLiteral("speed"));
+
+        verticalLayout_2->addWidget(speed);
+
+        file_out_of = new QLabel(Progress);
+        file_out_of->setObjectName(QStringLiteral("file_out_of"));
+
+        verticalLayout_2->addWidget(file_out_of);
+
+        threads_n = new QLabel(Progress);
+        threads_n->setObjectName(QStringLiteral("threads_n"));
+
+        verticalLayout_2->addWidget(threads_n);
+
+
+        horizontalLayout_4->addLayout(verticalLayout_2);
+
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         horizontalLayout_4->addItem(horizontalSpacer);
 
-        pushButton_2 = new QPushButton(Progress);
-        pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
+        pause_button = new QPushButton(Progress);
+        pause_button->setObjectName(QStringLiteral("pause_button"));
 
-        horizontalLayout_4->addWidget(pushButton_2);
+        horizontalLayout_4->addWidget(pause_button);
 
-        pushButton = new QPushButton(Progress);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
+        cancel_button = new QPushButton(Progress);
+        cancel_button->setObjectName(QStringLiteral("cancel_button"));
 
-        horizontalLayout_4->addWidget(pushButton);
+        horizontalLayout_4->addWidget(cancel_button);
 
 
         verticalLayout->addLayout(horizontalLayout_4);
@@ -82,9 +107,12 @@ public:
 
     void retranslateUi(QWidget *Progress)
     {
-        Progress->setWindowTitle(QApplication::translate("Progress", "Progression", 0));
-        pushButton_2->setText(QApplication::translate("Progress", "Pause", 0));
-        pushButton->setText(QApplication::translate("Progress", "Annuler", 0));
+        Progress->setWindowTitle(QApplication::translate("Progress", "Progression", Q_NULLPTR));
+        speed->setText(QApplication::translate("Progress", "Vitesse : 0 o", Q_NULLPTR));
+        file_out_of->setText(QApplication::translate("Progress", "Fichier 0/0", Q_NULLPTR));
+        threads_n->setText(QApplication::translate("Progress", "Threads : 0", Q_NULLPTR));
+        pause_button->setText(QApplication::translate("Progress", "Pause", Q_NULLPTR));
+        cancel_button->setText(QApplication::translate("Progress", "Annuler", Q_NULLPTR));
     } // retranslateUi
 
 };
