@@ -31,8 +31,7 @@ SOURCES += main.cpp \
     MainWindow.cpp \
     FilesEncrypt.cpp \
     Settings.cpp \
-    SettingsWindow.cpp \
-    TrollDialog.cpp
+    SettingsWindow.cpp
 
 HEADERS += \
     Crypt.h \
@@ -43,8 +42,7 @@ HEADERS += \
     FilesEncrypt.h \
     MainWindow.h \
     Settings.h \
-    SettingsWindow.h \
-    TrollDialog.h
+    SettingsWindow.h
 
 win32{
     INCLUDEPATH += "$$PWD/../include/windows/"
@@ -74,5 +72,4 @@ FORMS += \
     mainwindow.ui \
     progress.ui \
     ChooseKey.ui \
-    SettingsWindow.ui \
-    TrollDialog.ui
+    SettingsWindow.ui
