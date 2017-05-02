@@ -1,0 +1,4 @@
+﻿  Crypt.cpp
+Crypt.cpp(85): warning C4267: 'argument' : conversion de 'size_t' en 'int', perte possible de données
+m:\onedriveremote\onedrive\documents\c++ projects\filesencrypt\src\crypt.cpp(382): error C4703: variable de pointeur locale potentiellement non initialisée 'pubKey' utilisée
+m:\onedriveremote\onedrive\documents\c++ projects\filesencrypt\src\crypt.cpp(384): error C4703: variable de pointeur locale potentiellement non initialisée 'pubKeyRSA' utilisée
