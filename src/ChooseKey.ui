@@ -57,6 +57,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Saisir une clé AES</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="newKey">
        <property name="text">
         <string>Créer une nouvelle clé</string>

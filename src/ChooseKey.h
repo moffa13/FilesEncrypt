@@ -26,7 +26,9 @@ private slots:
     void on_newKey_clicked();
     void on_choose_clicked();
     void on_select_clicked();
-private:
+    void on_pushButton_clicked();
+
+    private:
     Ui::ChooseKey *ui;
     FilesEncrypt** m_filesEncrypt;
     bool m_close = false;

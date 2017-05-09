@@ -33,6 +33,7 @@ public:
     QSpacerItem *verticalSpacer;
     QHBoxLayout *horizontalLayout;
     QSpacerItem *horizontalSpacer;
+    QPushButton *pushButton;
     QPushButton *newKey;
     QPushButton *choose;
 
@@ -68,6 +69,11 @@ public:
 
         horizontalLayout->addItem(horizontalSpacer);
 
+        pushButton = new QPushButton(ChooseKey);
+        pushButton->setObjectName(QStringLiteral("pushButton"));
+
+        horizontalLayout->addWidget(pushButton);
+
         newKey = new QPushButton(ChooseKey);
         newKey->setObjectName(QStringLiteral("newKey"));
 
@@ -91,6 +97,7 @@ public:
     {
         ChooseKey->setWindowTitle(QApplication::translate("ChooseKey", "S\303\251lectionner une cl\303\251", Q_NULLPTR));
         select->setText(QApplication::translate("ChooseKey", "Parcourir", Q_NULLPTR));
+        pushButton->setText(QApplication::translate("ChooseKey", "Saisir une cl\303\251 AES", Q_NULLPTR));
         newKey->setText(QApplication::translate("ChooseKey", "Cr\303\251er une nouvelle cl\303\251", Q_NULLPTR));
         choose->setText(QApplication::translate("ChooseKey", "OK", Q_NULLPTR));
     } // retranslateUi
