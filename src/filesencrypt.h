@@ -26,11 +26,13 @@ class FilesEncrypt : public QObject
 
 public:
     FilesEncrypt(std::string const &key_file);
+    FilesEncrypt(const char* aes);
     FilesEncrypt(FilesEncrypt const&) = delete;
     FilesEncrypt& operator =(FilesEncrypt const&) = delete;
+    ~FilesEncrypt();
     bool encryptFile(QFile* file, EncryptDecrypt op);
     static bool genKey(QString const& file, QString const& password);
-    bool init();
+    bool readFromFile();
     static EncryptDecrypt guessEncrypted(QFile& f);
     static EncryptDecrypt guessEncrypted(QDir& dir);
     static EncryptDecrypt guessEncrypted(QByteArray const& content);
@@ -38,6 +40,7 @@ public:
     bool requestAesDecrypt(std::string const& password, bool* passOk = NULL);
     bool isAesUncrypted();
     const unsigned char* getAES() const;
+    void setAES(const char* aes);
     static unsigned getPendingCrypt();
 
 private:
@@ -48,6 +51,7 @@ private:
     std::string m_private_key_crypted;
     static unsigned m_pendingCrypt;
     static QMutex m_mutex;
+    void init();
     void addPendingCrypt();
     void removePendingCrypt();
     void startDeleteAesTimer();

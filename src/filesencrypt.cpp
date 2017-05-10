@@ -27,6 +27,20 @@ QMutex FilesEncrypt::m_mutex;
 
 FilesEncrypt::FilesEncrypt(std::string const &key_file) : m_key_file(key_file){
     init();
+    readFromFile();
+}
+
+FilesEncrypt::FilesEncrypt(const char* aes){
+    init();
+    setAES(aes);
+}
+
+void FilesEncrypt::init(){
+    m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(32));
+}
+
+FilesEncrypt::~FilesEncrypt(){
+    free(m_aes_decrypted);
 }
 
 void FilesEncrypt::addPendingCrypt(){
@@ -40,6 +54,11 @@ void FilesEncrypt::removePendingCrypt(){
     --m_pendingCrypt;
     emit file_done();
     m_mutex.unlock();
+}
+
+
+void FilesEncrypt::setAES(const char* aes){
+    memcpy(m_aes_decrypted, aes, 32);
 }
 
 const unsigned char* FilesEncrypt::getAES() const{
@@ -140,7 +159,13 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
 }
 
 
-bool FilesEncrypt::init(){
+/**
+ * Tries to retrieve the key file in m_key_file, if it doesn't exist, returns false
+ * Copies the crypted aes and private key to m_aes_crypted and m_private_key_crypted
+ * @brief FilesEncrypt::init
+ * @return True if key was retrieved, either false
+ */
+bool FilesEncrypt::readFromFile(){
     QFile f(m_key_file.c_str());
     if(!f.exists() || !f.open(QFile::ReadOnly)){
         Logger::error("Cannot retrieve key");
@@ -199,7 +224,6 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
     if(m_aes_decrypted == NULL){
         //free(passwordStr);
         private_key = Crypt::getRSAFromEVP_PKEY(container); // Save the private key
-        m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(32));
         if(Crypt::decrypt(
             private_key,
             m_aes_crypted,
@@ -243,8 +267,6 @@ void FilesEncrypt::startDeleteAesTimer(){
     QTimer::singleShot(1000 * 60 * TIME_MIN_REMOVE_AES, [this](){
         if(m_pendingCrypt == 0){
             memset(m_aes_decrypted, 0, 32);
-            delete m_aes_decrypted;
-            m_aes_decrypted = NULL;
             Logger::info("AES key deleted from ram");
         }else{
             Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(m_pendingCrypt) + " file(s)");

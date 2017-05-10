@@ -58,7 +58,7 @@ void MainWindow::displayKey(){
     bool passOk = false;
     while(!passOk){
         bool ok;
-        QString const pass(ChooseKey::askPassword(false, &ok, this));
+        QString const pass{ChooseKey::askPassword(false, &ok, this)};
         if(!ok) return;
         m_filesEncrypt->requestAesDecrypt(pass.toStdString(), &passOk);
     }
@@ -66,7 +66,7 @@ void MainWindow::displayKey(){
     const auto aes = m_filesEncrypt->getAES();
     QString key;
     for(quint8 i(0); i < 32; ++i){
-	key += QString::number(*(aes + i)) + " ";
+        key += QString{"%1"}.arg(*(aes + i), 2, 16, QChar{'0'}).toUpper() + " ";
     }
 
     QMessageBox::information(this, "Clé", "Votre clé est " + key, QMessageBox::Ok);

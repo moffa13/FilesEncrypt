@@ -115,8 +115,18 @@ void ChooseKey::on_pushButton_clicked()
     bool okCond;
     QString key;
     do{
-        key = QInputDialog::getText(nullptr, "Clé", "Entrez une clé AES-256 en hexadécimal", QLineEdit::Normal, "", &okCond);
-    }while(okCond && key.isEmpty());
+        key = QInputDialog::getText(nullptr, "Clé", "Entrez une clé AES-256 en hexadécimal (64 caractères)", QLineEdit::Normal,
+                                    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+                                    &okCond);
 
-    //TODO
+        key.replace(QRegularExpression{"\\s+"}, ""); // Remove any spaces
+
+    }while(okCond && key.length() != 64);
+
+    *m_filesEncrypt = new FilesEncrypt(key.toStdString().c_str()); // std::string is 65 length but we don't care it's memcpy
+
+
+    m_close = true;
+    close();
+
 }
