@@ -26,11 +26,13 @@ QMutex FilesEncrypt::m_mutex;
 
 
 FilesEncrypt::FilesEncrypt(std::string const &key_file) : m_key_file(key_file){
+	qDebug() << "construct std::string";
     init();
     readFromFile();
 }
 
 FilesEncrypt::FilesEncrypt(const char* aes){
+	qDebug() << "construct const char*";
     init();
     setAES(aes);
 }
@@ -58,15 +60,20 @@ void FilesEncrypt::removePendingCrypt(){
 
 
 void FilesEncrypt::setAES(const char* aes){
+	m_aes_decrypted_set = true;
     memcpy(m_aes_decrypted, aes, 32);
+}
+
+void FilesEncrypt::unsetAES(){
+	m_aes_decrypted_set = false;
+	memset(m_aes_decrypted, 0, 32);
 }
 
 const unsigned char* FilesEncrypt::getAES() const{
     return m_aes_decrypted;
 }
 
-unsigned FilesEncrypt::getPendingCrypt()
-{
+unsigned FilesEncrypt::getPendingCrypt(){
     return m_pendingCrypt;
 }
 
@@ -191,8 +198,8 @@ bool FilesEncrypt::readFromFile(){
     return true;
 }
 
-bool FilesEncrypt::isAesUncrypted(){
-    return m_aes_decrypted != NULL;
+bool FilesEncrypt::isAesDecrypted() const{
+	return m_aes_decrypted_set;
 }
 
 bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
@@ -221,7 +228,7 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
             *passOk = true;
     }
 
-    if(m_aes_decrypted == NULL){
+	if(!isAesDecrypted()){
         //free(passwordStr);
         private_key = Crypt::getRSAFromEVP_PKEY(container); // Save the private key
         if(Crypt::decrypt(
@@ -232,6 +239,7 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
         ) != -1 ){
             success = true;
             Logger::info("AES successfully decrypted");
+			m_aes_decrypted_set = true;
             startDeleteAesTimer();
 
         }else{
@@ -266,7 +274,7 @@ end:
 void FilesEncrypt::startDeleteAesTimer(){
     QTimer::singleShot(1000 * 60 * TIME_MIN_REMOVE_AES, [this](){
         if(m_pendingCrypt == 0){
-            memset(m_aes_decrypted, 0, 32);
+			unsetAES();
             Logger::info("AES key deleted from ram");
         }else{
             Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(m_pendingCrypt) + " file(s)");
@@ -348,8 +356,8 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
         // Gen IV
 	file->seek(COMPARE_SIZE);
-        QByteArray ivB = file->read(AES_BLOCK_SIZE);
-        iv = reinterpret_cast<unsigned char*>(ivB.data());
+	QByteArray ivB = file->read(AES_BLOCK_SIZE);
+	iv = reinterpret_cast<unsigned char*>(ivB.data());
 	QString msg = "";
 	msg += "File's IV is ";
 	for(quint8 i{0}; i < 16; ++i){

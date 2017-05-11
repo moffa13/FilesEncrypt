@@ -5,6 +5,8 @@ CONFIG += c++11
 TARGET = FilesEncrypt
 CONFIG -= app_bundle
 
+RC_FILE = FilesEncrypt.rc
+
 Release:DESTDIR = $$PWD/../bin/release
 Release:OBJECTS_DIR = $$PWD/../build/release/.obj
 Release:MOC_DIR = $$PWD/../build/release/.moc

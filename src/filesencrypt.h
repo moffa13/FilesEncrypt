@@ -25,8 +25,8 @@ class FilesEncrypt : public QObject
     Q_OBJECT
 
 public:
-    FilesEncrypt(std::string const &key_file);
-    FilesEncrypt(const char* aes);
+	explicit FilesEncrypt(std::string const &key_file);
+	explicit FilesEncrypt(const char* aes);
     FilesEncrypt(FilesEncrypt const&) = delete;
     FilesEncrypt& operator =(FilesEncrypt const&) = delete;
     ~FilesEncrypt();
@@ -38,16 +38,18 @@ public:
     static EncryptDecrypt guessEncrypted(QByteArray const& content);
     static FilesAndSize getFilesFromDirRecursive(QDir const& dir);
     bool requestAesDecrypt(std::string const& password, bool* passOk = NULL);
-    bool isAesUncrypted();
+	bool isAesDecrypted() const;
     const unsigned char* getAES() const;
     void setAES(const char* aes);
+	void unsetAES();
     static unsigned getPendingCrypt();
 
 private:
     std::string m_key_file;
     unsigned char* m_aes_crypted;
+	bool m_aes_decrypted_set = false;
     size_t m_aes_crypted_length;
-    unsigned char* m_aes_decrypted = NULL;
+	unsigned char* m_aes_decrypted = nullptr;
     std::string m_private_key_crypted;
     static unsigned m_pendingCrypt;
     static QMutex m_mutex;

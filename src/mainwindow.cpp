@@ -69,6 +69,7 @@ void MainWindow::displayKey(){
         key += QString{"%1"}.arg(*(aes + i), 2, 16, QChar{'0'}).toUpper() + " ";
     }
 
+    qApp->setStyleSheet("QMessageBox { messagebox-text-interaction-flags: 5 }");
     QMessageBox::information(this, "Clé", "Votre clé est " + key, QMessageBox::Ok);
 
 }
@@ -134,23 +135,23 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
     unsigned uncrypted = 0;
 
     foreach(auto i, res){
-	*(item.files[i.first]) = i.second;
-	if(i.second == EncryptDecrypt::ENCRYPT){
+        *(item.files[i.first]) = i.second;
+        if(i.second == EncryptDecrypt::ENCRYPT){
             ++crypted;
-	}else if(i.second == EncryptDecrypt::DECRYPT){
+        }else if(i.second == EncryptDecrypt::DECRYPT){
             ++uncrypted;
         }
     }
 
     if(crypted == length){
-	item.item->setText("Oui");
-	*item.state = ENCRYPT;
+        item.item->setText("Oui");
+        *item.state = ENCRYPT;
     }else if(uncrypted == length){
-	item.item->setText("Non");
-	*item.state = DECRYPT;
+        item.item->setText("Non");
+        *item.state = DECRYPT;
     }else{
-	item.item->setText("-");
-	*item.state = PARTIAL;
+        item.item->setText("-");
+        *item.state = PARTIAL;
     }
 }
 
@@ -179,7 +180,7 @@ QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
     f.read(begin, 512);
     EncryptDecrypt res = FilesEncrypt::guessEncrypted(QByteArray(begin, 512));
     if(res == EncryptDecrypt::ENCRYPT){
-	Logger::info("File " + fInfo.absoluteFilePath() + " is encrypted");
+        Logger::info("File " + fInfo.absoluteFilePath() + " is encrypted");
     }
     free(begin);
     return QPAIR_CRYPT_DEF(file, res);
@@ -189,7 +190,7 @@ void MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecr
     QFile f(file);
     if(f.open(QFile::ReadWrite)){
         m_filesEncrypt->encryptFile(&f, action);
-	*current_action = action;
+        *current_action = action;
     }else{
         Logger::error("Can't open file " + file);
     }
@@ -199,57 +200,57 @@ void MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecr
 void MainWindow::addWhateverToList(QString const& item){
     if(!m_dirs.contains(item) && !item.isEmpty()){
 
-	// Add a row
-	int rCount = ui->tableWidget->rowCount();
-	ui->tableWidget->insertRow(rCount);
+        // Add a row
+        int rCount = ui->tableWidget->rowCount();
+        ui->tableWidget->insertRow(rCount);
 
-	CryptInfos infos;
+        CryptInfos infos;
 
-	QFileInfo info(item);
+        QFileInfo info(item);
 
-	QMap<QString, EncryptDecrypt*> filesAndState;
+        QMap<QString, EncryptDecrypt*> filesAndState;
 
-	// Create the watcher
-	QFutureWatcher<QPAIR_CRYPT_DEF>* watcher = new QFutureWatcher<QPAIR_CRYPT_DEF>;
+        // Create the watcher
+        QFutureWatcher<QPAIR_CRYPT_DEF>* watcher = new QFutureWatcher<QPAIR_CRYPT_DEF>;
 
-	QTableWidgetItem* encryptedVal = new QTableWidgetItem("...");
-	infos.item = encryptedVal;
+        QTableWidgetItem* encryptedVal = new QTableWidgetItem("...");
+        infos.item = encryptedVal;
 
-	if(info.isDir()){
+        if(info.isDir()){
 
-	    // Add the files to the list
+            // Add the files to the list
             FilesAndSize f{FilesEncrypt::getFilesFromDirRecursive(QDir(item))};
             QStringList &files = f.files;
             auto size = f.size;
-	    foreach(auto file, files){
-		filesAndState[file] = new EncryptDecrypt{NOT_FINISHED};
-	    }
+            foreach(auto file, files){
+                filesAndState[file] = new EncryptDecrypt{NOT_FINISHED};
+            }
 
-	    // Show the type
-	    ui->tableWidget->setItem(rCount, 0, new QTableWidgetItem("Dossier"));
+            // Show the type
+            ui->tableWidget->setItem(rCount, 0, new QTableWidgetItem("Dossier"));
             ui->tableWidget->setItem(rCount, 1, new QTableWidgetItem(utilities::speed_to_human(size)));
 
-	}else{
-	    // Add the single file to the list
-	    filesAndState[info.absoluteFilePath()] = new EncryptDecrypt{NOT_FINISHED};
-	    // Show the type
-	    ui->tableWidget->setItem(rCount, 0, new QTableWidgetItem("Fichier"));
+        }else{
+            // Add the single file to the list
+            filesAndState[info.absoluteFilePath()] = new EncryptDecrypt{NOT_FINISHED};
+            // Show the type
+            ui->tableWidget->setItem(rCount, 0, new QTableWidgetItem("Fichier"));
             ui->tableWidget->setItem(rCount, 1, new QTableWidgetItem(utilities::speed_to_human(info.size())));
-	}
+        }
 
-	infos.files = filesAndState;
-	infos.state = new EncryptDecrypt(NOT_FINISHED);
+        infos.files = filesAndState;
+        infos.state = new EncryptDecrypt(NOT_FINISHED);
 
-	connect(watcher, &QFutureWatcher<QPAIR_CRYPT_DEF>::finished, [this, watcher, infos](){
-	    guessEncryptedFinished(watcher, infos);
-	    watcher->deleteLater();
-	});
+        connect(watcher, &QFutureWatcher<QPAIR_CRYPT_DEF>::finished, [this, watcher, infos](){
+            guessEncryptedFinished(watcher, infos);
+            watcher->deleteLater();
+        });
 
-	QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(filesAndState.keys(), &MainWindow::guessEncrypted);
-	watcher->setFuture(future);
+        QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(filesAndState.keys(), &MainWindow::guessEncrypted);
+        watcher->setFuture(future);
         ui->tableWidget->setItem(rCount, 2, encryptedVal);
         ui->tableWidget->setItem(rCount, 3, new QTableWidgetItem(item));
-	m_dirs.insert(item, infos);
+        m_dirs.insert(item, infos);
     }
 }
 
@@ -323,7 +324,7 @@ void MainWindow::action(EncryptDecrypt action){
 
     bool passOk(false);
 
-    if(!m_filesEncrypt->isAesUncrypted()){
+    if(!m_filesEncrypt->isAesDecrypted()){
         while(!passOk){
             bool ok;
             QString const pass(ChooseKey::askPassword(false, &ok, this));
@@ -333,28 +334,25 @@ void MainWindow::action(EncryptDecrypt action){
     }
 
     foreach(auto const& item, m_dirs.values()){
-	qDebug() << "dir entry is " << *item.state;
-	for(QMap<QString, EncryptDecrypt*>::const_iterator it = item.files.begin(); it != item.files.end(); ++it) {
-	    ++items_number;
-	    QFile f(it.key());
-	    f.open(QFile::ReadOnly);
-	    // If current state != from what you'd do
+        qDebug() << "dir entry is " << *item.state;
+        for(QMap<QString, EncryptDecrypt*>::const_iterator it = item.files.begin(); it != item.files.end(); ++it) {
+            ++items_number;
+            QFile f(it.key());
+            f.open(QFile::ReadOnly);
+            // If current state != from what you'd do
 
-	    if(*it.value() != action){
-		if(action == EncryptDecrypt::ENCRYPT){
-		    max += f.size();
-		}else{
-		    max += f.size() - (18 + 18 + 16);
-		}
-	    }else{
-		++item_does_not_need_action;
-	    }
-	    QCoreApplication::processEvents();
-	}
+            if(*it.value() != action){
+            if(action == EncryptDecrypt::ENCRYPT){
+                max += f.size();
+            }else{
+                max += f.size() - (18 + 18 + 16);
+            }
+            }else{
+                ++item_does_not_need_action;
+            }
+            QCoreApplication::processEvents();
+        }
     }
-
-
-
 
     // If at least one op is necessary
     if(item_does_not_need_action != items_number){
@@ -363,34 +361,34 @@ void MainWindow::action(EncryptDecrypt action){
         m_progress->setMax(max);
         m_progress->show();
 
-	foreach(auto const &item, m_dirs.values()){
+        foreach(auto const &item, m_dirs.values()){
 
-	    if(*item.state != action){ // Check again and avoid to do any action if it's not needed
+            if(*item.state != action){ // Check again and avoid to do any action if it's not needed
 
-		item.item->setText("En cours...");
+            item.item->setText("En cours...");
 
-		QFutureWatcher<void>* watcher = new QFutureWatcher<void>;
+            QFutureWatcher<void>* watcher = new QFutureWatcher<void>;
 
-		QStringList *l = new QStringList{item.files.keys()};
+            QStringList *l = new QStringList{item.files.keys()};
 
-		connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, item, l](){
-		    delete l;
-		    encryptFinished(item, action);
-		    watcher->deleteLater();
-		});
+            connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, item, l](){
+                delete l;
+                encryptFinished(item, action);
+                watcher->deleteLater();
+            });
 
-		std::function<void(QString const &)> func = [this, action, item](QString const &file){
-		    EncryptDecrypt *state = item.files[file];
-		    if(*state != action)
-			encrypt(file, action, state);
-		};
+            std::function<void(QString const &)> func = [this, action, item](QString const &file){
+                EncryptDecrypt *state = item.files[file];
+                if(*state != action)
+                encrypt(file, action, state);
+            };
 
-		QFuture<void> future = QtConcurrent::map(*l, func);
-		watcher->setFuture(future);
-                m_progress->encryptionStarted();
+            QFuture<void> future = QtConcurrent::map(*l, func);
+            watcher->setFuture(future);
+                    m_progress->encryptionStarted();
 
-	    }
-	}
+            }
+        }
     }
 
 }

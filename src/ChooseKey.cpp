@@ -68,7 +68,7 @@ void ChooseKey::on_choose_clicked()
     }else{
         bool ok;
 req:
-        QString pass(askPassword(false, &ok, this));
+        QString pass{askPassword(false, &ok, this)};
         if(ok){
             *m_filesEncrypt = new FilesEncrypt(ui->key->text().toStdString());
             if(!(*m_filesEncrypt)->requestAesDecrypt(pass.toStdString())){
@@ -123,10 +123,16 @@ void ChooseKey::on_pushButton_clicked()
 
     }while(okCond && key.length() != 64);
 
-    *m_filesEncrypt = new FilesEncrypt(key.toStdString().c_str()); // std::string is 65 length but we don't care it's memcpy
+    char e[32];
 
+    for(unsigned i{0}; i < key.length(); i += 2){
+        QString tmp{key.mid(i, 2)};
+        e[i / 2] = tmp.toInt(nullptr, 16);
+    }
 
-    m_close = true;
+    *m_filesEncrypt = new FilesEncrypt(&e[0]);
+
+    m_close = okCond;
     close();
 
 }
