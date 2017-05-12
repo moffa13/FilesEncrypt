@@ -193,19 +193,15 @@ bool FilesEncrypt::isAesDecrypted() const{
 bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
 
     bool success = false;
-    BIO* bio = NULL;
-    EVP_PKEY* container = NULL;
-    RSA* private_key = NULL;
-    char* passwordStr = NULL;
-
+    BIO* bio = nullptr;
+    EVP_PKEY* container = nullptr;
+    RSA* private_key = nullptr;
 
     // Write rsa to RSA container (RSA_st)
     bio = BIO_new(BIO_s_mem());
     BIO_write(bio, m_private_key_crypted.c_str(), m_private_key_crypted.length());
     container = EVP_PKEY_new();
-    passwordStr = reinterpret_cast<char*>(malloc(password.length()));
-    strcpy(passwordStr, password.c_str());
-    container = PEM_read_bio_PrivateKey(bio, NULL, NULL, passwordStr);
+    container = PEM_read_bio_PrivateKey(bio, NULL, NULL, const_cast<char*>(password.c_str()));
     if(container == NULL){
         if(passOk != NULL)
             *passOk = false;
@@ -217,7 +213,6 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
     }
 
 	if(!isAesDecrypted()){
-        //free(passwordStr);
         private_key = Crypt::getRSAFromEVP_PKEY(container); // Save the private key
         if(Crypt::decrypt(
             private_key,
@@ -233,26 +228,20 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
         }else{
             Logger::info("AES not successfully decrypted");
         }
-
-
     }else{
         Logger::error("AES already decrypted");
         success = true;
     }
 
 end:
-    if(bio != NULL){
+    if(bio != nullptr){
         BIO_free(bio);
     }
-    if(container != NULL){
+    if(container != nullptr){
         EVP_PKEY_free(container);
     }
-    if(private_key != NULL){
+    if(private_key != nullptr){
         RSA_free(private_key);
-    }
-    if(passwordStr != NULL){
-        //free(passwordStr);
-        // BUG BUG BUG
     }
 
     return success;
