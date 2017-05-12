@@ -46,6 +46,7 @@ void Crypt::init(){
     // SSL_load_error_strings();
 }
 
+
 EVP_PKEY* Crypt::genRSA(int keyLength){
     Logger::info("Generating RSA keypair");
     //Private key container
@@ -66,7 +67,7 @@ EVP_PKEY* Crypt::genRSA(int keyLength){
 
 void Crypt::writePrivateKey(EVP_PKEY* x, char* password) const{
     FILE* keyFile = fopen(m_key.c_str(), "wb");
-    if(password == NULL){
+    if(password == nullptr){
         PEM_write_PrivateKey(
            keyFile,
            x,
@@ -103,7 +104,7 @@ void Crypt::writePublicKey(EVP_PKEY* x) const{
 void Crypt::genCert(CertInfos const &infos, int keyLength) const{
 
     if(keyLength < MINIMUM_KEY_LENGTH){
-        Logger::warn("The key length is to small ("+QString::number(keyLength)+"). Must be at least 2048 bits");
+        Logger::warn("The key length is to small ("+QString::number(keyLength)+"). Must be at least " + MINIMUM_KEY_LENGTH + " bits");
     }
 
     Logger::info("Generating Cert file...");

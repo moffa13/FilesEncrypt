@@ -76,27 +76,25 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
     bool success = false;
 
     // Vars to be unallocated after
-    unsigned char* aes = NULL;
-    unsigned char* aes_encrypted = NULL;
-    char* rsaBuff = NULL;
-    unsigned char* passwordNew = NULL;
-    BIO *bio = NULL;
-    EVP_PKEY* rsa = NULL;
-    RSA* public_key = NULL;
+    unsigned char* aes = nullptr;
+    unsigned char* aes_encrypted = nullptr;
+    char* rsaBuff = nullptr;
+    BIO *bio = nullptr;
+    EVP_PKEY* rsa = nullptr;
+    RSA* public_key = nullptr;
 
-    // Gen rsa
+    // Gen rsa, this has to be unallocated
     rsa = Crypt::genRSA(4096);
     public_key = Crypt::getRSAFromEVP_PKEY(rsa);
 
     // Write private key encrypted to <rsaStr>
     bio = BIO_new(BIO_s_mem());
-    passwordNew = reinterpret_cast<unsigned char*>(malloc(password.length()));
-    memcpy(passwordNew, password.toStdString().c_str(), password.length());
+
     PEM_write_bio_PrivateKey(
         bio,
         rsa,
         EVP_des_ede3_cbc(),
-        passwordNew,
+        const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(password.toStdString().c_str())), // Might be dangerous
         password.length(),
         NULL,
         NULL
@@ -119,13 +117,11 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
     aes_encrypted = reinterpret_cast<unsigned char*>(malloc(RSA_size(public_key)));
     Crypt::encrypt(public_key, aes, AESSIZE::S256, aes_encrypted);
 
-    constexpr char sep = 0x10;
-
     QFile f(std::move(file));
     if(f.open(QFile::WriteOnly)){
         f.seek(0);
         f.write(rsaStr.c_str());
-        f.write(&sep, 1);
+        f.write(&PRIVATE_ENCRYPT_AES_SEPARATOR, 1);
         f.write(reinterpret_cast<char*>(aes_encrypted), RSA_size(public_key));
         f.close();
         Logger::info("Key successfully created");
@@ -135,25 +131,22 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
     }
 
 
-    if(aes != NULL){
+    if(aes != nullptr){
         free(aes);
     }
-    if(aes_encrypted != NULL) {
+    if(aes_encrypted != nullptr) {
         free(aes_encrypted);
     }
-    if(rsaBuff != NULL) {
+    if(rsaBuff != nullptr) {
         free(rsaBuff);
     }
-    if(passwordNew != NULL){
-        free(passwordNew);
-    }
-    if(bio != NULL) {
+    if(bio != nullptr) {
         BIO_free(bio);
     }
-    if(rsa != NULL) {
+    if(rsa != nullptr) {
         EVP_PKEY_free(rsa);
     }
-    if(public_key != NULL) {
+    if(public_key != nullptr) {
         RSA_free(public_key);
     }
 
@@ -177,7 +170,7 @@ bool FilesEncrypt::readFromFile(){
 
     // Get separated the private key and the aes-crypted key
     QByteArray arr(f.readAll());
-    int split = arr.indexOf(0x10);
+    int split = arr.indexOf(PRIVATE_ENCRYPT_AES_SEPARATOR);
     QByteArray private_key = arr.mid(0, split);
     QByteArray aes_crypted = arr.mid(split + 1, -1);
 

@@ -125,7 +125,7 @@ void ChooseKey::on_pushButton_clicked()
 
     char e[32];
 
-    for(unsigned i{0}; i < key.length(); i += 2){
+    for(int i{0}; i < key.length(); i += 2){
         QString tmp{key.mid(i, 2)};
         e[i / 2] = tmp.toInt(nullptr, 16);
     }
