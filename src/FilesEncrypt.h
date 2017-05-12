@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QStringList>
 #include <QMutex>
+#include "openssl/aes.h"
 
 enum EncryptDecrypt{
     NOT_FINISHED = - 1,
@@ -43,6 +44,9 @@ public:
     void setAES(const char* aes);
 	void unsetAES();
     static unsigned getPendingCrypt();
+    static constexpr char compare[] = {'E', 0x31, 'N', 0x31, 'C', 0x31, 'R', 0x31, 'Y', 0x31, 'P', 0x31, 'T', 0x31, 'E', 0x31, 'D', 0x31};
+    static constexpr size_t COMPARE_SIZE = sizeof(compare)/sizeof(*compare);
+    static constexpr size_t SIZE_BEFORE_CONTENT = COMPARE_SIZE * 2 + AES_BLOCK_SIZE;
 
 private:
     std::string m_key_file;

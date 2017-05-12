@@ -8,16 +8,11 @@
 #include "FilesEncrypt.h"
 #include "utilities.h"
 #include "openssl/err.h"
-#include "openssl/aes.h"
 #include "openssl/rsa.h"
 #include "openssl/pem.h"
 #include "Logger.h"
 
 #define TIME_MIN_REMOVE_AES 3
-
-constexpr char compare[] = {'E', 0x31, 'N', 0x31, 'C', 0x31, 'R', 0x31, 'Y', 0x31, 'P', 0x31, 'T', 0x31, 'E', 0x31, 'D', 0x31};
-constexpr size_t COMPARE_SIZE = sizeof(compare)/sizeof(*compare);
-constexpr size_t SIZE_BEFORE_CONTENT = COMPARE_SIZE * 2 + AES_BLOCK_SIZE;
 
 
 // Current crpyts number

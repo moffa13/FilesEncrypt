@@ -337,16 +337,15 @@ void MainWindow::action(EncryptDecrypt action){
         qDebug() << "dir entry is " << *item.state;
         for(QMap<QString, EncryptDecrypt*>::const_iterator it = item.files.begin(); it != item.files.end(); ++it) {
             ++items_number;
-            QFile f(it.key());
-            f.open(QFile::ReadOnly);
+            QFileInfo f{it.key()};
             // If current state != from what you'd do
 
-            if(*it.value() != action){
-            if(action == EncryptDecrypt::ENCRYPT){
-                max += f.size();
-            }else{
-                max += f.size() - (18 + 18 + 16);
-            }
+            if(*it.value() != action && f.isWritable()){
+                if(action == EncryptDecrypt::ENCRYPT){
+                    max += f.size();
+                }else{
+                    max += f.size() - (FilesEncrypt::SIZE_BEFORE_CONTENT);
+                }
             }else{
                 ++item_does_not_need_action;
             }

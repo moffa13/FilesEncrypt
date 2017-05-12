@@ -42,10 +42,10 @@ void Progress::progressed(qint32 progress){
     }
     ui->progress->setValue(percent);
 
-    if(m_done == m_max){
-	QTimer::singleShot(200, [this](){
-            close();
-            reset();
+    if(m_done >= m_max){
+        QTimer::singleShot(200, [this](){
+                close();
+                reset();
         });
     }
     renderLabels();
@@ -81,6 +81,7 @@ void Progress::renderLabels(){
         ui->threads_n->setText("Threads : " + QString::number((*m_f)->getPendingCrypt()));
         ui->speed->setText("Vitesse : " + utilities::speed_to_human(get_speed()) + "/s");
         m_last_update = QDateTime::currentMSecsSinceEpoch();
+        qDebug() << m_done << " / " << m_max;
     }
 }
 

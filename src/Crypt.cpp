@@ -18,6 +18,7 @@
 #include <iostream>
 #include <QThread>
 #include <QCoreApplication>
+
 #if defined(Q_OS_WIN32)
 #include "openssl/applink.c"
 #endif
@@ -59,7 +60,7 @@ EVP_PKEY* Crypt::genRSA(int keyLength){
     // Assign rsa to container
     EVP_PKEY_assign_RSA(prvKey, rsa);
     // Clean pointer
-    rsa = NULL;
+    rsa = nullptr;
     return prvKey;
 }
 
@@ -234,10 +235,10 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
     EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
     EVP_EncryptInit(ctx, EVP_aes_256_cbc(), key, iv);
 
-    qint64 read = 0;
-    int lastLength = 0;
-    unsigned pass = 0;
-    unsigned readPass = 0;
+    qint64 read{0};
+    int lastLength{0};
+    unsigned pass{0};
+    unsigned readPass{0};
     while((read = file->read(reinterpret_cast<char*>(buffer), 16)) > 0){
         EVP_EncryptUpdate(ctx, crypted, &lastLength, buffer, read);
         tmpFile->write(reinterpret_cast<char*>(crypted), lastLength);
@@ -276,10 +277,10 @@ void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, u
     EVP_DecryptInit(ctx, EVP_aes_256_cbc(), key, iv);
 
 
-    qint64 read = 0;
-    int lastLength = 0;
-    unsigned pass = 0;
-    unsigned readPass = 0;
+    qint64 read{0};
+    int lastLength{0};
+    unsigned pass{0};
+    unsigned readPass{0};
     while((read = file->read(reinterpret_cast<char*>(buffer), 16)) > 0){
 
         EVP_DecryptUpdate(ctx, uncrypted, &lastLength, buffer, read);
@@ -315,8 +316,6 @@ void Crypt::aes_decrypt(const unsigned char* key, int key_length, unsigned char*
     AES_set_decrypt_key(key, key_length, &aes_key);
     AES_cbc_encrypt(encrypted, message, len, &aes_key, iv, AES_DECRYPT);
 }
-
-
 
 void Crypt::genAES(AESSIZE length, unsigned char* p){
 
