@@ -123,16 +123,17 @@ void ChooseKey::on_pushButton_clicked()
 
     }while(okCond && key.length() != 64);
 
-    char e[32];
+    if(okCond){
+        char e[32];
 
-    for(int i{0}; i < key.length(); i += 2){
-        QString tmp{key.mid(i, 2)};
-        e[i / 2] = tmp.toInt(nullptr, 16);
+        for(int i{0}; i < key.length(); i += 2){
+            QString tmp{key.mid(i, 2)};
+            e[i / 2] = tmp.toInt(nullptr, 16);
+        }
+
+        *m_filesEncrypt = new FilesEncrypt(&e[0]);
+        m_close = okCond;
+        close();
     }
-
-    *m_filesEncrypt = new FilesEncrypt(&e[0]);
-
-    m_close = okCond;
-    close();
 
 }
