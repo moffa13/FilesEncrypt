@@ -310,7 +310,7 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
         // Log final size
         quint64 futureSize = (file->size() / 16 + 1) * 16 + SIZE_BEFORE_CONTENT;
-        Logger::info("Future file size will be " + utilities::speed_to_human(futureSize) + " bytes");
+        Logger::info("Future file size will be " + utilities::speed_to_human(futureSize));
 
         // Crypt data
 
