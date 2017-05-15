@@ -13,6 +13,7 @@
 #include "Logger.h"
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <cassert>
 
 #define TIME_MIN_REMOVE_AES 3
 #define CURRENT_VERSION 2
@@ -300,14 +301,21 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
         Crypt::genRandomIV(iv);
 
+        QString msg{"NEW IV is "};
+        for(quint8 i{0}; i < 16; ++i){
+            msg += QString::number(*(iv + i), 16) + " ";
+        }
+        Logger::info(msg.trimmed());
+
         // Add Header E1N1C1R1Y1P1T1E1D1AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1XXXXX...
         Logger::info("Encrypting file " + filename);
-        fileContentEncrypted.append(getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION));
+        auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION);
+        fileContentEncrypted.append(blob);
         tmpFile.write(fileContentEncrypted);
 
 
         // Log final size
-        quint64 futureSize = (file->size() / 16 + 1) * 16 + SIZE_BEFORE_CONTENT;
+        quint64 futureSize = (file->size() / AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE + blob.size();
         Logger::info("Future file size will be " + utilities::speed_to_human(futureSize));
 
         // Crypt data
@@ -322,26 +330,25 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         success = true;
     }else{
 
-        if(guessEncrypted(*file).state == EncryptDecrypt::DECRYPT){
+        EncryptDecrypt_s state{guessEncrypted(*file)};
+
+        if(state.state == EncryptDecrypt::DECRYPT){
             Logger::warn("Trying to decrypt a file maybe not encrypted");
             goto end;
         }
 
-    addPendingCrypt();
+        addPendingCrypt();
 
         // Gen IV
-    file->seek(COMPARE_SIZE);
-    QByteArray ivB = file->read(AES_BLOCK_SIZE);
-    iv = reinterpret_cast<unsigned char*>(ivB.data());
-    QString msg = "";
-    msg += "File's IV is ";
-    for(quint8 i{0}; i < 16; ++i){
-        msg += QString::number(*(iv + i)) + " ";
-    }
-    Logger::info(msg.trimmed());
+        QByteArray ivB{state.iv};
+        iv = reinterpret_cast<unsigned char*>(ivB.data());
+        QString msg{"File's IV is "};
+        for(quint8 i{0}; i < 16; ++i){
+            msg += QString::number(*(iv + i), 16) + " ";
+        }
+        Logger::info(msg.trimmed());
 
-
-    file->seek(SIZE_BEFORE_CONTENT);
+        file->seek(state.offsetBeforeContent);
         crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, iv);
 
         success = true;
@@ -421,11 +428,11 @@ FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
     return f;
 }
 
-QString FilesEncrypt::getEncryptBlob(const char* iv, quint32 version){
+QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version){
     QByteArray content{};
     content.append(compare);
     content.append("V");
-    content.append(version);
+    content.append(QString::number(version));
     content.append(";");
     content.append(iv, AES_BLOCK_SIZE);
     content.append(compare);
@@ -435,24 +442,31 @@ QString FilesEncrypt::getEncryptBlob(const char* iv, quint32 version){
 EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
     QByteArray header = content.mid(0, SIZE_BEFORE_CONTENT); // Be sure we check the right size
 
-    QRegularExpression encryptedRegex{QRegularExpression::escape(compare) + "(V[0-9]{1,5})?;?(.{16})" + QRegularExpression::escape(compare)};
-    qDebug() << encryptedRegex.pattern();
-    qDebug() << header;
-    QRegularExpressionMatch match{encryptedRegex.match(header)};
-
     EncryptDecrypt_s state;
     state.state = DECRYPT;
     state.version = 1;
+    state.offsetBeforeContent = 0;
 
-    if(match.hasMatch()){
-        state.state = EncryptDecrypt::ENCRYPT;
+    if(header.mid(0, COMPARE_SIZE) != compare){
+        return state;
     }
 
-    QString matched{match.captured(1)};
+    state.state = EncryptDecrypt::ENCRYPT;
 
-    if(!matched.isEmpty()){
-        state.version = matched.mid(1).toInt();
+    header = header.mid(COMPARE_SIZE); // Either VXXXXX;AAAAAAAAAAAAAAAAZZZZ.... or AAAAAAAAAAAAAAAAZZZZ....
+
+    if(header.mid(AES_BLOCK_SIZE, COMPARE_SIZE) == compare){ // There is not a version
+        state.iv = header.mid(0, AES_BLOCK_SIZE);
+        state.offsetBeforeContent = SIZE_BEFORE_CONTENT - VERSION_LENGTH;
+    }else{
+        auto ivIndex = header.indexOf(';') + 1;
+        auto version{header.mid(1, ivIndex - 2).toInt()};
+        state.iv = header.mid(ivIndex, AES_BLOCK_SIZE);
+        state.version = version;
+        state.offsetBeforeContent = SIZE_BEFORE_CONTENT - VERSION_LENGTH + ivIndex;
     }
 
+
+    assert(state.iv.size() == 16);
     return state;
 }
