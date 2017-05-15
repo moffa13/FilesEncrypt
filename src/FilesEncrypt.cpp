@@ -11,9 +11,11 @@
 #include "openssl/rsa.h"
 #include "openssl/pem.h"
 #include "Logger.h"
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #define TIME_MIN_REMOVE_AES 3
-
+#define CURRENT_VERSION 2
 
 // Current crpyts number
 unsigned FilesEncrypt::m_pendingCrypt = 0;
@@ -21,13 +23,11 @@ QMutex FilesEncrypt::m_mutex;
 
 
 FilesEncrypt::FilesEncrypt(std::string const &key_file) : m_key_file(key_file){
-	qDebug() << "construct std::string";
     init();
     readFromFile();
 }
 
 FilesEncrypt::FilesEncrypt(const char* aes){
-	qDebug() << "construct const char*";
     init();
     setAES(aes);
 }
@@ -55,13 +55,13 @@ void FilesEncrypt::removePendingCrypt(){
 
 
 void FilesEncrypt::setAES(const char* aes){
-	m_aes_decrypted_set = true;
+    m_aes_decrypted_set = true;
     memcpy(m_aes_decrypted, aes, 32);
 }
 
 void FilesEncrypt::unsetAES(){
-	m_aes_decrypted_set = false;
-	memset(m_aes_decrypted, 0, 32);
+    m_aes_decrypted_set = false;
+    memset(m_aes_decrypted, 0, 32);
 }
 
 const unsigned char* FilesEncrypt::getAES() const{
@@ -187,7 +187,7 @@ bool FilesEncrypt::readFromFile(){
 }
 
 bool FilesEncrypt::isAesDecrypted() const{
-	return m_aes_decrypted_set;
+    return m_aes_decrypted_set;
 }
 
 bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
@@ -212,7 +212,7 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
             *passOk = true;
     }
 
-	if(!isAesDecrypted()){
+    if(!isAesDecrypted()){
         private_key = Crypt::getRSAFromEVP_PKEY(container); // Save the private key
         if(Crypt::decrypt(
             private_key,
@@ -222,7 +222,7 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
         ) != -1 ){
             success = true;
             Logger::info("AES successfully decrypted");
-			m_aes_decrypted_set = true;
+            m_aes_decrypted_set = true;
             startDeleteAesTimer();
 
         }else{
@@ -251,7 +251,7 @@ end:
 void FilesEncrypt::startDeleteAesTimer(){
     QTimer::singleShot(1000 * 60 * TIME_MIN_REMOVE_AES, [this](){
         if(m_pendingCrypt == 0){
-			unsetAES();
+            unsetAES();
             Logger::info("AES key deleted from ram");
         }else{
             Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(m_pendingCrypt) + " file(s)");
@@ -287,7 +287,7 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
     if(op == EncryptDecrypt::ENCRYPT){
 
-        if(guessEncrypted(file->read(512)) == EncryptDecrypt::ENCRYPT){
+        if(guessEncrypted(*file).state == EncryptDecrypt::ENCRYPT){
             Logger::warn("Trying to encrypt a file maybe already encrypted");
             goto end;
         }
@@ -300,11 +300,9 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
         Crypt::genRandomIV(iv);
 
-        // Add Header E1N1C1R1Y1P1T1E1D1AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1AAAAA...
+        // Add Header E1N1C1R1Y1P1T1E1D1AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1XXXXX...
         Logger::info("Encrypting file " + filename);
-        fileContentEncrypted.append(compare);
-        fileContentEncrypted.append(reinterpret_cast<char*>(iv), AES_BLOCK_SIZE);
-        fileContentEncrypted.append(compare);
+        fileContentEncrypted.append(getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION));
         tmpFile.write(fileContentEncrypted);
 
 
@@ -324,26 +322,26 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         success = true;
     }else{
 
-        if(guessEncrypted(file->read(512)) == EncryptDecrypt::DECRYPT){
+        if(guessEncrypted(*file).state == EncryptDecrypt::DECRYPT){
             Logger::warn("Trying to decrypt a file maybe not encrypted");
             goto end;
         }
 
-	addPendingCrypt();
+    addPendingCrypt();
 
         // Gen IV
-	file->seek(COMPARE_SIZE);
-	QByteArray ivB = file->read(AES_BLOCK_SIZE);
-	iv = reinterpret_cast<unsigned char*>(ivB.data());
-	QString msg = "";
-	msg += "File's IV is ";
-	for(quint8 i{0}; i < 16; ++i){
-	    msg += QString::number(*(iv + i)) + " ";
-	}
-	Logger::info(msg.trimmed());
+    file->seek(COMPARE_SIZE);
+    QByteArray ivB = file->read(AES_BLOCK_SIZE);
+    iv = reinterpret_cast<unsigned char*>(ivB.data());
+    QString msg = "";
+    msg += "File's IV is ";
+    for(quint8 i{0}; i < 16; ++i){
+        msg += QString::number(*(iv + i)) + " ";
+    }
+    Logger::info(msg.trimmed());
 
 
-	file->seek(SIZE_BEFORE_CONTENT);
+    file->seek(SIZE_BEFORE_CONTENT);
         crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, iv);
 
         success = true;
@@ -367,7 +365,7 @@ end:
 
 }
 
-EncryptDecrypt FilesEncrypt::guessEncrypted(QFile& file){
+EncryptDecrypt_s FilesEncrypt::guessEncrypted(QFile& file){
     QByteArray content = file.read(SIZE_BEFORE_CONTENT);
     return FilesEncrypt::guessEncrypted(content);
 }
@@ -385,7 +383,7 @@ EncryptDecrypt FilesEncrypt::guessEncrypted(QDir& dir){
             if(!file.open(QFile::ReadOnly)){
                 ;; // TODO MOTHERFUCKER
             }
-	    if(FilesEncrypt::guessEncrypted(file) == EncryptDecrypt::ENCRYPT){
+        if(FilesEncrypt::guessEncrypted(file).state == EncryptDecrypt::ENCRYPT){
                 crypted++;
             }else{
                 uncrypted++;
@@ -423,10 +421,38 @@ FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
     return f;
 }
 
-EncryptDecrypt FilesEncrypt::guessEncrypted(QByteArray const& content){
-    QByteArray header = content.mid(0, COMPARE_SIZE); // Be sure we check the right size
-    if(strcmp(header.constData(), &compare[0]) == 0){
-        return EncryptDecrypt::ENCRYPT;
+QString FilesEncrypt::getEncryptBlob(const char* iv, quint32 version){
+    QByteArray content{};
+    content.append(compare);
+    content.append("V");
+    content.append(version);
+    content.append(";");
+    content.append(iv, AES_BLOCK_SIZE);
+    content.append(compare);
+    return content;
+}
+
+EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
+    QByteArray header = content.mid(0, SIZE_BEFORE_CONTENT); // Be sure we check the right size
+
+    QRegularExpression encryptedRegex{QRegularExpression::escape(compare) + "(V[0-9]{1,5})?;?(.{16})" + QRegularExpression::escape(compare)};
+    qDebug() << encryptedRegex.pattern();
+    qDebug() << header;
+    QRegularExpressionMatch match{encryptedRegex.match(header)};
+
+    EncryptDecrypt_s state;
+    state.state = DECRYPT;
+    state.version = 1;
+
+    if(match.hasMatch()){
+        state.state = EncryptDecrypt::ENCRYPT;
     }
-    return EncryptDecrypt::DECRYPT;
+
+    QString matched{match.captured(1)};
+
+    if(!matched.isEmpty()){
+        state.version = matched.mid(1).toInt();
+    }
+
+    return state;
 }

@@ -170,20 +170,14 @@ void MainWindow::encryptFinished(CryptInfos const &item, EncryptDecrypt action){
 }
 
 QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
-
     QFileInfo fInfo(file);
-
     QFile f(fInfo.absoluteFilePath());
     f.open(QFile::ReadOnly);
-    char* begin = reinterpret_cast<char*>(malloc(512));
-    // Only read a few bytes
-    f.read(begin, 512);
-    EncryptDecrypt res = FilesEncrypt::guessEncrypted(QByteArray(begin, 512));
-    if(res == EncryptDecrypt::ENCRYPT){
+    auto res = FilesEncrypt::guessEncrypted(f);
+    if(res.state == EncryptDecrypt::ENCRYPT){
         Logger::info("File " + fInfo.absoluteFilePath() + " is encrypted");
     }
-    free(begin);
-    return QPAIR_CRYPT_DEF(file, res);
+    return QPAIR_CRYPT_DEF{file, res.state};
 }
 
 void MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action){
