@@ -131,7 +131,6 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
         Logger::info("Can't write aes key to file");
     }
 
-
     if(aes != nullptr){
         free(aes);
     }
@@ -258,23 +257,16 @@ void FilesEncrypt::startDeleteAesTimer(){
             Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(m_pendingCrypt) + " file(s)");
             startDeleteAesTimer();
         }
-
     });
 }
 
 bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
+    bool success{false};
 
-    Logger::info("Thread " + QString::number(reinterpret_cast<int>(QThread::currentThreadId())) + " encrypting");
+    QString filename{QFileInfo(*file).fileName()};
 
-    bool success = false;
-
-    QString filename = QFileInfo(*file).fileName();
-    QByteArray fileContentEncrypted;
     Logger::info("File size : " + QString::number(file->size()) + " bytes");
-
-    unsigned char* encrypted = NULL;
-    unsigned char* iv = NULL;
 
     QTemporaryFile tmpFile;
     tmpFile.setAutoRemove(true);
@@ -298,19 +290,12 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         file->seek(0);
 
         // Gen IV
-        iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
+        unsigned char* iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
         Crypt::genRandomIV(iv);
 
-        QString msg{"NEW IV is "};
-        for(quint8 i{0}; i < 16; ++i){
-            msg += QString::number(*(iv + i), 16) + " ";
-        }
-        Logger::info(msg.trimmed());
-
-        // Add Header E1N1C1R1Y1P1T1E1D1AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1XXXXX...
-        Logger::info("Encrypting file " + filename);
+        // Add Header E1N1C1R1Y1P1T1E1D1VZZZZZ;AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1XXXXX...
         auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION);
-        fileContentEncrypted.append(blob);
+        QByteArray fileContentEncrypted{blob};
         tmpFile.write(fileContentEncrypted);
 
 
@@ -319,10 +304,10 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         Logger::info("Future file size will be " + utilities::speed_to_human(futureSize));
 
         // Crypt data
-
         crypt.aes_crypt(file, &tmpFile, m_aes_decrypted, iv);
 
         free(iv);
+        iv = nullptr;
 
         removePendingCrypt();
 
@@ -340,16 +325,8 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         addPendingCrypt();
 
         // Gen IV
-        QByteArray ivB{state.iv};
-        iv = reinterpret_cast<unsigned char*>(ivB.data());
-        QString msg{"File's IV is "};
-        for(quint8 i{0}; i < 16; ++i){
-            msg += QString::number(*(iv + i), 16) + " ";
-        }
-        Logger::info(msg.trimmed());
-
         file->seek(state.offsetBeforeContent);
-        crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, iv);
+        crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(state.iv.constData())));
 
         success = true;
         Logger::info("File " + filename + " decrypted");
@@ -362,14 +339,7 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
     tmpFile.copy(name);
 
 end:
-
-    if(encrypted != NULL){
-        free(encrypted);
-    }
-
     return success;
-
-
 }
 
 EncryptDecrypt_s FilesEncrypt::guessEncrypted(QFile& file){
@@ -414,7 +384,7 @@ FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
     foreach(auto object, objects){
         if(object.isDir()){
            //qDebug() << "Entering recursive " << object.absoluteFilePath();
-           FilesAndSize f_tmp{getFilesFromDirRecursive(QDir(object.absoluteFilePath()))};
+           FilesAndSize f_tmp{getFilesFromDirRecursive(QDir{object.absoluteFilePath()})};
            size += f_tmp.size;
            files.append(f_tmp.files);
         }else{
