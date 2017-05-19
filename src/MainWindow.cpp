@@ -332,13 +332,16 @@ void MainWindow::action(EncryptDecrypt action){
         for(QMap<QString, EncryptDecrypt*>::const_iterator it = item.files.begin(); it != item.files.end(); ++it) {
             ++items_number;
             QFileInfo f{it.key()};
+            QFile ff{it.key()};
+            ff.open(QFile::ReadOnly);
+            EncryptDecrypt_s state = FilesEncrypt::guessEncrypted(ff);
             // If current state != from what you'd do
 
             if(*it.value() != action && f.isWritable()){
                 if(action == EncryptDecrypt::ENCRYPT){
                     max += f.size();
                 }else{
-                    max += f.size() - (FilesEncrypt::SIZE_BEFORE_CONTENT);
+                    max += f.size() - state.offsetBeforeContent;
                 }
             }else{
                 ++item_does_not_need_action;
@@ -386,11 +389,10 @@ void MainWindow::action(EncryptDecrypt action){
 
 }
 
-void MainWindow::on_remove_clicked()
-{
+void MainWindow::on_remove_clicked(){
     int row = ui->tableWidget->currentRow();
     if(row >= 0){
-        m_dirs.remove(ui->tableWidget->item(row, 2)->text());
+        m_dirs.remove(ui->tableWidget->item(row, 3)->text());
         ui->tableWidget->removeRow(row);
     }
 }

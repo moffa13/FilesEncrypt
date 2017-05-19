@@ -398,24 +398,29 @@ FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
     return f;
 }
 
-QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version){
+QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, QString const &newFilename){
     QByteArray content{};
     content.append(compare);
     content.append("V");
     content.append(QString::number(version));
     content.append(";");
     content.append(iv, AES_BLOCK_SIZE);
-    content.append(compare);
+    content.append(QString::number(filenameChanged));
+    content.append(QString::number(newFilename.length()));
+    content.append(";");
+    content.append(newFilename);
     return content;
 }
 
 EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
     QByteArray header = content.mid(0, SIZE_BEFORE_CONTENT); // Be sure we check the right size
+    const size_t headerSize = header.size();
 
     EncryptDecrypt_s state;
     state.state = DECRYPT;
     state.version = 1;
     state.offsetBeforeContent = 0;
+    state.filenameChanged = false;
 
     if(header.mid(0, COMPARE_SIZE) != compare){
         return state;
@@ -423,17 +428,30 @@ EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
 
     state.state = EncryptDecrypt::ENCRYPT;
 
-    header = header.mid(COMPARE_SIZE); // Either VXXXXX;AAAAAAAAAAAAAAAAZZZZ.... or AAAAAAAAAAAAAAAAZZZZ....
+    header = header.mid(COMPARE_SIZE);
 
     if(header.mid(AES_BLOCK_SIZE, COMPARE_SIZE) == compare){ // There is not a version
         state.iv = header.mid(0, AES_BLOCK_SIZE);
-        state.offsetBeforeContent = SIZE_BEFORE_CONTENT - VERSION_LENGTH;
+        state.offsetBeforeContent = COMPARE_SIZE * 2 + AES_BLOCK_SIZE;
     }else{
         auto ivIndex = header.indexOf(';') + 1;
         auto version{header.mid(1, ivIndex - 2).toInt()};
         state.iv = header.mid(ivIndex, AES_BLOCK_SIZE);
+
+        header = header.mid(ivIndex + AES_BLOCK_SIZE); // Begins at filenameChanged
+        state.filenameChanged = header.mid(0, 1).toInt();
+
+        header = header.mid(1);
+        auto filenameIndex = header.indexOf(';') + 1;
+        auto filenameSize{header.mid(0, filenameIndex - 2).toInt()};
+
+        header = header.mid(filenameIndex);
+        state.newFilename = header.mid(0, filenameSize);
+        header = header.mid(filenameIndex + filenameSize);
+
+
         state.version = version;
-        state.offsetBeforeContent = SIZE_BEFORE_CONTENT - VERSION_LENGTH + ivIndex;
+        state.offsetBeforeContent = COMPARE_SIZE + ivIndex + AES_BLOCK_SIZE + 1 + filenameIndex + filenameSize ;
     }
 
 

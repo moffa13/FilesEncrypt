@@ -20,6 +20,8 @@ typedef struct {
     quint32 version;
     QByteArray iv;
     quint8 offsetBeforeContent;
+    bool filenameChanged;
+    QString newFilename;
 } EncryptDecrypt_s;
 
 typedef struct{
@@ -54,7 +56,7 @@ public:
     static constexpr char compare[] = {'E', 0x31, 'N', 0x31, 'C', 0x31, 'R', 0x31, 'Y', 0x31, 'P', 0x31, 'T', 0x31, 'E', 0x31, 'D', 0x31};
     static constexpr size_t COMPARE_SIZE = sizeof(compare)/sizeof(*compare);
     static constexpr size_t VERSION_LENGTH = 1 + 5 + 1; // V00000;
-    static constexpr size_t SIZE_BEFORE_CONTENT = COMPARE_SIZE * 2 + AES_BLOCK_SIZE + VERSION_LENGTH; // 1 is for the delimiter in versionning
+    static constexpr size_t SIZE_BEFORE_CONTENT = COMPARE_SIZE + AES_BLOCK_SIZE + VERSION_LENGTH + 1 + 8 + 256;
     static constexpr char PRIVATE_ENCRYPT_AES_SEPARATOR = 0x10;
 
 private:
@@ -70,7 +72,7 @@ private:
     void addPendingCrypt();
     void removePendingCrypt();
     void startDeleteAesTimer();
-    static QByteArray getEncryptBlob(const char* iv, quint32 version);
+    static QByteArray getEncryptBlob(const char* iv, quint32 version, bool filenameChanged = false, QString const &newFilename = QString{});
 Q_SIGNALS:
     void encrypt_updated(qint32 progress);
     void decrypt_updated(qint32 progress);
