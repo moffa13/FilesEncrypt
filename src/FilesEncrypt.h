@@ -21,7 +21,7 @@ typedef struct {
     QByteArray iv;
     quint8 offsetBeforeContent;
     bool filenameChanged;
-    QString newFilename;
+    QByteArray newFilename;
 } EncryptDecrypt_s;
 
 typedef struct{

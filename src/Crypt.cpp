@@ -355,7 +355,7 @@ void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, u
 }
 
 // Decrypt by buffer
-void Crypt::aes_decrypt(
+int Crypt::aes_decrypt(
         const unsigned char* encrypted,
         int encrypted_size,
         unsigned char* uncrypted,
@@ -397,6 +397,8 @@ void Crypt::aes_decrypt(
     // Writes the padding
     EVP_DecryptFinal(ctx, uncrypted + current_uncrypted_position, &lastLength);
     EVP_CIPHER_CTX_free(ctx);
+
+    return current_uncrypted_position + lastLength;
 }
 
 void Crypt::genAES(AESSIZE length, unsigned char* p){

@@ -293,14 +293,16 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         unsigned char* iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
         Crypt::genRandomIV(iv);
 
-        qDebug() << "Filename size will be " << getEncryptedSize(name.length());
+        QString nameWithoutPath{QFileInfo{file->fileName()}.fileName()};
 
-        unsigned char* encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(name.length())));
+        qDebug() << "Filename size will be " << getEncryptedSize(nameWithoutPath.length());
 
-        crypt.aes_crypt(reinterpret_cast<const unsigned char*>(name.toStdString().c_str()), name.length(), encrypted_filename, m_aes_decrypted, iv);
+        unsigned char* encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length())));
+
+        crypt.aes_crypt(reinterpret_cast<const unsigned char*>(nameWithoutPath.toStdString().c_str()), nameWithoutPath.length(), encrypted_filename, m_aes_decrypted, iv);
 
         // Add Header E1N1C1R1Y1P1T1E1D1VZZZZZ;AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1XXXXX...
-        auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, true, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(name.length()));
+        auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, true, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(nameWithoutPath.length()));
         QByteArray fileContentEncrypted{blob};
         tmpFile.write(fileContentEncrypted);
 
@@ -338,7 +340,7 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
         char* uncrypted_filename = reinterpret_cast<char*>(malloc(state.newFilename.size()));
         crypt.aes_decrypt(
-                    reinterpret_cast<const unsigned char*>(state.newFilename.toStdString().c_str()),
+                    reinterpret_cast<const unsigned char*>(state.newFilename.constData()),
                     state.newFilename.size(),
                     reinterpret_cast<unsigned char*>(uncrypted_filename),
                     m_aes_decrypted,
