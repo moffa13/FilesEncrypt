@@ -297,7 +297,7 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
         unsigned char* encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(name.length())));
 
-        crypt.aes_crypt(m_aes_decrypted, 256, iv, reinterpret_cast<const unsigned char*>(name.toStdString().c_str()), name.length(), encrypted_filename);
+        crypt.aes_crypt(reinterpret_cast<const unsigned char*>(name.toStdString().c_str()), name.length(), encrypted_filename, m_aes_decrypted, iv);
 
         // Add Header E1N1C1R1Y1P1T1E1D1VZZZZZ;AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1XXXXX...
         auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, true, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(name.length()));
@@ -335,6 +335,18 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         // Gen IV
         file->seek(state.offsetBeforeContent);
         crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(state.iv.constData())));
+
+        char* uncrypted_filename = reinterpret_cast<char*>(malloc(state.newFilename.size()));
+        crypt.aes_decrypt(
+                    reinterpret_cast<const unsigned char*>(state.newFilename.toStdString().c_str()),
+                    state.newFilename.size(),
+                    reinterpret_cast<unsigned char*>(uncrypted_filename),
+                    m_aes_decrypted,
+                    const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(state.iv.constData()))
+        );
+
+        QByteArray str(uncrypted_filename, state.newFilename.size());
+        qDebug() << QString::fromLocal8Bit(str);
 
         success = true;
         Logger::info("File " + filename + " decrypted");
@@ -426,7 +438,6 @@ QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version, bool fi
 
 EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
     QByteArray header = content.mid(0, SIZE_BEFORE_CONTENT); // Be sure we check the right size
-    const size_t headerSize = header.size();
 
     EncryptDecrypt_s state;
     state.state = DECRYPT;
@@ -460,7 +471,6 @@ EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
         header = header.mid(filenameIndex);
         state.newFilename = header.mid(0, filenameSize);
         header = header.mid(filenameIndex + filenameSize);
-
 
         state.version = version;
         state.offsetBeforeContent = COMPARE_SIZE + ivIndex + AES_BLOCK_SIZE + 1 + filenameIndex + filenameSize ;

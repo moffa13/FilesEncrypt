@@ -33,7 +33,8 @@ SOURCES += main.cpp \
     MainWindow.cpp \
     FilesEncrypt.cpp \
     Settings.cpp \
-    SettingsWindow.cpp
+    SettingsWindow.cpp \
+    TestCrypt.cpp
 
 HEADERS += \
     Crypt.h \
@@ -44,7 +45,8 @@ HEADERS += \
     FilesEncrypt.h \
     MainWindow.h \
     Settings.h \
-    SettingsWindow.h
+    SettingsWindow.h \
+    TestCrypt.h
 
 win32{
     INCLUDEPATH += "$$PWD/../include/windows/"

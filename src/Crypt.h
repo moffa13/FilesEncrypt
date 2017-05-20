@@ -41,8 +41,8 @@ class Crypt : public QObject
         void writePublicKey(EVP_PKEY* x) const;
         static void genAES(AESSIZE length, unsigned char* p);
         static void genRandomIV(unsigned char* p);
-        static void aes_crypt(const unsigned char* key, int key_length, unsigned char* iv, const unsigned char* message, int len, unsigned char* encrypted);
-        static void aes_decrypt(const unsigned char* key, int key_length, unsigned char* iv, const unsigned char* encrypted, int len, unsigned char* message);
+        void aes_decrypt(const unsigned char *encrypted, int encrypted_size, unsigned char *uncrypted, const unsigned char* key, unsigned char* iv);
+        void aes_crypt(const unsigned char *uncrypted, int uncrypted_size, unsigned char *encrypted, const unsigned char* key, unsigned char* iv);
         void aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
         void aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
         std::string m_key;

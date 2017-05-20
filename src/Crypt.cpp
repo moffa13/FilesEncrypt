@@ -18,6 +18,7 @@
 #include <iostream>
 #include <QThread>
 #include <QCoreApplication>
+#include <cassert>
 
 #if defined(Q_OS_WIN32)
 #include "openssl/applink.c"
@@ -222,13 +223,52 @@ int Crypt::decrypt(RSA* private_key, const unsigned char* encrypted, int len, un
     return ret;
 }
 
-void Crypt::aes_crypt(const unsigned char* key, int key_length, unsigned char* iv, const unsigned char* message, int len, unsigned char* encrypted){
-    AES_KEY aes_key;
-    AES_set_encrypt_key(key, key_length, &aes_key);
-    AES_cbc_encrypt(message, encrypted, len, &aes_key, iv, AES_ENCRYPT);
+// Encrypt by buffer
+void Crypt::aes_crypt(
+        const unsigned char* uncrypted,
+        int uncrypted_size,
+        unsigned char* encrypted,
+        const unsigned char* key,
+        unsigned char* iv
+){
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    EVP_EncryptInit(ctx, EVP_aes_256_cbc(), key, iv);
+
+    qint64 read{0};
+    int lastLength{0};
+    unsigned pass{0};
+    unsigned readPass{0};
+
+    unsigned current_position{0};
+
+    do{
+        if(current_position + AES_BLOCK_SIZE < uncrypted_size){
+            read = AES_BLOCK_SIZE;
+        }else{
+            read = uncrypted_size - current_position - 1;
+        }
+        assert(current_position + read < uncrypted_size);
+        EVP_EncryptUpdate(ctx, encrypted + current_position, &lastLength, uncrypted + current_position, read);
+        while(paused) QThread::msleep(100);
+        current_position += read;
+        ++pass;
+        readPass += read;
+        if(pass >= 64){
+            emit aes_encrypt_updated(readPass);
+            pass = 0;
+            readPass = 0;
+        }
+    }while(read == AES_BLOCK_SIZE);
+
+    emit aes_encrypt_updated(readPass);
+
+    // Writes the padding
+    EVP_EncryptFinal(ctx, encrypted + current_position, &lastLength);
+    EVP_CIPHER_CTX_free(ctx);
 }
 
-// Encrypt by buffer
+// Encrypt by stream
 void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv){
     unsigned char* buffer = reinterpret_cast<unsigned char*>(malloc(16));
     unsigned char* crypted = reinterpret_cast<unsigned char*>(malloc(16));
@@ -247,7 +287,7 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
         ++pass;
         readPass += read;
         if(pass >= 64){
-            emit aes_decrypt_updated(readPass);
+            emit aes_encrypt_updated(readPass);
             pass = 0;
             readPass = 0;
         }
@@ -256,7 +296,7 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
         memset(crypted, 0, 16);
     }
 
-    emit aes_decrypt_updated(readPass);
+    emit aes_encrypt_updated(readPass);
 
     // Writes the padding
     EVP_EncryptFinal(ctx, crypted, &lastLength);
@@ -268,7 +308,7 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
     free(crypted);
 }
 
-// Decrypt by buffer
+// Decrypt by stream
 void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv){
 
     unsigned char* buffer = reinterpret_cast<unsigned char*>(malloc(16));
@@ -312,10 +352,48 @@ void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, u
     EVP_CIPHER_CTX_free(ctx);
 }
 
-void Crypt::aes_decrypt(const unsigned char* key, int key_length, unsigned char* iv, const unsigned char* encrypted, int len, unsigned char* message){
-    AES_KEY aes_key;
-    AES_set_decrypt_key(key, key_length, &aes_key);
-    AES_cbc_encrypt(encrypted, message, len, &aes_key, iv, AES_DECRYPT);
+// Decrypt by buffer
+void Crypt::aes_decrypt(
+        const unsigned char* encrypted,
+        int encrypted_size,
+        unsigned char* uncrypted,
+        const unsigned char* key,
+        unsigned char* iv
+){
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    EVP_DecryptInit(ctx, EVP_aes_256_cbc(), key, iv);
+
+    qint64 read{0};
+    int lastLength{0};
+    unsigned pass{0};
+    unsigned readPass{0};
+
+    unsigned current_position{0};
+
+    do{
+        if(current_position + AES_BLOCK_SIZE < encrypted_size){
+            read = AES_BLOCK_SIZE;
+        }else{
+            read = encrypted_size - current_position - 1;
+        }
+        assert(current_position + read < encrypted_size);
+        EVP_DecryptUpdate(ctx, uncrypted + current_position, &lastLength, uncrypted + current_position, read);
+        while(paused) QThread::msleep(100);
+        current_position += read;
+        ++pass;
+        readPass += read;
+        if(pass >= 64){
+            emit aes_decrypt_updated(readPass);
+            pass = 0;
+            readPass = 0;
+        }
+    }while(read > 0);
+
+    emit aes_decrypt_updated(readPass);
+
+    // Writes the padding
+    EVP_DecryptFinal(ctx, uncrypted + current_position, &lastLength);
+    EVP_CIPHER_CTX_free(ctx);
 }
 
 void Crypt::genAES(AESSIZE length, unsigned char* p){
