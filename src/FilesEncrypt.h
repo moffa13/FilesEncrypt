@@ -58,7 +58,7 @@ public:
     static constexpr size_t VERSION_LENGTH = 1 + 5 + 1; // V00000;
     static constexpr size_t SIZE_BEFORE_CONTENT = COMPARE_SIZE + AES_BLOCK_SIZE + VERSION_LENGTH + 1 + 8 + 256;
     static constexpr char PRIVATE_ENCRYPT_AES_SEPARATOR = 0x10;
-
+    static size_t getEncryptedSize(int message_length);
 private:
     std::string m_key_file;
     unsigned char* m_aes_crypted;
@@ -73,7 +73,6 @@ private:
     void removePendingCrypt();
     void startDeleteAesTimer();
     static QByteArray getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, const char* newFilename, int newFilename_size);
-    static size_t getEncryptedSize(int message_length);
 Q_SIGNALS:
     void encrypt_updated(qint32 progress);
     void decrypt_updated(qint32 progress);

@@ -1,4 +1,4 @@
-QT += core widgets concurrent
+QT += core widgets concurrent testlib
 
 CONFIG += c++11
 
@@ -34,7 +34,7 @@ SOURCES += main.cpp \
     FilesEncrypt.cpp \
     Settings.cpp \
     SettingsWindow.cpp \
-    TestCrypt.cpp
+    tests/TestCrypt.cpp
 
 HEADERS += \
     Crypt.h \
@@ -46,7 +46,7 @@ HEADERS += \
     MainWindow.h \
     Settings.h \
     SettingsWindow.h \
-    TestCrypt.h
+    tests/TestCrypt.h
 
 win32{
     INCLUDEPATH += "$$PWD/../include/windows/"

@@ -111,7 +111,7 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
     }
 
     // Gen aes key
-    aes = reinterpret_cast<unsigned char*>(malloc(AESSIZE::S256 + 1));
+    aes = reinterpret_cast<unsigned char*>(malloc(AESSIZE::S256));
     Crypt::genAES(AESSIZE::S256, aes);
 
     // Encrypt aes
@@ -368,7 +368,7 @@ EncryptDecrypt_s FilesEncrypt::guessEncrypted(QFile& file){
 }
 
 size_t FilesEncrypt::getEncryptedSize(int message_length){
-    return  (message_length / AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
+    return (message_length / AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
 }
 
 EncryptDecrypt FilesEncrypt::guessEncrypted(QDir& dir){
