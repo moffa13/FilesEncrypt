@@ -293,14 +293,22 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         unsigned char* iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
         Crypt::genRandomIV(iv);
 
+        qDebug() << "Filename size will be " << getEncryptedSize(name.length());
+
+        unsigned char* encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(name.length())));
+
+        crypt.aes_crypt(m_aes_decrypted, 256, iv, reinterpret_cast<const unsigned char*>(name.toStdString().c_str()), name.length(), encrypted_filename);
+
         // Add Header E1N1C1R1Y1P1T1E1D1VZZZZZ;AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1XXXXX...
-        auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION);
+        auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, true, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(name.length()));
         QByteArray fileContentEncrypted{blob};
         tmpFile.write(fileContentEncrypted);
 
+        free(encrypted_filename);
+
 
         // Log final size
-        quint64 futureSize = (file->size() / AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE + blob.size();
+        quint64 futureSize = getEncryptedSize(file->size()) + blob.size();
         Logger::info("Future file size will be " + utilities::speed_to_human(futureSize));
 
         // Crypt data
@@ -345,6 +353,10 @@ end:
 EncryptDecrypt_s FilesEncrypt::guessEncrypted(QFile& file){
     QByteArray content = file.read(SIZE_BEFORE_CONTENT);
     return FilesEncrypt::guessEncrypted(content);
+}
+
+size_t FilesEncrypt::getEncryptedSize(int message_length){
+    return  (message_length / AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
 }
 
 EncryptDecrypt FilesEncrypt::guessEncrypted(QDir& dir){
@@ -398,7 +410,7 @@ FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
     return f;
 }
 
-QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, QString const &newFilename){
+QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, const char* newFilename, int newFilename_size){
     QByteArray content{};
     content.append(compare);
     content.append("V");
@@ -406,9 +418,9 @@ QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version, bool fi
     content.append(";");
     content.append(iv, AES_BLOCK_SIZE);
     content.append(QString::number(filenameChanged));
-    content.append(QString::number(newFilename.length()));
+    content.append(QString::number(newFilename_size));
     content.append(";");
-    content.append(newFilename);
+    content.append(newFilename, newFilename_size);
     return content;
 }
 
@@ -443,7 +455,7 @@ EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
 
         header = header.mid(1);
         auto filenameIndex = header.indexOf(';') + 1;
-        auto filenameSize{header.mid(0, filenameIndex - 2).toInt()};
+        auto filenameSize{header.mid(0, filenameIndex - 1).toInt()};
 
         header = header.mid(filenameIndex);
         state.newFilename = header.mid(0, filenameSize);

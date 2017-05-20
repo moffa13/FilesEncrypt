@@ -72,7 +72,8 @@ private:
     void addPendingCrypt();
     void removePendingCrypt();
     void startDeleteAesTimer();
-    static QByteArray getEncryptBlob(const char* iv, quint32 version, bool filenameChanged = false, QString const &newFilename = QString{});
+    static QByteArray getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, const char* newFilename, int newFilename_size);
+    static size_t getEncryptedSize(int message_length);
 Q_SIGNALS:
     void encrypt_updated(qint32 progress);
     void decrypt_updated(qint32 progress);
