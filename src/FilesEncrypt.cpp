@@ -308,9 +308,9 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
             do{
                 newName = "/" + utilities::randomString(15);
-            }while(QFile::exists(fileInfo.absolutePath() + newName));
+            }while(QFile::exists(fileInfo.absolutePath() + newName + ".filesencrypt"));
 
-            name = fileInfo.absolutePath() + newName;
+            name = fileInfo.absolutePath() + newName + ".filesencrypt";
         }
 
         unsigned char* encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length())));

@@ -5,6 +5,7 @@
 #include "Logger.h"
 #include <experimental/filesystem>
 #include <random>
+#include <QtDebug>
 
 namespace utilities{
 
@@ -36,7 +37,8 @@ namespace utilities{
         QByteArray res;
 
         for (unsigned i{0}; i < size; ++i) {
-            res.append(alphanum[random(0, sizeof(alphanum) - 1)]);
+            auto r = random(0, sizeof(alphanum) - 2);
+            res.append(alphanum[r]);
         }
 
         return QString::fromLocal8Bit(res);
