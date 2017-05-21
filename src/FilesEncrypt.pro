@@ -1,9 +1,20 @@
-QT += core widgets concurrent testlib
+QT += core gui widgets concurrent
+
+CONFIG(debug, debug|release) {
+
+    QT += testlib
+
+    SOURCES += tests/TestCrypt.cpp
+
+    HEADERS += tests/TestCrypt.h
+
+}
 
 CONFIG += c++11
 
 TARGET = FilesEncrypt
 CONFIG -= app_bundle
+CONFIG -= console
 
 RC_FILE = FilesEncrypt.rc
 
@@ -33,9 +44,7 @@ SOURCES += main.cpp \
     MainWindow.cpp \
     FilesEncrypt.cpp \
     Settings.cpp \
-    SettingsWindow.cpp \
-    tests/TestCrypt.cpp
-
+    SettingsWindow.cpp
 HEADERS += \
     Crypt.h \
     Logger.h \
@@ -45,8 +54,7 @@ HEADERS += \
     FilesEncrypt.h \
     MainWindow.h \
     Settings.h \
-    SettingsWindow.h \
-    tests/TestCrypt.h
+    SettingsWindow.h
 
 win32{
     INCLUDEPATH += "$$PWD/../include/windows/"
