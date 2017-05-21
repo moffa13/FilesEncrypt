@@ -311,7 +311,7 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
 }
 
 // Decrypt by stream
-void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv){
+int Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv){
 
     unsigned char* buffer = reinterpret_cast<unsigned char*>(malloc(16));
     unsigned char* uncrypted = reinterpret_cast<unsigned char*>(malloc(32));
@@ -324,9 +324,12 @@ void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, u
     int lastLength{0};
     unsigned pass{0};
     unsigned readPass{0};
+    unsigned uncrypted_size{0};
+
     while((read = file->read(reinterpret_cast<char*>(buffer), 16)) > 0){
 
         EVP_DecryptUpdate(ctx, uncrypted, &lastLength, buffer, read);
+        uncrypted_size += lastLength;
         tmpFile->write(reinterpret_cast<char*>(uncrypted), lastLength);
         while(paused) QThread::msleep(100);
         ++pass;
@@ -345,6 +348,7 @@ void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, u
 
     // Writes the padding
     EVP_DecryptFinal(ctx, uncrypted, &lastLength);
+    uncrypted_size += lastLength;
     tmpFile->write(reinterpret_cast<char*>(uncrypted), lastLength);
 
     tmpFile->close();
@@ -352,6 +356,8 @@ void Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, u
     free(buffer);
     free(uncrypted);
     EVP_CIPHER_CTX_free(ctx);
+
+    return uncrypted_size;
 }
 
 // Decrypt by buffer

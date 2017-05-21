@@ -189,7 +189,6 @@ void MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecr
     }else{
         Logger::error("Can't open file " + file);
     }
-
 }
 
 void MainWindow::addWhateverToList(QString const& item){

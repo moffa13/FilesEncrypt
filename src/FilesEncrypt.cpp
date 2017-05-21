@@ -260,32 +260,39 @@ void FilesEncrypt::startDeleteAesTimer(){
     });
 }
 
-bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
+finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
-    bool success{false};
+    finfo_s result;
+    result.state = op;
+    result.success = false;
 
-    QString filename{QFileInfo(*file).fileName()};
-
-    Logger::info("File size : " + QString::number(file->size()) + " bytes");
-
+    // Create a temporary file
     QTemporaryFile tmpFile;
     tmpFile.setAutoRemove(true);
     tmpFile.open();
-    QString name(file->fileName());
+
+    // The new name the file will have (absolute file name)
+    QString name;
     QFileInfo fileInfo{file->fileName()};
+
+    // Connect signals
     Crypt crypt;
     connect(&crypt, SIGNAL(aes_decrypt_updated(qint32)), this, SIGNAL(encrypt_updated(qint32)));
     connect(&crypt, SIGNAL(aes_encrypt_updated(qint32)), this, SIGNAL(decrypt_updated(qint32)));
 
+    EncryptDecrypt_s fileState{guessEncrypted(*file)};
+
+    // If there is no action to do to the file
+    if(op == fileState.state){
+        Logger::warn("Trying to encrypt/decrypt a file maybe already encrypted/uncrypted");
+        goto end;
+    }
+
+    // Tell the class that one more object is being used
+    addPendingCrypt();
+
 
     if(op == EncryptDecrypt::ENCRYPT){
-
-        if(guessEncrypted(*file).state == EncryptDecrypt::ENCRYPT){
-            Logger::warn("Trying to encrypt a file maybe already encrypted");
-            goto end;
-        }
-
-        addPendingCrypt();
 
         file->seek(0);
 
@@ -295,13 +302,16 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
 
         QString nameWithoutPath{fileInfo.fileName()};
-        QString newName;
 
-        do{
-            newName = "/" + utilities::randomString(15);
-        }while(QFile::exists(fileInfo.absolutePath() + newName));
+        {
+            QString newName;
 
-        name = fileInfo.absolutePath() + newName;
+            do{
+                newName = "/" + utilities::randomString(15);
+            }while(QFile::exists(fileInfo.absolutePath() + newName));
+
+            name = fileInfo.absolutePath() + newName;
+        }
 
         unsigned char* encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length())));
 
@@ -315,9 +325,9 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         free(encrypted_filename);
 
 
-        // Log final size
+        // Save final size
         quint64 futureSize = getEncryptedSize(file->size()) + blob.size();
-        Logger::info("Future file size will be " + utilities::speed_to_human(futureSize));
+        result.size = futureSize;
 
         // Crypt data
         crypt.aes_crypt(file, &tmpFile, m_aes_decrypted, iv);
@@ -325,49 +335,44 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         free(iv);
         iv = nullptr;
 
-        removePendingCrypt();
-
-        Logger::info("File " + filename + " encrypted");
-        success = true;
     }else{
 
-        EncryptDecrypt_s state{guessEncrypted(*file)};
-
-        if(state.state == EncryptDecrypt::DECRYPT){
-            Logger::warn("Trying to decrypt a file maybe not encrypted");
-            goto end;
-        }
-
-        addPendingCrypt();
-
         // Gen IV
-        file->seek(state.offsetBeforeContent);
-        crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(state.iv.constData())));
+        file->seek(fileState.offsetBeforeContent);
+        result.size = crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(fileState.iv.constData())));
 
-        char* uncrypted_filename = reinterpret_cast<char*>(malloc(state.newFilename.size()));
-        auto nameSize = crypt.aes_decrypt(
-                    reinterpret_cast<const unsigned char*>(state.newFilename.constData()),
-                    state.newFilename.size(),
-                    reinterpret_cast<unsigned char*>(uncrypted_filename),
-                    m_aes_decrypted,
-                    const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(state.iv.constData()))
-        );
+        // If there is a new file name to apply
+        if(fileState.filenameChanged){
+            char* uncrypted_filename = reinterpret_cast<char*>(malloc(fileState.newFilename.size()));
+            auto nameSize = crypt.aes_decrypt(
+                        reinterpret_cast<const unsigned char*>(fileState.newFilename.constData()),
+                        fileState.newFilename.size(),
+                        reinterpret_cast<unsigned char*>(uncrypted_filename),
+                        m_aes_decrypted,
+                        const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(fileState.iv.constData()))
+            );
 
-        QByteArray str(uncrypted_filename, nameSize);
-        name = fileInfo.absolutePath() + "/" + QString::fromLocal8Bit(str);
-
-        success = true;
-        Logger::info("File " + filename + " decrypted");
-        removePendingCrypt();
-
+            QByteArray str(uncrypted_filename, nameSize);
+            name = fileInfo.absolutePath() + "/" + QString::fromLocal8Bit(str);
+            free(uncrypted_filename);
+        }
     }
+
+    removePendingCrypt();
+    result.success = true;
+
+    result.name = name;
+
+    qDebug() << "Future name : " << result.name;
+    qDebug() << "Future size : " << result.size;
+    qDebug() << "Future state : " << result.state;
 
 
     file->remove();
     tmpFile.copy(name);
 
 end:
-    return success;
+    return result;
 }
 
 EncryptDecrypt_s FilesEncrypt::guessEncrypted(QFile& file){

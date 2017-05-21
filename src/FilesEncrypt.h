@@ -24,6 +24,13 @@ typedef struct {
     QByteArray newFilename;
 } EncryptDecrypt_s;
 
+typedef struct {
+    QString name;
+    unsigned size;
+    EncryptDecrypt state;
+    bool success;
+} finfo_s;
+
 typedef struct{
     QStringList files;
     quint64 size;
@@ -40,7 +47,7 @@ public:
     FilesEncrypt(FilesEncrypt const&) = delete;
     FilesEncrypt& operator =(FilesEncrypt const&) = delete;
     ~FilesEncrypt();
-    bool encryptFile(QFile* file, EncryptDecrypt op);
+    finfo_s encryptFile(QFile* file, EncryptDecrypt op);
     static bool genKey(QString const& file, QString const& password);
     bool readFromFile();
     static EncryptDecrypt_s guessEncrypted(QFile& f);
