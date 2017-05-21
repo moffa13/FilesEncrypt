@@ -185,10 +185,11 @@ void MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecr
     if(f.open(QFile::ReadWrite)){
         m_filesEncrypt->encryptFile(&f, action);
         *current_action = action;
+        f.close();
     }else{
         Logger::error("Can't open file " + file);
     }
-    f.close();
+
 }
 
 void MainWindow::addWhateverToList(QString const& item){
@@ -312,12 +313,13 @@ void MainWindow::on_invertAll_clicked()
 
 void MainWindow::action(EncryptDecrypt action){
 
-    qint64 max(0);
-    qint64 items_number(0);
-    qint64 item_does_not_need_action(0);
+    qint64 max{0};
+    qint64 items_number{0};
+    qint64 item_does_not_need_action{0};
 
-    bool passOk(false);
+    bool passOk{false};
 
+    // Ask password to decrypt aes if aes has been deleted
     if(!m_filesEncrypt->isAesDecrypted()){
         while(!passOk){
             bool ok;
@@ -328,7 +330,7 @@ void MainWindow::action(EncryptDecrypt action){
     }
 
     foreach(auto const& item, m_dirs.values()){
-        qDebug() << "dir entry is " << *item.state;
+        // For each file in the dir, or one file
         for(QMap<QString, EncryptDecrypt*>::const_iterator it = item.files.begin(); it != item.files.end(); ++it) {
             ++items_number;
             QFileInfo f{it.key()};
@@ -361,32 +363,30 @@ void MainWindow::action(EncryptDecrypt action){
 
             if(*item.state != action){ // Check again and avoid to do any action if it's not needed
 
-            item.item->setText("En cours...");
+                item.item->setText("En cours...");
 
-            QFutureWatcher<void>* watcher = new QFutureWatcher<void>;
+                QFutureWatcher<void>* watcher = new QFutureWatcher<void>;
 
-            QStringList *l = new QStringList{item.files.keys()};
+                QStringList *l = new QStringList{item.files.keys()};
 
-            connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, item, l](){
-                delete l;
-                encryptFinished(item, action);
-                watcher->deleteLater();
-            });
+                connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, item, l](){
+                    delete l;
+                    encryptFinished(item, action);
+                    watcher->deleteLater();
+                });
 
-            std::function<void(QString const &)> func = [this, action, item](QString const &file){
-                EncryptDecrypt *state = item.files[file];
-                if(*state != action)
-                encrypt(file, action, state);
-            };
+                std::function<void(QString const &)> func = [this, action, item](QString const &file){
+                    EncryptDecrypt *state = item.files[file];
+                    if(*state != action)
+                        encrypt(file, action, state);
+                };
 
-            QFuture<void> future = QtConcurrent::map(*l, func);
-            watcher->setFuture(future);
-                    m_progress->encryptionStarted();
-
+                QFuture<void> future = QtConcurrent::map(*l, func);
+                watcher->setFuture(future);
+                m_progress->encryptionStarted();
             }
         }
     }
-
 }
 
 void MainWindow::on_remove_clicked(){
