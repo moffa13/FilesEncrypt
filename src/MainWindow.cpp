@@ -211,7 +211,12 @@ void MainWindow::addWhateverToList(QString const& item){
         QFutureWatcher<QPAIR_CRYPT_DEF>* watcher = new QFutureWatcher<QPAIR_CRYPT_DEF>;
 
         QTableWidgetItem* encryptedVal = new QTableWidgetItem("...");
+        QTableWidgetItem* sizeItem = new QTableWidgetItem("0");
+        QTableWidgetItem* nameItem = new QTableWidgetItem("---");
         infos.encryptedItem = encryptedVal;
+        infos.sizeItem = sizeItem;
+        infos.nameItem  = nameItem;
+        infos.isFile = false;
 
         if(info.isDir()){
 
@@ -228,11 +233,13 @@ void MainWindow::addWhateverToList(QString const& item){
             ui->tableWidget->setItem(rCount, 1, new QTableWidgetItem(utilities::speed_to_human(size)));
 
         }else{
+            infos.isFile = true;
             // Add the single file to the list
             filesAndState[info.absoluteFilePath()] = new EncryptDecrypt{NOT_FINISHED};
             // Show the type
             ui->tableWidget->setItem(rCount, 0, new QTableWidgetItem("Fichier"));
-            ui->tableWidget->setItem(rCount, 1, new QTableWidgetItem(utilities::speed_to_human(info.size())));
+            sizeItem->setText(utilities::speed_to_human(info.size()));
+            ui->tableWidget->setItem(rCount, 1, sizeItem);
         }
 
         infos.files = filesAndState;
@@ -246,7 +253,8 @@ void MainWindow::addWhateverToList(QString const& item){
         QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(filesAndState.keys(), &MainWindow::guessEncrypted);
         watcher->setFuture(future);
         ui->tableWidget->setItem(rCount, 2, encryptedVal);
-        ui->tableWidget->setItem(rCount, 3, new QTableWidgetItem(item));
+        nameItem->setText(item);
+        ui->tableWidget->setItem(rCount, 3, nameItem);
         m_dirs.insert(item, infos);
     }
 }
@@ -386,8 +394,12 @@ void MainWindow::action(EncryptDecrypt action){
                         finfo_s state = encrypt(file, action, current_state);
                         if(state.success){
                             // Because the filename changed, we delete the concerned file and recreate it with the appropriate name
-                            m_dirs[key].files.remove(file);
-                            m_dirs[key].files.insert(state.name, current_state);
+                            CryptInfos& dirInfos = m_dirs[key];
+                            dirInfos.files.remove(file);
+                            dirInfos.files.insert(state.name, current_state);
+                            if(dirInfos.isFile){
+                                dirInfos.nameItem->setText(state.name);
+                            }
                         }
 
                     }
