@@ -144,13 +144,13 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
     }
 
     if(crypted == length){
-        item.item->setText("Oui");
+        item.encryptedItem->setText("Oui");
         *item.state = ENCRYPT;
     }else if(uncrypted == length){
-        item.item->setText("Non");
+        item.encryptedItem->setText("Non");
         *item.state = DECRYPT;
     }else{
-        item.item->setText("-");
+        item.encryptedItem->setText("-");
         *item.state = PARTIAL;
     }
 }
@@ -161,10 +161,10 @@ void MainWindow::encryptFinished(CryptInfos const &item, EncryptDecrypt action){
 
     switch(action){
         case EncryptDecrypt::ENCRYPT:
-	    item.item->setText("Oui");
+        item.encryptedItem->setText("Oui");
             break;
         case EncryptDecrypt::DECRYPT:
-	    item.item->setText("Non");
+        item.encryptedItem->setText("Non");
             break;
     }
 }
@@ -180,15 +180,18 @@ QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
     return QPAIR_CRYPT_DEF{file, res.state};
 }
 
-void MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action){
+finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action){
     QFile f(file);
+    finfo_s res;
+    res.success = false;
     if(f.open(QFile::ReadWrite)){
-        m_filesEncrypt->encryptFile(&f, action);
+        res = m_filesEncrypt->encryptFile(&f, action);
         *current_action = action;
         f.close();
     }else{
         Logger::error("Can't open file " + file);
     }
+    return res;
 }
 
 void MainWindow::addWhateverToList(QString const& item){
@@ -208,7 +211,7 @@ void MainWindow::addWhateverToList(QString const& item){
         QFutureWatcher<QPAIR_CRYPT_DEF>* watcher = new QFutureWatcher<QPAIR_CRYPT_DEF>;
 
         QTableWidgetItem* encryptedVal = new QTableWidgetItem("...");
-        infos.item = encryptedVal;
+        infos.encryptedItem = encryptedVal;
 
         if(info.isDir()){
 
@@ -358,11 +361,14 @@ void MainWindow::action(EncryptDecrypt action){
         m_progress->setMax(max);
         m_progress->show();
 
-        foreach(auto const &item, m_dirs.values()){
+        for(QMap<QString, CryptInfos>::iterator it = m_dirs.begin(); it != m_dirs.end(); ++it){
+
+            const QString& key{it.key()};
+            CryptInfos& item{it.value()};
 
             if(*item.state != action){ // Check again and avoid to do any action if it's not needed
 
-                item.item->setText("En cours...");
+                item.encryptedItem->setText("En cours...");
 
                 QFutureWatcher<void>* watcher = new QFutureWatcher<void>;
 
@@ -374,10 +380,17 @@ void MainWindow::action(EncryptDecrypt action){
                     watcher->deleteLater();
                 });
 
-                std::function<void(QString const &)> func = [this, action, item](QString const &file){
-                    EncryptDecrypt *state = item.files[file];
-                    if(*state != action)
-                        encrypt(file, action, state);
+                std::function<void(QString const &)> func = [this, action, item, key](QString const &file){
+                    EncryptDecrypt *current_state = item.files[file];
+                    if(*current_state != action){
+                        finfo_s state = encrypt(file, action, current_state);
+                        if(state.success){
+                            // Because the filename changed, we delete the concerned file and recreate it with the appropriate name
+                            m_dirs[key].files.remove(file);
+                            m_dirs[key].files.insert(state.name, current_state);
+                        }
+
+                    }
                 };
 
                 QFuture<void> future = QtConcurrent::map(*l, func);

@@ -20,7 +20,7 @@ class MainWindow;
 typedef struct CryptInfos CryptInfos;
 struct CryptInfos{
     QMap<QString, EncryptDecrypt*> files;
-    QTableWidgetItem* item;
+    QTableWidgetItem* encryptedItem;
     EncryptDecrypt* state;
 };
 
@@ -60,7 +60,7 @@ private:
     QFutureWatcher<void> m_future_guessEncrypted_watcher;
     QSettings* m_settings;
     static QPAIR_CRYPT_DEF guessEncrypted(QString const& file);
-    void encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action);
+    finfo_s encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action);
     void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item);
     void encryptFinished(CryptInfos const &item, EncryptDecrypt action);
     void action(EncryptDecrypt action);
