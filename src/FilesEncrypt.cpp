@@ -272,7 +272,7 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
     tmpFile.setAutoRemove(true);
     tmpFile.open();
     QString name(file->fileName());
-
+    QFileInfo fileInfo{file->fileName()};
     Crypt crypt;
     connect(&crypt, SIGNAL(aes_decrypt_updated(qint32)), this, SIGNAL(encrypt_updated(qint32)));
     connect(&crypt, SIGNAL(aes_encrypt_updated(qint32)), this, SIGNAL(decrypt_updated(qint32)));
@@ -293,9 +293,15 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         unsigned char* iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
         Crypt::genRandomIV(iv);
 
-        QString nameWithoutPath{QFileInfo{file->fileName()}.fileName()};
 
-        qDebug() << "Filename size will be " << getEncryptedSize(nameWithoutPath.length());
+        QString nameWithoutPath{fileInfo.fileName()};
+        QString newName;
+
+        do{
+            newName = "/" + utilities::randomString(15);
+        }while(QFile::exists(fileInfo.absolutePath() + newName));
+
+        name = fileInfo.absolutePath() + newName;
 
         unsigned char* encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length())));
 
@@ -339,7 +345,7 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
         crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(state.iv.constData())));
 
         char* uncrypted_filename = reinterpret_cast<char*>(malloc(state.newFilename.size()));
-        crypt.aes_decrypt(
+        auto nameSize = crypt.aes_decrypt(
                     reinterpret_cast<const unsigned char*>(state.newFilename.constData()),
                     state.newFilename.size(),
                     reinterpret_cast<unsigned char*>(uncrypted_filename),
@@ -347,8 +353,8 @@ bool FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
                     const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(state.iv.constData()))
         );
 
-        QByteArray str(uncrypted_filename, state.newFilename.size());
-        qDebug() << QString::fromLocal8Bit(str);
+        QByteArray str(uncrypted_filename, nameSize);
+        name = fileInfo.absolutePath() + "/" + QString::fromLocal8Bit(str);
 
         success = true;
         Logger::info("File " + filename + " decrypted");

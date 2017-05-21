@@ -4,6 +4,7 @@
 #include <fstream>
 #include "Logger.h"
 #include <experimental/filesystem>
+#include <random>
 
 namespace utilities{
 
@@ -13,8 +14,32 @@ namespace utilities{
         return std::experimental::filesystem::exists(filename);
     }
 
-    int random(void *){
-        return rand();
+    /**
+     * Returns a number between a and b, which are included
+     * @brief CloudflareScraper::random
+     * @param a
+     * @param b
+     */
+    unsigned random(unsigned a, unsigned b){
+        std::mt19937 random_gen;
+        random_gen.seed(std::random_device()());
+        std::uniform_int_distribution<std::mt19937::result_type> rnd(a, b);
+        return rnd(random_gen);
+    }
+
+    QString randomString(unsigned size){
+        static constexpr char alphanum[] =
+                "0123456789"
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "abcdefghijklmnopqrstuvwxyz";
+
+        QByteArray res;
+
+        for (unsigned i{0}; i < size; ++i) {
+            res.append(alphanum[random(0, sizeof(alphanum) - 1)]);
+        }
+
+        return QString::fromLocal8Bit(res);
     }
 
     QString speed_to_human(quint64 speed){

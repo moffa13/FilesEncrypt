@@ -4,12 +4,10 @@
 #include <QString>
 
 namespace utilities{
-
     bool checkFileExists(std::string const &filename);
     QString speed_to_human(quint64 speed);
-
-    int random(void *);
-
+    QString randomString(unsigned size);
+    unsigned random(unsigned a, unsigned b);
 }
 
 #if defined(Q_OS_WINRT) || defined(Q_OS_WIN32)
