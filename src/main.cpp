@@ -16,8 +16,6 @@ int main(int argc, char *argv[])
     a.setOrganizationName("Bigcoding");
     a.setOrganizationDomain("Bigcoding.com");
 
-    qDebug() << QDir::tempPath();
-
     MainWindow w;
 
     return a.exec();

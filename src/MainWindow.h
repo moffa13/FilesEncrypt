@@ -20,7 +20,10 @@ class MainWindow;
 typedef struct CryptInfos CryptInfos;
 struct CryptInfos{
     QMap<QString, EncryptDecrypt*> files;
+    bool isFile;
     QTableWidgetItem* encryptedItem;
+    QTableWidgetItem* sizeItem;
+    QTableWidgetItem* nameItem;
     EncryptDecrypt* state;
 };
 
