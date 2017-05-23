@@ -109,26 +109,22 @@ void MainWindow::showEvent(QShowEvent *event){
     correctResize();
 }
 
-MainWindow::~MainWindow()
-{
-    if(m_progress != NULL){
-        delete m_progress;
-    }
+MainWindow::~MainWindow(){
+    delete m_progress;
     delete m_choose_key;
-    if(m_filesEncrypt != NULL)
-        delete m_filesEncrypt;
+    delete m_filesEncrypt;
     delete ui;
 }
 
 void MainWindow::addWhateverToList(QStringList const& items){
-    foreach(auto item, items){
+    foreach(const auto& item, items){
         addWhateverToList(item);
     }
 }
 
 void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item){
     // Retrieve results
-    QList<QPAIR_CRYPT_DEF> res = watcher->future().results();
+    QList<QPAIR_CRYPT_DEF> res{watcher->future().results()};
 
     size_t length = res.length();
     unsigned crypted = 0;

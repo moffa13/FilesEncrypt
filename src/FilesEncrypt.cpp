@@ -176,7 +176,7 @@ bool FilesEncrypt::readFromFile(){
     }
 
     // Get separated the private key and the aes-crypted key
-    QByteArray arr(f.readAll());
+    QByteArray arr{f.readAll()};
     int split = arr.indexOf(PRIVATE_ENCRYPT_AES_SEPARATOR);
     QByteArray private_key = arr.mid(0, split);
     QByteArray aes_crypted = arr.mid(split + 1, -1);
