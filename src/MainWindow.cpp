@@ -9,7 +9,7 @@
 #include "Logger.h"
 #include "FilesEncrypt.h"
 #include "MainWindow.h"
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 #include "utilities.h"
 #include <QDesktopServices>
 
@@ -343,11 +343,6 @@ void MainWindow::on_decryptAll_clicked()
 void MainWindow::on_cryptAll_clicked()
 {
     action(EncryptDecrypt::ENCRYPT);
-}
-
-void MainWindow::on_invertAll_clicked()
-{
-
 }
 
 void MainWindow::action(EncryptDecrypt action){

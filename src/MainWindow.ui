@@ -26,36 +26,6 @@
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="3" column="5">
-       <widget class="QPushButton" name="importButton">
-        <property name="text">
-         <string>Ajouter</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_3"/>
-      </item>
-      <item row="3" column="3">
-       <widget class="QPushButton" name="invertAll">
-        <property name="text">
-         <string>Intervertir</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="1">
        <widget class="QPushButton" name="cryptAll">
         <property name="text">
@@ -70,12 +40,35 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="4">
+      <item row="3" column="3">
        <widget class="QPushButton" name="remove">
         <property name="text">
          <string>Supprimer</string>
         </property>
        </widget>
+      </item>
+      <item row="3" column="0">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="3" column="4">
+       <widget class="QPushButton" name="importButton">
+        <property name="text">
+         <string>Ajouter</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_3"/>
       </item>
      </layout>
     </item>

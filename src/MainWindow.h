@@ -46,7 +46,6 @@ private Q_SLOTS:
     void on_importButton_clicked();
     void on_decryptAll_clicked();
     void on_cryptAll_clicked();
-    void on_invertAll_clicked();
     void on_remove_clicked();
     void keySelected();
     void displayKey();

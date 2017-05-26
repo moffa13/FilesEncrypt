@@ -1,5 +1,5 @@
 /********************************************************************************
-** Form generated from reading UI file 'mainwindow.ui'
+** Form generated from reading UI file 'MainWindow.ui'
 **
 ** Created by: Qt User Interface Compiler version 5.8.0
 **
@@ -36,13 +36,12 @@ public:
     QVBoxLayout *verticalLayout_4;
     QTableWidget *tableWidget;
     QGridLayout *gridLayout;
-    QSpacerItem *horizontalSpacer;
-    QPushButton *importButton;
-    QVBoxLayout *verticalLayout_3;
-    QPushButton *invertAll;
     QPushButton *cryptAll;
     QPushButton *decryptAll;
     QPushButton *remove;
+    QSpacerItem *horizontalSpacer;
+    QPushButton *importButton;
+    QVBoxLayout *verticalLayout_3;
     QMenuBar *menubar;
     QMenu *menuOptions;
     QStatusBar *statusbar;
@@ -68,25 +67,6 @@ public:
 
         gridLayout = new QGridLayout();
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-        gridLayout->addItem(horizontalSpacer, 3, 0, 1, 1);
-
-        importButton = new QPushButton(centralwidget);
-        importButton->setObjectName(QStringLiteral("importButton"));
-
-        gridLayout->addWidget(importButton, 3, 5, 1, 1);
-
-        verticalLayout_3 = new QVBoxLayout();
-        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
-
-        gridLayout->addLayout(verticalLayout_3, 0, 0, 1, 1);
-
-        invertAll = new QPushButton(centralwidget);
-        invertAll->setObjectName(QStringLiteral("invertAll"));
-
-        gridLayout->addWidget(invertAll, 3, 3, 1, 1);
-
         cryptAll = new QPushButton(centralwidget);
         cryptAll->setObjectName(QStringLiteral("cryptAll"));
 
@@ -100,7 +80,21 @@ public:
         remove = new QPushButton(centralwidget);
         remove->setObjectName(QStringLiteral("remove"));
 
-        gridLayout->addWidget(remove, 3, 4, 1, 1);
+        gridLayout->addWidget(remove, 3, 3, 1, 1);
+
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        gridLayout->addItem(horizontalSpacer, 3, 0, 1, 1);
+
+        importButton = new QPushButton(centralwidget);
+        importButton->setObjectName(QStringLiteral("importButton"));
+
+        gridLayout->addWidget(importButton, 3, 4, 1, 1);
+
+        verticalLayout_3 = new QVBoxLayout();
+        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+
+        gridLayout->addLayout(verticalLayout_3, 0, 0, 1, 1);
 
 
         verticalLayout_4->addLayout(gridLayout);
@@ -130,11 +124,10 @@ public:
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Encrypter", Q_NULLPTR));
         actionObtenir_la_cl->setText(QApplication::translate("MainWindow", "Obtenir la cl\303\251", Q_NULLPTR));
         actionParam_tres->setText(QApplication::translate("MainWindow", "Param\303\250tres", Q_NULLPTR));
-        importButton->setText(QApplication::translate("MainWindow", "Ajouter", Q_NULLPTR));
-        invertAll->setText(QApplication::translate("MainWindow", "Intervertir", Q_NULLPTR));
         cryptAll->setText(QApplication::translate("MainWindow", "Crypter", Q_NULLPTR));
         decryptAll->setText(QApplication::translate("MainWindow", "D\303\251crypter", Q_NULLPTR));
         remove->setText(QApplication::translate("MainWindow", "Supprimer", Q_NULLPTR));
+        importButton->setText(QApplication::translate("MainWindow", "Ajouter", Q_NULLPTR));
         menuOptions->setTitle(QApplication::translate("MainWindow", "Options", Q_NULLPTR));
     } // retranslateUi
 
