@@ -11,7 +11,7 @@
 #include "MainWindow.h"
 #include "ui_mainwindow.h"
 #include "utilities.h"
-#include <QProcessEnvironment>
+#include <QDesktopServices>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
 
@@ -78,47 +78,20 @@ void MainWindow::openSelectedRowInDir(){
 }
 
 void MainWindow::showInGraphicalShell(QWidget *parent, const QString &pathIn){
-    // Mac, Windows support folder or file.
-#if defined(Q_OS_WIN)
-    const QString explorer = QProcessEnvironment::systemEnvironment().value(QLatin1String("explorer.exe"));
-    if (explorer.isEmpty()) {
-        QMessageBox::warning(parent,
-                             tr("Launching Windows Explorer failed"),
-                             tr("Could not find explorer.exe in path to launch Windows Explorer."));
-        return;
-    }
-    QString param;
-    if (!QFileInfo(pathIn).isDir())
-        param = QLatin1String("/select,");
-    param += QDir::toNativeSeparators(pathIn);
-    QString command = explorer + " " + param;
-    QProcess::startDetached(command);
-#elif defined(Q_OS_MAC)
-    Q_UNUSED(parent)
-    QStringList scriptArgs;
-    scriptArgs << QLatin1String("-e")
-               << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
-                                     .arg(pathIn);
-    QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
-    scriptArgs.clear();
-    scriptArgs << QLatin1String("-e")
-               << QLatin1String("tell application \"Finder\" to activate");
-    QProcess::execute("/usr/bin/osascript", scriptArgs);
+#ifdef Q_OS_WIN
+    openInExplorer(pathIn);
 #else
-    // we cannot select a file here, because no file browser really supports it...
-    const QFileInfo fileInfo(pathIn);
-    const QString folder = fileInfo.absoluteFilePath();
-    const QString app = Utils::UnixUtils::fileBrowser(Core::ICore::instance()->settings());
-    QProcess browserProc;
-    const QString browserArgs = Utils::UnixUtils::substituteFileBrowserParameters(app, folder);
-    if (debug)
-        qDebug() <<  browserArgs;
-    bool success = browserProc.startDetached(browserArgs);
-    const QString error = QString::fromLocal8Bit(browserProc.readAllStandardError());
-    success = success && error.isEmpty();
-    if (!success)
-        showGraphicalShellError(parent, app, error);
+    QMessageBox::warning(this, "Not supported yet", "Sorry, but this functionnality is not supported yet for other than Windows Systems", QMessageBox::Ok);
 #endif
+}
+
+void MainWindow::openInExplorer(const QString &pathIn){
+      QStringList args;
+
+      args << "/select," << QDir::toNativeSeparators(pathIn);
+
+      QProcess *process = new QProcess(this);
+      process->start("explorer.exe", args);
 }
 
 void MainWindow::displayKey(){

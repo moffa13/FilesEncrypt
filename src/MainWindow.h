@@ -74,6 +74,7 @@ private:
     void set_base_dir(QString const &dir);
     void showInGraphicalShell(QWidget *parent, const QString &pathIn);
     QString getCurrentDir() const;
+    void openInExplorer(const QString& pathIn);
 protected:
     void closeEvent(QCloseEvent* event);
 
