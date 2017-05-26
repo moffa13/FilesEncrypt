@@ -22,12 +22,18 @@
 unsigned FilesEncrypt::m_pendingCrypt = 0;
 QMutex FilesEncrypt::m_mutex;
 
-
+/**
+ * Constructs from a key path string
+ */
 FilesEncrypt::FilesEncrypt(std::string const &key_file) : m_key_file(key_file){
     init();
     readFromFile();
 }
 
+/**
+ * Directly constructs via an uncrypted aes key
+ * @param aes the 32-bytes aes key
+ */
 FilesEncrypt::FilesEncrypt(const char* aes){
     init();
     setAES(aes);
@@ -54,7 +60,6 @@ void FilesEncrypt::removePendingCrypt(){
     m_mutex.unlock();
 }
 
-
 void FilesEncrypt::setAES(const char* aes){
     m_aes_decrypted_set = true;
     memcpy(m_aes_decrypted, aes, 32);
@@ -73,6 +78,13 @@ unsigned FilesEncrypt::getPendingCrypt(){
     return m_pendingCrypt;
 }
 
+/**
+ * Makes a 256 bits aes-cbc key encrypted with rsa by a password
+ * Private key locked with a password and encrypted aes with public key are stored in the file
+ * @param file The file where we write the keys
+ * @param password The password which will lock the private key
+ * @return true if everything happend right
+ */
 bool FilesEncrypt::genKey(QString const& file, QString const& password){
     bool success = false;
 
@@ -131,15 +143,10 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
         Logger::info("Can't write aes key to file");
     }
 
-    if(aes != nullptr){
-        free(aes);
-    }
-    if(aes_encrypted != nullptr) {
-        free(aes_encrypted);
-    }
-    if(rsaBuff != nullptr) {
-        free(rsaBuff);
-    }
+    free(aes);
+    free(aes_encrypted);
+    free(rsaBuff);
+
     if(bio != nullptr) {
         BIO_free(bio);
     }
@@ -169,7 +176,7 @@ bool FilesEncrypt::readFromFile(){
     }
 
     // Get separated the private key and the aes-crypted key
-    QByteArray arr(f.readAll());
+    QByteArray arr{f.readAll()};
     int split = arr.indexOf(PRIVATE_ENCRYPT_AES_SEPARATOR);
     QByteArray private_key = arr.mid(0, split);
     QByteArray aes_crypted = arr.mid(split + 1, -1);
@@ -318,7 +325,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
         crypt.aes_crypt(reinterpret_cast<const unsigned char*>(nameWithoutPath.toStdString().c_str()), nameWithoutPath.length(), encrypted_filename, m_aes_decrypted, iv);
 
-        // Add Header E1N1C1R1Y1P1T1E1D1VZZZZZ;AAAAAAAAAAAAAAAAE1N1C1R1Y1P1T1E1D1XXXXX...
+        // Add Header
         auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, true, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(nameWithoutPath.length()));
         QByteArray fileContentEncrypted{blob};
         tmpFile.write(fileContentEncrypted);
