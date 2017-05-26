@@ -11,6 +11,7 @@
 #include "MainWindow.h"
 #include "ui_mainwindow.h"
 #include "utilities.h"
+#include <QProcessEnvironment>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
 
@@ -52,6 +53,72 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionObtenir_la_cl, SIGNAL(triggered(bool)), this, SLOT(displayKey()));
     connect(ui->actionParam_tres, SIGNAL(triggered(bool)), this, SLOT(openSettings()));
+
+    m_addWhateverMenu = new QMenu(this);
+    QAction* dir = new QAction("Importer des dossiers", m_addWhateverMenu);
+    QAction* file = new QAction("Importer des fichiers", m_addWhateverMenu);
+    connect(dir, SIGNAL(triggered(bool)), this, SLOT(select_dir()));
+    connect(file, SIGNAL(triggered(bool)), this, SLOT(select_file()));
+    m_addWhateverMenu->addAction(dir);
+    m_addWhateverMenu->addAction(file);
+
+    m_listRowMenu = new QMenu(this);
+    QAction* openDir = new QAction("Ouvrir le dossier", m_listRowMenu);
+    connect(openDir, SIGNAL(triggered(bool)), this, SLOT(openSelectedRowInDir()));
+
+    ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->tableWidget, &QTableWidget::customContextMenuRequested, [this](const QPoint &p){
+        m_listRowMenu->exec(QCursor::pos());
+    });
+    m_listRowMenu->addAction(openDir);
+}
+
+void MainWindow::openSelectedRowInDir(){
+    showInGraphicalShell(this, getCurrentDir());
+}
+
+void MainWindow::showInGraphicalShell(QWidget *parent, const QString &pathIn){
+    // Mac, Windows support folder or file.
+#if defined(Q_OS_WIN)
+    const QString explorer = QProcessEnvironment::systemEnvironment().value(QLatin1String("explorer.exe"));
+    if (explorer.isEmpty()) {
+        QMessageBox::warning(parent,
+                             tr("Launching Windows Explorer failed"),
+                             tr("Could not find explorer.exe in path to launch Windows Explorer."));
+        return;
+    }
+    QString param;
+    if (!QFileInfo(pathIn).isDir())
+        param = QLatin1String("/select,");
+    param += QDir::toNativeSeparators(pathIn);
+    QString command = explorer + " " + param;
+    QProcess::startDetached(command);
+#elif defined(Q_OS_MAC)
+    Q_UNUSED(parent)
+    QStringList scriptArgs;
+    scriptArgs << QLatin1String("-e")
+               << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
+                                     .arg(pathIn);
+    QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
+    scriptArgs.clear();
+    scriptArgs << QLatin1String("-e")
+               << QLatin1String("tell application \"Finder\" to activate");
+    QProcess::execute("/usr/bin/osascript", scriptArgs);
+#else
+    // we cannot select a file here, because no file browser really supports it...
+    const QFileInfo fileInfo(pathIn);
+    const QString folder = fileInfo.absoluteFilePath();
+    const QString app = Utils::UnixUtils::fileBrowser(Core::ICore::instance()->settings());
+    QProcess browserProc;
+    const QString browserArgs = Utils::UnixUtils::substituteFileBrowserParameters(app, folder);
+    if (debug)
+        qDebug() <<  browserArgs;
+    bool success = browserProc.startDetached(browserArgs);
+    const QString error = QString::fromLocal8Bit(browserProc.readAllStandardError());
+    success = success && error.isEmpty();
+    if (!success)
+        showGraphicalShellError(parent, app, error);
+#endif
 }
 
 void MainWindow::displayKey(){
@@ -292,14 +359,7 @@ void MainWindow::set_base_dir(QString const &dir){
 
 void MainWindow::on_importButton_clicked()
 {
-    QMenu menu(ui->importButton);
-    QAction* dir = new QAction("Importer des dossiers");
-    QAction* file = new QAction("Importer des fichiers");
-    connect(dir, SIGNAL(triggered(bool)), this, SLOT(select_dir()));
-    connect(file, SIGNAL(triggered(bool)), this, SLOT(select_file()));
-    menu.addAction(dir);
-    menu.addAction(file);
-    menu.exec(QCursor::pos());
+    m_addWhateverMenu->exec(QCursor::pos());
 }
 
 void MainWindow::on_decryptAll_clicked()
@@ -409,10 +469,15 @@ void MainWindow::action(EncryptDecrypt action){
     }
 }
 
+QString MainWindow::getCurrentDir() const{
+    int const row{ui->tableWidget->currentRow()};
+    return ui->tableWidget->item(row, 3)->text();
+}
+
 void MainWindow::on_remove_clicked(){
-    int row = ui->tableWidget->currentRow();
+    int const row = ui->tableWidget->currentRow();
     if(row >= 0){
-        m_dirs.remove(ui->tableWidget->item(row, 3)->text());
+        m_dirs.remove(getCurrentDir());
         ui->tableWidget->removeRow(row);
     }
 }

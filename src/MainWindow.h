@@ -52,6 +52,7 @@ private Q_SLOTS:
     void displayKey();
     void openSettings();
     void closeSettings();
+    void openSelectedRowInDir();
 private:
     Ui::MainWindow *ui;
     Progress* m_progress = NULL;
@@ -62,6 +63,8 @@ private:
     QFuture<void> m_future_guessEncrypted;
     QFutureWatcher<void> m_future_guessEncrypted_watcher;
     QSettings* m_settings;
+    QMenu* m_addWhateverMenu;
+    QMenu* m_listRowMenu;
     static QPAIR_CRYPT_DEF guessEncrypted(QString const& file);
     finfo_s encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action);
     void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item);
@@ -69,6 +72,8 @@ private:
     void action(EncryptDecrypt action);
     QString get_base_dir() const;
     void set_base_dir(QString const &dir);
+    void showInGraphicalShell(QWidget *parent, const QString &pathIn);
+    QString getCurrentDir() const;
 protected:
     void closeEvent(QCloseEvent* event);
 
