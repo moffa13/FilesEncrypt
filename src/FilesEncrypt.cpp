@@ -272,8 +272,9 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
     tmpFile.open();
 
     // The new name the file will have (absolute file name)
-    QString name;
+
     QFileInfo fileInfo{file->fileName()};
+    QString name{fileInfo.absoluteFilePath()};
 
     // Connect signals
     Crypt crypt;
