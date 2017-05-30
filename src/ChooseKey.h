@@ -34,7 +34,7 @@ private slots:
     bool m_close = false;
     QString showInputKeyDialog();
 protected:
-    void ChooseKey::closeEvent(QCloseEvent *e);
+    void closeEvent(QCloseEvent *e);
 };
 
 #endif // CHOOSEKEY_H

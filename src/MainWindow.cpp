@@ -12,6 +12,7 @@
 #include "ui_MainWindow.h"
 #include "utilities.h"
 #include <QDesktopServices>
+#include <QDesktopWidget>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
 
@@ -42,6 +43,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget->setHorizontalHeaderLabels(type);
     ui->tableWidget->update();
 
+    // Center item
+    setGeometry(
+        QStyle::alignedRect(
+            Qt::LeftToRight,
+            Qt::AlignCenter,
+            size(),
+            qApp->desktop()->availableGeometry()
+        )
+    );
 
     m_choose_key = new ChooseKey(&m_filesEncrypt, this);
     connect(m_choose_key, SIGNAL(keyDone()), this, SLOT(keySelected()));
@@ -123,7 +133,7 @@ void MainWindow::closeSettings(){
 }
 
 void MainWindow::keySelected(){
-    m_progress = new Progress(&m_filesEncrypt);
+    m_progress = new Progress(&m_filesEncrypt, this);
     m_progress->setFixedSize(m_progress->size());
 }
 

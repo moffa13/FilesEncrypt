@@ -21,6 +21,11 @@
 // Current crpyts number
 unsigned FilesEncrypt::m_pendingCrypt = 0;
 QMutex FilesEncrypt::m_mutex;
+const char FilesEncrypt::compare[] = {'E', 0x31, 'N', 0x31, 'C', 0x31, 'R', 0x31, 'Y', 0x31, 'P', 0x31, 'T', 0x31, 'E', 0x31, 'D', 0x31};
+const size_t FilesEncrypt::COMPARE_SIZE = sizeof(compare)/sizeof(*compare);
+const size_t FilesEncrypt::VERSION_LENGTH = 1 + 5 + 1; // V00000;
+const size_t FilesEncrypt::SIZE_BEFORE_CONTENT = COMPARE_SIZE + AES_BLOCK_SIZE + VERSION_LENGTH + 1 + 8 + 256;
+const char FilesEncrypt::PRIVATE_ENCRYPT_AES_SEPARATOR = 0x10;
 
 /**
  * Constructs from a key path string
