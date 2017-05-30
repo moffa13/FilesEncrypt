@@ -8,7 +8,7 @@ Application for files/dir encrypting, RSA-4096 & AES-256 CBC
 
 If you are using linux system, please install openssl libraries by running in a terminal
 
-	sudo apt-get install openssl libssl-dev -y
+	sudo apt-get install openssl libssl-dev libgl1-mesa-dev -y
 
 Then, simply run
 
