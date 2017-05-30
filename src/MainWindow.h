@@ -71,7 +71,7 @@ private:
     void action(EncryptDecrypt action);
     QString get_base_dir() const;
     void set_base_dir(QString const &dir);
-    void showInGraphicalShell(QWidget *parent, const QString &pathIn);
+    void showInGraphicalShell(const QString &pathIn);
     QString getCurrentDir() const;
     void openInExplorer(const QString& pathIn);
 protected:

@@ -48,7 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_choose_key->setWindowModality(Qt::WindowModal);
     m_choose_key->show();
 
-
     correctResize();
 
     connect(ui->actionObtenir_la_cl, SIGNAL(triggered(bool)), this, SLOT(displayKey()));
@@ -65,7 +64,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_listRowMenu = new QMenu(this);
     QAction* openDir = new QAction("Ouvrir le dossier", m_listRowMenu);
     connect(openDir, SIGNAL(triggered(bool)), this, SLOT(openSelectedRowInDir()));
-
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested, [this](const QPoint &p){
         m_listRowMenu->exec(QCursor::pos());
@@ -74,10 +72,10 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 void MainWindow::openSelectedRowInDir(){
-    showInGraphicalShell(this, getCurrentDir());
+    showInGraphicalShell(getCurrentDir());
 }
 
-void MainWindow::showInGraphicalShell(QWidget *parent, const QString &pathIn){
+void MainWindow::showInGraphicalShell(const QString &pathIn){
 #ifdef Q_OS_WIN
     openInExplorer(pathIn);
 #else
@@ -111,7 +109,6 @@ void MainWindow::displayKey(){
 
     qApp->setStyleSheet("QMessageBox { messagebox-text-interaction-flags: 5 }");
     QMessageBox::information(this, "Clé", "Votre clé est " + key, QMessageBox::Ok);
-
 }
 
 void MainWindow::openSettings(){
