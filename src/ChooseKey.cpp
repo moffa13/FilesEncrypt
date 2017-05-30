@@ -13,6 +13,7 @@ ChooseKey::ChooseKey(FilesEncrypt** filesEncrypt, QWidget *parent) :
     ui(new Ui::ChooseKey)
 {
     ui->setupUi(this);
+    setFixedSize(size());
 }
 
 ChooseKey::~ChooseKey()

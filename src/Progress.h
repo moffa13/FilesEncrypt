@@ -1,7 +1,7 @@
 #ifndef Progress_H
 #define Progress_H
 
-#include <QWidget>
+#include <QDialog>
 #include "FilesEncrypt.h"
 #include <QMutex>
 
@@ -9,7 +9,7 @@ namespace Ui {
 class Progress;
 }
 
-class Progress : public QWidget
+class Progress : public QDialog
 {
     Q_OBJECT
 

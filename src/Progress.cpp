@@ -12,7 +12,7 @@ QMutex Progress::m_mutex;
 QMutex Progress::m_mutex2;
 
 Progress::Progress(FilesEncrypt** f, QWidget *parent) :
-    QWidget(parent),
+    QDialog(parent),
     m_f(f),
     ui(new Ui::Progress)
 {

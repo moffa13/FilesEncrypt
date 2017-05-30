@@ -60,11 +60,11 @@ public:
     void setAES(const char* aes);
     void unsetAES();
     static unsigned getPendingCrypt();
-    static constexpr char compare[] = {'E', 0x31, 'N', 0x31, 'C', 0x31, 'R', 0x31, 'Y', 0x31, 'P', 0x31, 'T', 0x31, 'E', 0x31, 'D', 0x31};
-    static constexpr size_t COMPARE_SIZE = sizeof(compare)/sizeof(*compare);
-    static constexpr size_t VERSION_LENGTH = 1 + 5 + 1; // V00000;
-    static constexpr size_t SIZE_BEFORE_CONTENT = COMPARE_SIZE + AES_BLOCK_SIZE + VERSION_LENGTH + 1 + 8 + 256;
-    static constexpr char PRIVATE_ENCRYPT_AES_SEPARATOR = 0x10;
+    static const char compare[];
+    static const size_t COMPARE_SIZE;
+    static const size_t VERSION_LENGTH; // V00000;
+    static const size_t SIZE_BEFORE_CONTENT;
+    static const char PRIVATE_ENCRYPT_AES_SEPARATOR;
     static size_t getEncryptedSize(int message_length);
 private:
     std::string m_key_file;
