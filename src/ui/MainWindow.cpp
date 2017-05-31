@@ -76,6 +76,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(openDir, SIGNAL(triggered(bool)), this, SLOT(openSelectedRowInDir()));
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested, [this](const QPoint &p){
+        Q_UNUSED(p);
         m_listRowMenu->exec(QCursor::pos());
     });
     m_listRowMenu->addAction(openDir);
@@ -86,11 +87,22 @@ void MainWindow::openSelectedRowInDir(){
 }
 
 void MainWindow::showInGraphicalShell(const QString &pathIn){
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
     openInExplorer(pathIn);
+#elif defined(Q_OS_LINUX)
+    openInNautilus(pathIn);
 #else
-    QMessageBox::warning(this, "Not supported yet", "Sorry, but this functionnality is not supported yet for other than Windows Systems", QMessageBox::Ok);
+    QMessageBox::warning(this, "Not supported yet", "Sorry, but this functionnality is not supported yet for other than Windows and Linux Systems", QMessageBox::Ok);
 #endif
+}
+
+void MainWindow::openInNautilus(const QString &pathIn){
+      QStringList args;
+
+      args << QDir::toNativeSeparators(pathIn);
+
+      QProcess *process = new QProcess(this);
+      process->start("nautilus", args);
 }
 
 void MainWindow::openInExplorer(const QString &pathIn){

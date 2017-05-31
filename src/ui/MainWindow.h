@@ -74,6 +74,7 @@ private:
     void showInGraphicalShell(const QString &pathIn);
     QString getCurrentDir() const;
     void openInExplorer(const QString& pathIn);
+    void openInNautilus(const QString& pathIn);
 protected:
     void closeEvent(QCloseEvent* event);
 

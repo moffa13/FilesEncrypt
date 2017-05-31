@@ -1,5 +1,5 @@
 #include <QApplication>
-#include "MainWindow.h"
+#include "ui/MainWindow.h"
 #include <QMutexLocker>
 #include <QMap>
 #include "tests/TestCrypt.h"

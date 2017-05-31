@@ -100,7 +100,7 @@ QString ChooseKey::showInputKeyDialog(){
         this,
         "Emplacement de la clé",
         QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
-        "All Files (*.*)",
+        "All files (*)",
         NULL,
         QFileDialog::DontConfirmOverwrite
     );

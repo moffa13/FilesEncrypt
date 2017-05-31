@@ -1,13 +1,9 @@
 QT += core gui widgets concurrent
 
 CONFIG(debug, debug|release) {
-
     QT += testlib
-
     SOURCES += tests/TestCrypt.cpp
-
     HEADERS += tests/TestCrypt.h
-
 }
 
 CONFIG += c++11
@@ -29,9 +25,6 @@ Debug:OBJECTS_DIR = $$PWD/../build/debug/.obj
 Debug:MOC_DIR = $$PWD/../build/debug/.moc
 Debug:RCC_DIR = $$PWD/../build/debug/.rcc
 Debug:UI_DIR = $$PWD/../build/debug/.ui
-
-QMAKE_CFLAGS_RELEASE = -O2 -MD
-QMAKE_CFLAGS_DEBUG = -MD
 
 TEMPLATE = app
 
@@ -57,6 +50,8 @@ HEADERS += \
     ui/SettingsWindow.h
 
 win32{
+    QMAKE_CXXFLAGS_RELEASE = -O2 -MD
+    QMAKE_CXXFLAGS_DEBUG = -MD
     INCLUDEPATH += "$$PWD/../include/windows/"
     DEPENDPATH += "$$PWD/../include/windows/"
     !contains(QMAKE_TARGET.arch, x86_64) {
@@ -72,8 +67,8 @@ win32{
     }
 }
 
-
 unix{
+    QMAKE_CXXFLAGS += -Wno-reorder
     INCLUDEPATH += "$$PWD/../include/linux/"
     DEPENDPATH += "$$PWD/../include/linux/"
     INCLUDEPATH += "$$PWD/../include/"

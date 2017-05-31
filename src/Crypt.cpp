@@ -105,7 +105,7 @@ void Crypt::writePublicKey(EVP_PKEY* x) const{
 void Crypt::genCert(CertInfos const &infos, int keyLength) const{
 
     if(keyLength < MINIMUM_KEY_LENGTH){
-        Logger::warn("The key length is to small ("+QString::number(keyLength)+"). Must be at least " + MINIMUM_KEY_LENGTH + " bits");
+        Logger::warn("The key length is to small ("+QString::number(keyLength)+"). Must be at least " + QString::number(MINIMUM_KEY_LENGTH) + " bits");
     }
 
     Logger::info("Generating Cert file...");
@@ -226,7 +226,7 @@ int Crypt::decrypt(RSA* private_key, const unsigned char* encrypted, int len, un
 // Encrypt by buffer
 void Crypt::aes_crypt(
         const unsigned char* uncrypted,
-        int uncrypted_size,
+        unsigned uncrypted_size,
         unsigned char* encrypted,
         const unsigned char* key,
         unsigned char* iv
@@ -363,7 +363,7 @@ int Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, un
 // Decrypt by buffer
 int Crypt::aes_decrypt(
         const unsigned char* encrypted,
-        int encrypted_size,
+        unsigned encrypted_size,
         unsigned char* uncrypted,
         const unsigned char* key,
         unsigned char* iv
