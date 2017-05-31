@@ -2,8 +2,10 @@ QT += core gui widgets concurrent
 
 CONFIG(debug, debug|release) {
     QT += testlib
-    SOURCES += tests/TestCrypt.cpp
-    HEADERS += tests/TestCrypt.h
+    SOURCES += tests/TestCrypt.cpp \
+        tests/TestFilesEncrypt.cpp
+    HEADERS += tests/TestCrypt.h \
+        tests/TestFilesEncrypt.h
 }
 
 CONFIG += c++11

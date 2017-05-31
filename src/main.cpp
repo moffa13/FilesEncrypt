@@ -3,12 +3,14 @@
 #include <QMutexLocker>
 #include <QMap>
 #include "tests/TestCrypt.h"
+#include "tests/TestFilesEncrypt.h"
 
 int main(int argc, char *argv[])
 {
 
 #ifdef QT_DEBUG
     TestCrypt::runTests();
+    TestFilesEncrypt::runTests();
 #endif
 
     QApplication a(argc, argv);
