@@ -1,7 +1,7 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include "SettingsWindow.h"
-#include "ui_SettingsWindow.h"
+#include "ui/ui_SettingsWindow.h"
 
 
 SettingsWindow::SettingsWindow(QWidget *parent) :
@@ -18,12 +18,8 @@ SettingsWindow::~SettingsWindow()
     delete ui;
 }
 
-void SettingsWindow::on_checkBox_toggled(bool checked)
-{
-
-}
-
 void SettingsWindow::closeEvent(QCloseEvent *e){
+    Q_UNUSED(e);
     if(!m_refuseClose){
         emit closed();
     }

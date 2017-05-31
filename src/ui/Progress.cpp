@@ -1,5 +1,5 @@
 #include "Progress.h"
-#include "ui_Progress.h"
+#include "ui/ui_Progress.h"
 #include "utilities.h"
 #include <QTimer>
 #include <QtDebug>

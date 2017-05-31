@@ -39,22 +39,22 @@ SOURCES += main.cpp \
     Crypt.cpp \
     Logger.cpp \
     utilities.cpp \
-    ChooseKey.cpp \
-    Progress.cpp \
-    MainWindow.cpp \
+    ui/ChooseKey.cpp \
+    ui/Progress.cpp \
+    ui/MainWindow.cpp \
     FilesEncrypt.cpp \
     Settings.cpp \
-    SettingsWindow.cpp
+    ui/SettingsWindow.cpp
 HEADERS += \
     Crypt.h \
     Logger.h \
     utilities.h \
-    ChooseKey.h \
-    Progress.h \
+    ui/ChooseKey.h \
+    ui/Progress.h \
     FilesEncrypt.h \
-    MainWindow.h \
+    ui/MainWindow.h \
     Settings.h \
-    SettingsWindow.h
+    ui/SettingsWindow.h
 
 win32{
     INCLUDEPATH += "$$PWD/../include/windows/"
@@ -81,7 +81,7 @@ unix{
 }
 
 FORMS += \
-    mainwindow.ui \
-    progress.ui \
-    ChooseKey.ui \
-    SettingsWindow.ui
+    ui/MainWindow.ui \
+    ui/Progress.ui \
+    ui/ChooseKey.ui \
+    ui/SettingsWindow.ui

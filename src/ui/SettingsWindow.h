@@ -15,7 +15,7 @@ public:
     explicit SettingsWindow(QWidget *parent = 0);
     ~SettingsWindow();
 private slots:
-    void on_checkBox_toggled(bool checked);
+
 Q_SIGNALS:
     void closed();
 private:

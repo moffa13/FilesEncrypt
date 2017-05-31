@@ -9,7 +9,7 @@
 #include "Logger.h"
 #include "FilesEncrypt.h"
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
+#include "ui/ui_MainWindow.h"
 #include "utilities.h"
 #include <QDesktopServices>
 #include <QDesktopWidget>

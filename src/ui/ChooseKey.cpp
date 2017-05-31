@@ -1,5 +1,5 @@
 #include "ChooseKey.h"
-#include "ui_ChooseKey.h"
+#include "ui/ui_ChooseKey.h"
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QMessageBox>
