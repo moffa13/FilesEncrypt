@@ -16,7 +16,12 @@ int main(int argc, char *argv[])
     a.setOrganizationName("Bigcoding");
     a.setOrganizationDomain("Bigcoding.com");
 
+    OpenSSL_add_all_algorithms();
+    ERR_load_BIO_strings();
+
     MainWindow w;
+
+    //EVP_cleanup();
 
     return a.exec();
 }

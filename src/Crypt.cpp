@@ -19,6 +19,7 @@
 #include <QThread>
 #include <QCoreApplication>
 #include <cassert>
+#include <QtDebug>
 
 #if defined(Q_OS_WIN32)
 #include "openssl/applink.c"
@@ -30,23 +31,12 @@ using namespace std;
 
 bool Crypt::paused = false;
 
-
 Crypt::Crypt()
 {
-    init();
 }
 
 Crypt::~Crypt(){
-
 }
-
-void Crypt::init(){
-    OpenSSL_add_all_algorithms();
-    ERR_load_BIO_strings();
-    // ERR_load_crypto_strings();
-    // SSL_load_error_strings();
-}
-
 
 EVP_PKEY* Crypt::genRSA(int keyLength){
     Logger::info("Generating RSA keypair");
