@@ -418,10 +418,10 @@ void MainWindow::action(EncryptDecrypt action){
         m_progress->setMax(max);
         m_progress->show();
 
-        for(QMap<QString, CryptInfos>::const_iterator it = m_dirs.begin(); it != m_dirs.end(); ++it){
+        for(QMap<QString, CryptInfos>::iterator it = m_dirs.begin(); it != m_dirs.end(); ++it){
 
             const QString& key{it.key()};
-            const CryptInfos& item{it.value()};
+            CryptInfos& item{it.value()};
 
             if(*item.state != action){ // Check again and avoid to do any action if it's not needed
 
@@ -444,11 +444,10 @@ void MainWindow::action(EncryptDecrypt action){
                         finfo_s state = encrypt(file, action, current_state);
                         if(state.success){
                             // Because the filename changed, we delete the concerned file and recreate it with the appropriate name
-                            CryptInfos& dirInfos = m_dirs[key];
-                            dirInfos.files.remove(file);
-                            dirInfos.files.insert(state.name, current_state);
-                            if(dirInfos.isFile){
-                                dirInfos.nameItem->setText(state.name);
+                            item.files.remove(file);
+                            item.files.insert(state.name, current_state);
+                            if(item.isFile){
+                                item.nameItem->setText(state.name);
                             }
                         }
 
