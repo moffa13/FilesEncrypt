@@ -467,6 +467,7 @@ void MainWindow::on_remove_clicked(){
     int const row = ui->tableWidget->currentRow();
     if(row >= 0){
         CryptInfos c = m_dirs[getCurrentDir()];
+        m_dirs.remove(getCurrentDir());
         delete c.encryptedItem;
         for(QMap<QString, EncryptDecrypt*>::const_iterator it{c.files.begin()}; it != c.files.end(); ++it){
             delete it.value();
@@ -474,7 +475,7 @@ void MainWindow::on_remove_clicked(){
         delete c.nameItem;
         delete c.sizeItem;
         delete c.state;
-        m_dirs.remove(getCurrentDir());
+
         ui->tableWidget->removeRow(row);
     }
 }
