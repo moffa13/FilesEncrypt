@@ -428,7 +428,7 @@ EncryptDecrypt FilesEncrypt::guessEncrypted(QDir& dir){
 }
 
 FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
-    QFileInfoList objects = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+    QFileInfoList objects = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs | QDir::Hidden);
     QStringList files;
     quint64 size{0};
     foreach(auto object, objects){
