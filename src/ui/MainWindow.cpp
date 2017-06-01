@@ -382,7 +382,8 @@ void MainWindow::action(EncryptDecrypt action){
         }
     }
 
-    foreach(auto const& item, m_dirs.values()){
+    for(auto const& item : m_dirs.values()){
+
         // For each file in the dir, or one file
         for(QMap<QString, EncryptDecrypt*>::const_iterator it = item.files.begin(); it != item.files.end(); ++it) {
             ++items_number;
@@ -407,15 +408,16 @@ void MainWindow::action(EncryptDecrypt action){
 
     // If at least one op is necessary
     if(item_does_not_need_action != items_number){
+
         // Show the progress bar and set the max
         m_progress->setFileMax(items_number - item_does_not_need_action);
         m_progress->setMax(max);
         m_progress->show();
 
-        for(QMap<QString, CryptInfos>::iterator it = m_dirs.begin(); it != m_dirs.end(); ++it){
+        for(QMap<QString, CryptInfos>::const_iterator it = m_dirs.begin(); it != m_dirs.end(); ++it){
 
             const QString& key{it.key()};
-            CryptInfos& item{it.value()};
+            const CryptInfos& item{it.value()};
 
             if(*item.state != action){ // Check again and avoid to do any action if it's not needed
 
@@ -425,13 +427,13 @@ void MainWindow::action(EncryptDecrypt action){
 
                 QStringList *l = new QStringList{item.files.keys()};
 
-                connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, item, l](){
+                connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, &item, l](){
                     delete l;
                     encryptFinished(item, action);
                     watcher->deleteLater();
                 });
 
-                std::function<void(QString const &)> func = [this, action, item, key](QString const &file){
+                std::function<void(QString const &)> func = [this, action, &item, key](QString const &file){
                     EncryptDecrypt *current_state = item.files[file];
                     if(*current_state != action){
                         finfo_s state = encrypt(file, action, current_state);
@@ -464,6 +466,14 @@ QString MainWindow::getCurrentDir() const{
 void MainWindow::on_remove_clicked(){
     int const row = ui->tableWidget->currentRow();
     if(row >= 0){
+        CryptInfos c = m_dirs[getCurrentDir()];
+        delete c.encryptedItem;
+        for(QMap<QString, EncryptDecrypt*>::const_iterator it{c.files.begin()}; it != c.files.end(); ++it){
+            delete it.value();
+        }
+        delete c.nameItem;
+        delete c.sizeItem;
+        delete c.state;
         m_dirs.remove(getCurrentDir());
         ui->tableWidget->removeRow(row);
     }
