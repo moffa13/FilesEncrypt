@@ -366,6 +366,10 @@ void MainWindow::on_cryptAll_clicked()
 
 void MainWindow::action(EncryptDecrypt action){
 
+    if(m_encrypting) return;
+
+    m_encrypting = true;
+
     qint64 max{0};
     qint64 items_number{0};
     qint64 item_does_not_need_action{0};
@@ -430,6 +434,7 @@ void MainWindow::action(EncryptDecrypt action){
                 connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, &item, l](){
                     delete l;
                     encryptFinished(item, action);
+                    m_encrypting = false;
                     watcher->deleteLater();
                 });
 
@@ -455,6 +460,8 @@ void MainWindow::action(EncryptDecrypt action){
                 m_progress->encryptionStarted();
             }
         }
+    }else{
+        m_encrypting = false;
     }
 }
 

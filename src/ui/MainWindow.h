@@ -64,6 +64,7 @@ private:
     QSettings* m_settings;
     QMenu* m_addWhateverMenu;
     QMenu* m_listRowMenu;
+    bool m_encrypting = false;
     static QPAIR_CRYPT_DEF guessEncrypted(QString const& file);
     finfo_s encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action);
     void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item);
