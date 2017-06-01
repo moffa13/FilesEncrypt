@@ -319,8 +319,9 @@ struct ISSUING_DIST_POINT_st {
 /* onlysomereasons present */
 # define IDP_REASONS     0x40
 
-# define X509V3_conf_err(val) ERR_add_error_data(6, "section:", val->section, \
-",name:", val->name, ",value:", val->value);
+# define X509V3_conf_err(val) ERR_add_error_data(6, \
+                        "section:", (val)->section, \
+                        ",name:", (val)->name, ",value:", (val)->value)
 
 # define X509V3_set_ctx_test(ctx) \
                         X509V3_set_ctx(ctx, NULL, NULL, NULL, NULL, CTX_TEST)
@@ -355,6 +356,7 @@ struct ISSUING_DIST_POINT_st {
 # define EXFLAG_SI               0x20
 # define EXFLAG_V1               0x40
 # define EXFLAG_INVALID          0x80
+/* EXFLAG_SET is set to indicate that some values have been precomputed */
 # define EXFLAG_SET              0x100
 # define EXFLAG_CRITICAL         0x200
 # define EXFLAG_PROXY            0x400
@@ -449,13 +451,13 @@ DECLARE_ASN1_FUNCTIONS(BASIC_CONSTRAINTS)
 DECLARE_ASN1_FUNCTIONS(SXNET)
 DECLARE_ASN1_FUNCTIONS(SXNETID)
 
-int SXNET_add_id_asc(SXNET **psx, char *zone, char *user, int userlen);
-int SXNET_add_id_ulong(SXNET **psx, unsigned long lzone, char *user,
+int SXNET_add_id_asc(SXNET **psx, const char *zone, const char *user, int userlen);
+int SXNET_add_id_ulong(SXNET **psx, unsigned long lzone, const char *user,
                        int userlen);
-int SXNET_add_id_INTEGER(SXNET **psx, ASN1_INTEGER *izone, char *user,
+int SXNET_add_id_INTEGER(SXNET **psx, ASN1_INTEGER *izone, const char *user,
                          int userlen);
 
-ASN1_OCTET_STRING *SXNET_get_id_asc(SXNET *sx, char *zone);
+ASN1_OCTET_STRING *SXNET_get_id_asc(SXNET *sx, const char *zone);
 ASN1_OCTET_STRING *SXNET_get_id_ulong(SXNET *sx, unsigned long lzone);
 ASN1_OCTET_STRING *SXNET_get_id_INTEGER(SXNET *sx, ASN1_INTEGER *zone);
 
@@ -501,12 +503,12 @@ int GENERAL_NAME_get0_otherName(GENERAL_NAME *gen,
                                 ASN1_OBJECT **poid, ASN1_TYPE **pvalue);
 
 char *i2s_ASN1_OCTET_STRING(X509V3_EXT_METHOD *method,
-                            ASN1_OCTET_STRING *ia5);
+                            const ASN1_OCTET_STRING *ia5);
 ASN1_OCTET_STRING *s2i_ASN1_OCTET_STRING(X509V3_EXT_METHOD *method,
-                                         X509V3_CTX *ctx, char *str);
+                                         X509V3_CTX *ctx, const char *str);
 
 DECLARE_ASN1_FUNCTIONS(EXTENDED_KEY_USAGE)
-int i2a_ACCESS_DESCRIPTION(BIO *bp, ACCESS_DESCRIPTION *a);
+int i2a_ACCESS_DESCRIPTION(BIO *bp, const ACCESS_DESCRIPTION *a);
 
 DECLARE_ASN1_ALLOC_FUNCTIONS(TLS_FEATURE)
 
@@ -583,8 +585,8 @@ int X509V3_EXT_CRL_add_conf(LHASH_OF(CONF_VALUE) *conf, X509V3_CTX *ctx,
 
 int X509V3_add_value_bool_nf(const char *name, int asn1_bool,
                              STACK_OF(CONF_VALUE) **extlist);
-int X509V3_get_value_bool(CONF_VALUE *value, int *asn1_bool);
-int X509V3_get_value_int(CONF_VALUE *value, ASN1_INTEGER **aint);
+int X509V3_get_value_bool(const CONF_VALUE *value, int *asn1_bool);
+int X509V3_get_value_int(const CONF_VALUE *value, ASN1_INTEGER **aint);
 void X509V3_set_nconf(X509V3_CTX *ctx, CONF *conf);
 void X509V3_set_conf_lhash(X509V3_CTX *ctx, LHASH_OF(CONF_VALUE) *lhash);
 # endif
@@ -602,13 +604,13 @@ int X509V3_add_value_uchar(const char *name, const unsigned char *value,
                            STACK_OF(CONF_VALUE) **extlist);
 int X509V3_add_value_bool(const char *name, int asn1_bool,
                           STACK_OF(CONF_VALUE) **extlist);
-int X509V3_add_value_int(const char *name, ASN1_INTEGER *aint,
+int X509V3_add_value_int(const char *name, const ASN1_INTEGER *aint,
                          STACK_OF(CONF_VALUE) **extlist);
-char *i2s_ASN1_INTEGER(X509V3_EXT_METHOD *meth, ASN1_INTEGER *aint);
+char *i2s_ASN1_INTEGER(X509V3_EXT_METHOD *meth, const ASN1_INTEGER *aint);
 ASN1_INTEGER *s2i_ASN1_INTEGER(X509V3_EXT_METHOD *meth, const char *value);
-char *i2s_ASN1_ENUMERATED(X509V3_EXT_METHOD *meth, ASN1_ENUMERATED *aint);
+char *i2s_ASN1_ENUMERATED(X509V3_EXT_METHOD *meth, const ASN1_ENUMERATED *aint);
 char *i2s_ASN1_ENUMERATED_TABLE(X509V3_EXT_METHOD *meth,
-                                ASN1_ENUMERATED *aint);
+                                const ASN1_ENUMERATED *aint);
 int X509V3_EXT_add(X509V3_EXT_METHOD *ext);
 int X509V3_EXT_add_list(X509V3_EXT_METHOD *extlist);
 int X509V3_EXT_add_alias(int nid_to, int nid_from);
@@ -619,7 +621,7 @@ const X509V3_EXT_METHOD *X509V3_EXT_get_nid(int nid);
 int X509V3_add_standard_extensions(void);
 STACK_OF(CONF_VALUE) *X509V3_parse_list(const char *line);
 void *X509V3_EXT_d2i(X509_EXTENSION *ext);
-void *X509V3_get_d2i(STACK_OF(X509_EXTENSION) *x, int nid, int *crit,
+void *X509V3_get_d2i(const STACK_OF(X509_EXTENSION) *x, int nid, int *crit,
                      int *idx);
 
 X509_EXTENSION *X509V3_EXT_i2d(int ext_nid, int crit, void *ext_struc);
@@ -639,8 +641,8 @@ int X509V3_EXT_print(BIO *out, X509_EXTENSION *ext, unsigned long flag,
 #ifndef OPENSSL_NO_STDIO
 int X509V3_EXT_print_fp(FILE *out, X509_EXTENSION *ext, int flag, int indent);
 #endif
-int X509V3_extensions_print(BIO *out, char *title,
-                            STACK_OF(X509_EXTENSION) *exts,
+int X509V3_extensions_print(BIO *out, const char *title,
+                            const STACK_OF(X509_EXTENSION) *exts,
                             unsigned long flag, int indent);
 
 int X509_check_ca(X509 *x);
@@ -649,6 +651,9 @@ int X509_supported_extension(X509_EXTENSION *ex);
 int X509_PURPOSE_set(int *p, int purpose);
 int X509_check_issued(X509 *issuer, X509 *subject);
 int X509_check_akid(X509 *issuer, AUTHORITY_KEYID *akid);
+void X509_set_proxy_flag(X509 *x);
+void X509_set_proxy_pathlen(X509 *x, long l);
+long X509_get_proxy_pathlen(X509 *x);
 
 uint32_t X509_get_extension_flags(X509 *x);
 uint32_t X509_get_key_usage(X509 *x);

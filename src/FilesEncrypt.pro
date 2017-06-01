@@ -62,10 +62,10 @@ win32{
         CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcryptox86MD
         CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibsslx86MD
     } else {
-        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcryptox64MDd
-        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibsslx64MDd
-        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcryptox64MD
-        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibsslx64MD
+        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64d
+        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64d
+        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64
+        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64
     }
 }
 

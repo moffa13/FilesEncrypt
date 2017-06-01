@@ -65,7 +65,12 @@ extern "C" {
 # define TLS1_VERSION                    0x0301
 # define TLS1_1_VERSION                  0x0302
 # define TLS1_2_VERSION                  0x0303
-# define TLS_MAX_VERSION                 TLS1_2_VERSION
+# define TLS1_3_VERSION                  0x0304
+# define TLS_MAX_VERSION                 TLS1_3_VERSION
+
+/* TODO(TLS1.3) REMOVE ME: Version indicator for draft -20 */
+# define TLS1_3_VERSION_DRAFT            0x7f14
+# define TLS1_3_VERSION_DRAFT_TXT        "TLS 1.3 (draft 20)"
 
 /* Special value for method supporting multiple versions */
 # define TLS_ANY_VERSION                 0x10000
@@ -98,6 +103,10 @@ extern "C" {
 # define TLS1_AD_INAPPROPRIATE_FALLBACK  86/* fatal */
 # define TLS1_AD_USER_CANCELLED          90
 # define TLS1_AD_NO_RENEGOTIATION        100
+/* TLSv1.3 alerts */
+# define TLS13_AD_END_OF_EARLY_DATA      1
+# define TLS13_AD_MISSING_EXTENSION      109 /* fatal */
+# define TLS13_AD_CERTIFICATE_REQUIRED   116 /* fatal */
 /* codes 110-114 are from RFC3546 */
 # define TLS1_AD_UNSUPPORTED_EXTENSION   110
 # define TLS1_AD_CERTIFICATE_UNOBTAINABLE 111
@@ -123,8 +132,14 @@ extern "C" {
 # define TLSEXT_TYPE_cert_type           9
 
 /* ExtensionType values from RFC4492 */
-# define TLSEXT_TYPE_elliptic_curves             10
+/*
+ * Prior to TLSv1.3 the supported_groups extension was known as
+ * elliptic_curves
+ */
+# define TLSEXT_TYPE_supported_groups            10
+# define TLSEXT_TYPE_elliptic_curves             TLSEXT_TYPE_supported_groups
 # define TLSEXT_TYPE_ec_point_formats            11
+
 
 /* ExtensionType value from RFC5054 */
 # define TLSEXT_TYPE_srp                         12
@@ -161,6 +176,15 @@ extern "C" {
 
 /* ExtensionType value from RFC4507 */
 # define TLSEXT_TYPE_session_ticket              35
+
+/* As defined for TLS1.3 */
+# define TLSEXT_TYPE_key_share                   40
+# define TLSEXT_TYPE_psk                         41
+# define TLSEXT_TYPE_early_data                  42
+# define TLSEXT_TYPE_supported_versions          43
+# define TLSEXT_TYPE_cookie                      44
+# define TLSEXT_TYPE_psk_kex_modes               45
+# define TLSEXT_TYPE_certificate_authorities     47
 
 /* Temporary extension type */
 # define TLSEXT_TYPE_renegotiate                 0xff01
@@ -233,6 +257,8 @@ __owur int SSL_export_keying_material(SSL *s, unsigned char *out, size_t olen,
                                const unsigned char *p, size_t plen,
                                int use_context);
 
+int SSL_get_peer_signature_type_nid(const SSL *s, int *pnid);
+
 int SSL_get_sigalgs(SSL *s, int idx,
                     int *psign, int *phash, int *psignandhash,
                     unsigned char *rsig, unsigned char *rhash);
@@ -244,13 +270,14 @@ int SSL_get_shared_sigalgs(SSL *s, int idx,
 __owur int SSL_check_chain(SSL *s, X509 *x, EVP_PKEY *pk, STACK_OF(X509) *chain);
 
 # define SSL_set_tlsext_host_name(s,name) \
-SSL_ctrl(s,SSL_CTRL_SET_TLSEXT_HOSTNAME,TLSEXT_NAMETYPE_host_name,(char *)name)
+SSL_ctrl(s,SSL_CTRL_SET_TLSEXT_HOSTNAME,TLSEXT_NAMETYPE_host_name, \
+         (char *)(name))
 
 # define SSL_set_tlsext_debug_callback(ssl, cb) \
-SSL_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_DEBUG_CB,(void (*)(void))cb)
+SSL_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_DEBUG_CB,(void (*)(void))(cb))
 
 # define SSL_set_tlsext_debug_arg(ssl, arg) \
-SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_DEBUG_ARG,0, (void *)arg)
+SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_DEBUG_ARG,0, (void *)(arg))
 
 # define SSL_get_tlsext_status_type(ssl) \
 SSL_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_TYPE,0, NULL)
@@ -259,25 +286,26 @@ SSL_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_TYPE,0, NULL)
 SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_TYPE,type, NULL)
 
 # define SSL_get_tlsext_status_exts(ssl, arg) \
-SSL_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_EXTS,0, (void *)arg)
+SSL_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_EXTS,0, (void *)(arg))
 
 # define SSL_set_tlsext_status_exts(ssl, arg) \
-SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_EXTS,0, (void *)arg)
+SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_EXTS,0, (void *)(arg))
 
 # define SSL_get_tlsext_status_ids(ssl, arg) \
-SSL_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_IDS,0, (void *)arg)
+SSL_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_IDS,0, (void *)(arg))
 
 # define SSL_set_tlsext_status_ids(ssl, arg) \
-SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_IDS,0, (void *)arg)
+SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_IDS,0, (void *)(arg))
 
 # define SSL_get_tlsext_status_ocsp_resp(ssl, arg) \
-SSL_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_OCSP_RESP,0, (void *)arg)
+SSL_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_OCSP_RESP,0, (void *)(arg))
 
 # define SSL_set_tlsext_status_ocsp_resp(ssl, arg, arglen) \
-SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP,arglen, (void *)arg)
+SSL_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_OCSP_RESP,arglen, (void *)(arg))
 
 # define SSL_CTX_set_tlsext_servername_callback(ctx, cb) \
-SSL_CTX_callback_ctrl(ctx,SSL_CTRL_SET_TLSEXT_SERVERNAME_CB,(void (*)(void))cb)
+SSL_CTX_callback_ctrl(ctx,SSL_CTRL_SET_TLSEXT_SERVERNAME_CB, \
+                      (void (*)(void))(cb))
 
 # define SSL_TLSEXT_ERR_OK 0
 # define SSL_TLSEXT_ERR_ALERT_WARNING 1
@@ -285,18 +313,23 @@ SSL_CTX_callback_ctrl(ctx,SSL_CTRL_SET_TLSEXT_SERVERNAME_CB,(void (*)(void))cb)
 # define SSL_TLSEXT_ERR_NOACK 3
 
 # define SSL_CTX_set_tlsext_servername_arg(ctx, arg) \
-SSL_CTX_ctrl(ctx,SSL_CTRL_SET_TLSEXT_SERVERNAME_ARG,0, (void *)arg)
+SSL_CTX_ctrl(ctx,SSL_CTRL_SET_TLSEXT_SERVERNAME_ARG,0, (void *)(arg))
 
 # define SSL_CTX_get_tlsext_ticket_keys(ctx, keys, keylen) \
         SSL_CTX_ctrl((ctx),SSL_CTRL_GET_TLSEXT_TICKET_KEYS,(keylen),(keys))
 # define SSL_CTX_set_tlsext_ticket_keys(ctx, keys, keylen) \
         SSL_CTX_ctrl((ctx),SSL_CTRL_SET_TLSEXT_TICKET_KEYS,(keylen),(keys))
 
+# define SSL_CTX_get_tlsext_status_cb(ssl, cb) \
+SSL_CTX_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_CB,0, (void (**)(void))(cb))
 # define SSL_CTX_set_tlsext_status_cb(ssl, cb) \
-SSL_CTX_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_CB,(void (*)(void))cb)
+SSL_CTX_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_CB, \
+                      (void (*)(void))(cb))
 
+# define SSL_CTX_get_tlsext_status_arg(ssl, arg) \
+SSL_CTX_ctrl(ssl,SSL_CTRL_GET_TLSEXT_STATUS_REQ_CB_ARG,0, (void *)(arg))
 # define SSL_CTX_set_tlsext_status_arg(ssl, arg) \
-SSL_CTX_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_CB_ARG,0, (void *)arg)
+SSL_CTX_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_CB_ARG,0, (void *)(arg))
 
 #define SSL_CTX_set_tlsext_status_type(ssl, type) \
         SSL_CTX_ctrl(ssl, SSL_CTRL_SET_TLSEXT_STATUS_REQ_TYPE, type, NULL)
@@ -305,7 +338,8 @@ SSL_CTX_ctrl(ssl,SSL_CTRL_SET_TLSEXT_STATUS_REQ_CB_ARG,0, (void *)arg)
         SSL_CTX_ctrl(ssl, SSL_CTRL_GET_TLSEXT_STATUS_REQ_TYPE, 0, NULL)
 
 # define SSL_CTX_set_tlsext_ticket_key_cb(ssl, cb) \
-SSL_CTX_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB,(void (*)(void))cb)
+SSL_CTX_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB, \
+                      (void (*)(void))(cb))
 
 # ifndef OPENSSL_NO_HEARTBEATS
 #  define SSL_DTLSEXT_HB_ENABLED                   0x01
@@ -595,6 +629,13 @@ SSL_CTX_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB,(void (*)(void))cb)
 # define TLS1_CK_DHE_PSK_WITH_CHACHA20_POLY1305           0x0300CCAD
 # define TLS1_CK_RSA_PSK_WITH_CHACHA20_POLY1305           0x0300CCAE
 
+/* TLS v1.3 ciphersuites */
+# define TLS1_3_CK_AES_128_GCM_SHA256                     0x03001301
+# define TLS1_3_CK_AES_256_GCM_SHA384                     0x03001302
+# define TLS1_3_CK_CHACHA20_POLY1305_SHA256               0x03001303
+# define TLS1_3_CK_AES_128_CCM_SHA256                     0x03001304
+# define TLS1_3_CK_AES_128_CCM_8_SHA256                   0x03001305
+
 /*
  * XXX Backward compatibility alert: Older versions of OpenSSL gave some DHE
  * ciphers names with "EDH" instead of "DHE".  Going forward, we should be
@@ -863,6 +904,17 @@ SSL_CTX_callback_ctrl(ssl,SSL_CTRL_SET_TLSEXT_TICKET_KEY_CB,(void (*)(void))cb)
 # define TLS1_TXT_ECDHE_PSK_WITH_CHACHA20_POLY1305         "ECDHE-PSK-CHACHA20-POLY1305"
 # define TLS1_TXT_DHE_PSK_WITH_CHACHA20_POLY1305           "DHE-PSK-CHACHA20-POLY1305"
 # define TLS1_TXT_RSA_PSK_WITH_CHACHA20_POLY1305           "RSA-PSK-CHACHA20-POLY1305"
+
+/* TLSv1.3 ciphersuites */
+/*
+ * TODO(TLS1.3): Review the naming scheme for TLSv1.3 ciphers and also the
+ * cipherstring selection process for these ciphers
+ */
+# define TLS1_3_TXT_AES_128_GCM_SHA256                     "TLS13-AES-128-GCM-SHA256"
+# define TLS1_3_TXT_AES_256_GCM_SHA384                     "TLS13-AES-256-GCM-SHA384"
+# define TLS1_3_TXT_CHACHA20_POLY1305_SHA256               "TLS13-CHACHA20-POLY1305-SHA256"
+# define TLS1_3_TXT_AES_128_CCM_SHA256                     "TLS13-AES-128-CCM-SHA256"
+# define TLS1_3_TXT_AES_128_CCM_8_SHA256                   "TLS13-AES-128-CCM-8-SHA256"
 
 # define TLS_CT_RSA_SIGN                 1
 # define TLS_CT_DSS_SIGN                 2

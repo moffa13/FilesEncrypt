@@ -334,8 +334,6 @@ ENGINE *ENGINE_by_id(const char *id);
     OPENSSL_init_crypto(OPENSSL_INIT_ENGINE_PADLOCK, NULL)
 #  define ENGINE_load_capi() \
     OPENSSL_init_crypto(OPENSSL_INIT_ENGINE_CAPI, NULL)
-#  define ENGINE_load_dasync() \
-    OPENSSL_init_crypto(OPENSSL_INIT_ENGINE_DASYNC, NULL)
 #  define ENGINE_load_afalg() \
     OPENSSL_init_crypto(OPENSSL_INIT_ENGINE_AFALG, NULL)
 # endif
@@ -672,7 +670,7 @@ typedef struct st_dynamic_MEM_fns {
 } dynamic_MEM_fns;
 /*
  * FIXME: Perhaps the memory and locking code (crypto.h) should declare and
- * use these types so we (and any other dependant code) can simplify a bit??
+ * use these types so we (and any other dependent code) can simplify a bit??
  */
 /* The top-level structure */
 typedef struct st_dynamic_fns {
@@ -745,7 +743,7 @@ typedef int (*dynamic_bind_engine) (ENGINE *e, const char *id,
  */
 void *ENGINE_get_static_state(void);
 
-# if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(HAVE_CRYPTODEV)
+# if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(HAVE_CRYPTODEV)
 DEPRECATEDIN_1_1_0(void ENGINE_setup_bsd_cryptodev(void))
 # endif
 

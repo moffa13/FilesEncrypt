@@ -22,8 +22,20 @@ extern "C" {
  * OpenSSL was configured with the following options:
  */
 
-#ifndef OPENSSL_SYS_WIN32
-# define OPENSSL_SYS_WIN32 1
+#ifndef OPENSSL_SYS_WIN64A
+# define OPENSSL_SYS_WIN64A 1
+#endif
+#ifndef OPENSSL_NO_ARIA
+# define OPENSSL_NO_ARIA
+#endif
+#ifndef OPENSSL_NO_MD2
+# define OPENSSL_NO_MD2
+#endif
+#ifndef OPENSSL_NO_RC5
+# define OPENSSL_NO_RC5
+#endif
+#ifndef OPENSSL_THREADS
+# define OPENSSL_THREADS
 #endif
 #ifndef OPENSSL_NO_ASAN
 # define OPENSSL_NO_ASAN
@@ -40,6 +52,9 @@ extern "C" {
 #ifndef OPENSSL_NO_EGD
 # define OPENSSL_NO_EGD
 #endif
+#ifndef OPENSSL_NO_EXTERNAL_TESTS
+# define OPENSSL_NO_EXTERNAL_TESTS
+#endif
 #ifndef OPENSSL_NO_FUZZ_AFL
 # define OPENSSL_NO_FUZZ_AFL
 #endif
@@ -49,11 +64,8 @@ extern "C" {
 #ifndef OPENSSL_NO_HEARTBEATS
 # define OPENSSL_NO_HEARTBEATS
 #endif
-#ifndef OPENSSL_NO_MD2
-# define OPENSSL_NO_MD2
-#endif
-#ifndef OPENSSL_NO_RC5
-# define OPENSSL_NO_RC5
+#ifndef OPENSSL_NO_MSAN
+# define OPENSSL_NO_MSAN
 #endif
 #ifndef OPENSSL_NO_SCTP
 # define OPENSSL_NO_SCTP
@@ -67,6 +79,12 @@ extern "C" {
 #ifndef OPENSSL_NO_SSL3_METHOD
 # define OPENSSL_NO_SSL3_METHOD
 #endif
+#ifndef OPENSSL_NO_TLS13DOWNGRADE
+# define OPENSSL_NO_TLS13DOWNGRADE
+#endif
+#ifndef OPENSSL_NO_TLS1_3
+# define OPENSSL_NO_TLS1_3
+#endif
 #ifndef OPENSSL_NO_UBSAN
 # define OPENSSL_NO_UBSAN
 #endif
@@ -75,9 +93,6 @@ extern "C" {
 #endif
 #ifndef OPENSSL_NO_WEAK_SSL_CIPHERS
 # define OPENSSL_NO_WEAK_SSL_CIPHERS
-#endif
-#ifndef OPENSSL_THREADS
-# define OPENSSL_THREADS
 #endif
 #ifndef OPENSSL_NO_AFALGENG
 # define OPENSSL_NO_AFALGENG
@@ -155,11 +170,11 @@ extern "C" {
  * The following are cipher-specific, but are part of the public API.
  */
 #if !defined(OPENSSL_SYS_UEFI)
-# define BN_LLONG
+# undef BN_LLONG
 /* Only one for the following should be defined */
 # undef SIXTY_FOUR_BIT_LONG
-# undef SIXTY_FOUR_BIT
-# define THIRTY_TWO_BIT
+# define SIXTY_FOUR_BIT
+# undef THIRTY_TWO_BIT
 #endif
 
 #define RC4_INT unsigned int

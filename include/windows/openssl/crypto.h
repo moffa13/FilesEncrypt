@@ -110,7 +110,8 @@ DEFINE_STACK_OF(void)
 # define CRYPTO_EX_INDEX_UI              11
 # define CRYPTO_EX_INDEX_BIO             12
 # define CRYPTO_EX_INDEX_APP             13
-# define CRYPTO_EX_INDEX__COUNT          14
+# define CRYPTO_EX_INDEX_UI_METHOD       14
+# define CRYPTO_EX_INDEX__COUNT          15
 
 /*
  * This is the default callbacks, but we can have others as well: this is
@@ -173,8 +174,8 @@ typedef void CRYPTO_EX_new (void *parent, void *ptr, CRYPTO_EX_DATA *ad,
                            int idx, long argl, void *argp);
 typedef void CRYPTO_EX_free (void *parent, void *ptr, CRYPTO_EX_DATA *ad,
                              int idx, long argl, void *argp);
-typedef int CRYPTO_EX_dup (CRYPTO_EX_DATA *to, CRYPTO_EX_DATA *from,
-                           void *srcp, int idx, long argl, void *argp);
+typedef int CRYPTO_EX_dup (CRYPTO_EX_DATA *to, const CRYPTO_EX_DATA *from,
+                           void *from_d, int idx, long argl, void *argp);
 __owur int CRYPTO_get_ex_new_index(int class_index, long argl, void *argp,
                             CRYPTO_EX_new *new_func, CRYPTO_EX_dup *dup_func,
                             CRYPTO_EX_free *free_func);
@@ -187,7 +188,7 @@ int CRYPTO_free_ex_index(int class_index, int idx);
  */
 int CRYPTO_new_ex_data(int class_index, void *obj, CRYPTO_EX_DATA *ad);
 int CRYPTO_dup_ex_data(int class_index, CRYPTO_EX_DATA *to,
-                       CRYPTO_EX_DATA *from);
+                       const CRYPTO_EX_DATA *from);
 
 void CRYPTO_free_ex_data(int class_index, void *obj, CRYPTO_EX_DATA *ad);
 
@@ -313,6 +314,8 @@ void CRYPTO_mem_debug_realloc(void *addr1, void *addr2, size_t num, int flag,
 void CRYPTO_mem_debug_free(void *addr, int flag,
         const char *file, int line);
 
+int CRYPTO_mem_leaks_cb(int (*cb) (const char *str, size_t len, void *u),
+                        void *u);
 #  ifndef OPENSSL_NO_STDIO
 int CRYPTO_mem_leaks_fp(FILE *);
 #  endif
@@ -346,9 +349,7 @@ int OPENSSL_gmtime_diff(int *pday, int *psec,
  * into a defined order as the return value when a != b is undefined, other
  * than to be non-zero.
  */
-int CRYPTO_memcmp(const volatile void * volatile in_a,
-                  const volatile void * volatile in_b,
-                  size_t len);
+int CRYPTO_memcmp(const void * in_a, const void * in_b, size_t len);
 
 /* Standard initialisation options */
 # define OPENSSL_INIT_NO_LOAD_CRYPTO_STRINGS 0x00000001L
@@ -366,9 +367,8 @@ int CRYPTO_memcmp(const volatile void * volatile in_a,
 # define OPENSSL_INIT_ENGINE_CRYPTODEV       0x00001000L
 # define OPENSSL_INIT_ENGINE_CAPI            0x00002000L
 # define OPENSSL_INIT_ENGINE_PADLOCK         0x00004000L
-# define OPENSSL_INIT_ENGINE_DASYNC          0x00008000L
+# define OPENSSL_INIT_ENGINE_AFALG           0x00008000L
 /* OPENSSL_INIT flag 0x00010000 reserved for internal use */
-# define OPENSSL_INIT_ENGINE_AFALG           0x00020000L
 /* OPENSSL_INIT flag range 0xfff00000 reserved for OPENSSL_init_ssl() */
 /* Max OPENSSL_INIT flag value is 0x80000000 */
 

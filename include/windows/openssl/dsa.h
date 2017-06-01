@@ -101,6 +101,7 @@ void DSA_free(DSA *r);
 /* "up" the DSA object's reference count */
 int DSA_up_ref(DSA *r);
 int DSA_size(const DSA *);
+int DSA_bits(const DSA *d);
 int DSA_security_bits(const DSA *d);
         /* next 4 return -1 on error */
 int DSA_sign_setup(DSA *dsa, BN_CTX *ctx_in, BIGNUM **kinvp, BIGNUM **rp);
@@ -198,7 +199,7 @@ int (*DSA_meth_get_sign_setup(const DSA_METHOD *dsam))
 int DSA_meth_set_sign_setup(DSA_METHOD *dsam,
         int (*sign_setup) (DSA *, BN_CTX *, BIGNUM **, BIGNUM **));
 int (*DSA_meth_get_verify(const DSA_METHOD *dsam))
-        (const unsigned char *, int , DSA_SIG *, DSA *);
+        (const unsigned char *, int, DSA_SIG *, DSA *);
 int DSA_meth_set_verify(DSA_METHOD *dsam,
     int (*verify) (const unsigned char *, int, DSA_SIG *, DSA *));
 int (*DSA_meth_get_mod_exp(const DSA_METHOD *dsam))
@@ -273,6 +274,7 @@ int ERR_load_DSA_strings(void);
 # define DSA_R_NO_PARAMETERS_SET                          107
 # define DSA_R_PARAMETER_ENCODING_ERROR                   105
 # define DSA_R_Q_NOT_PRIME                                113
+# define DSA_R_SEED_LEN_SMALL                             110
 
 #  ifdef  __cplusplus
 }

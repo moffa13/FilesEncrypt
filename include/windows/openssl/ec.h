@@ -573,11 +573,9 @@ int EC_POINT_oct2point(const EC_GROUP *group, EC_POINT *p,
  *  \param  point  EC_POINT object
  *  \param  form   point conversion form
  *  \param  pbuf   returns pointer to allocated buffer
- *  \param  len    length of the memory buffer
  *  \param  ctx    BN_CTX object (optional)
  *  \return the length of the encoded octet string or 0 if an error occurred
  */
-
 size_t EC_POINT_point2buf(const EC_GROUP *group, const EC_POINT *point,
                           point_conversion_form_t form,
                           unsigned char **pbuf, BN_CTX *ctx);
@@ -699,7 +697,9 @@ int EC_GROUP_have_precompute_mult(const EC_GROUP *group);
 /********************************************************************/
 
 DECLARE_ASN1_ITEM(ECPKPARAMETERS)
+DECLARE_ASN1_ALLOC_FUNCTIONS(ECPKPARAMETERS)
 DECLARE_ASN1_ITEM(ECPARAMETERS)
+DECLARE_ASN1_ALLOC_FUNCTIONS(ECPARAMETERS)
 
 /*
  * EC_GROUP_get_basis_type() returns the NID of the basis type used to
@@ -771,19 +771,25 @@ void EC_KEY_free(EC_KEY *key);
  *  \param  src  src EC_KEY object
  *  \return dst or NULL if an error occurred.
  */
-EC_KEY *EC_KEY_copy(EC_KEY *dst, EC_KEY *src);
+EC_KEY *EC_KEY_copy(EC_KEY *dst, const EC_KEY *src);
 
 /** Creates a new EC_KEY object and copies the content from src to it.
  *  \param  src  the source EC_KEY object
  *  \return newly created EC_KEY object or NULL if an error occurred.
  */
-EC_KEY *EC_KEY_dup(EC_KEY *src);
+EC_KEY *EC_KEY_dup(const EC_KEY *src);
 
 /** Increases the internal reference count of a EC_KEY object.
  *  \param  key  EC_KEY object
  *  \return 1 on success and 0 if an error occurred.
  */
 int EC_KEY_up_ref(EC_KEY *key);
+
+/** Returns the ENGINE object of a EC_KEY object
+ *  \param  key  EC_KEY object
+ *  \return the ENGINE object (possibly NULL).
+ */
+ENGINE *EC_KEY_get0_engine(const EC_KEY *eckey);
 
 /** Returns the EC_GROUP object of a EC_KEY object
  *  \param  key  EC_KEY object
@@ -861,7 +867,7 @@ int EC_KEY_generate_key(EC_KEY *key);
 int EC_KEY_check_key(const EC_KEY *key);
 
 /** Indicates if an EC_KEY can be used for signing.
- *  \param  key  the EC_KEY object
+ *  \param  eckey  the EC_KEY object
  *  \return 1 if can can sign and 0 otherwise.
  */
 int EC_KEY_can_sign(const EC_KEY *eckey);
@@ -880,11 +886,9 @@ int EC_KEY_set_public_key_affine_coordinates(EC_KEY *key, BIGNUM *x,
  *  \param  key    key to encode
  *  \param  form   point conversion form
  *  \param  pbuf   returns pointer to allocated buffer
- *  \param  len    length of the memory buffer
  *  \param  ctx    BN_CTX object (optional)
  *  \return the length of the encoded octet string or 0 if an error occurred
  */
-
 size_t EC_KEY_key2buf(const EC_KEY *key, point_conversion_form_t form,
                       unsigned char **pbuf, BN_CTX *ctx);
 
@@ -906,7 +910,7 @@ int EC_KEY_oct2key(EC_KEY *key, const unsigned char *buf, size_t len,
  *  \return 1 on success and 0 if an error occurred
  */
 
-int EC_KEY_oct2priv(EC_KEY *key, unsigned char *buf, size_t len);
+int EC_KEY_oct2priv(EC_KEY *key, const unsigned char *buf, size_t len);
 
 /** Encodes a EC_KEY private key to an octet string
  *  \param  key    key to encode
@@ -919,11 +923,10 @@ int EC_KEY_oct2priv(EC_KEY *key, unsigned char *buf, size_t len);
 size_t EC_KEY_priv2oct(const EC_KEY *key, unsigned char *buf, size_t len);
 
 /** Encodes an EC_KEY private key to an allocated octet string
- *  \param  key    key to encode
+ *  \param  eckey  key to encode
  *  \param  pbuf   returns pointer to allocated buffer
  *  \return the length of the encoded octet string or 0 if an error occurred
  */
-
 size_t EC_KEY_priv2buf(const EC_KEY *eckey, unsigned char **pbuf);
 
 /********************************************************************/
@@ -987,7 +990,7 @@ EC_KEY *o2i_ECPublicKey(EC_KEY **key, const unsigned char **in, long len);
  *               of bytes needed).
  *  \return 1 on success and 0 if an error occurred
  */
-int i2o_ECPublicKey(EC_KEY *key, unsigned char **out);
+int i2o_ECPublicKey(const EC_KEY *key, unsigned char **out);
 
 /** Prints out the ec parameters on human readable form.
  *  \param  bp   BIO object to which the information is printed
@@ -1313,12 +1316,12 @@ void EC_KEY_METHOD_get_verify(EC_KEY_METHOD *meth,
 # define EVP_PKEY_CTX_set_ecdh_kdf_md(ctx, md) \
         EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_EC, \
                                 EVP_PKEY_OP_DERIVE, \
-                                EVP_PKEY_CTRL_EC_KDF_MD, 0, (void *)md)
+                                EVP_PKEY_CTRL_EC_KDF_MD, 0, (void *)(md))
 
 # define EVP_PKEY_CTX_get_ecdh_kdf_md(ctx, pmd) \
         EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_EC, \
                                 EVP_PKEY_OP_DERIVE, \
-                                EVP_PKEY_CTRL_GET_EC_KDF_MD, 0, (void *)pmd)
+                                EVP_PKEY_CTRL_GET_EC_KDF_MD, 0, (void *)(pmd))
 
 # define EVP_PKEY_CTX_set_ecdh_kdf_outlen(ctx, len) \
         EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_EC, \
@@ -1328,17 +1331,18 @@ void EC_KEY_METHOD_get_verify(EC_KEY_METHOD *meth,
 # define EVP_PKEY_CTX_get_ecdh_kdf_outlen(ctx, plen) \
         EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_EC, \
                                 EVP_PKEY_OP_DERIVE, \
-                        EVP_PKEY_CTRL_GET_EC_KDF_OUTLEN, 0, (void *)plen)
+                                EVP_PKEY_CTRL_GET_EC_KDF_OUTLEN, 0, \
+                                (void *)(plen))
 
 # define EVP_PKEY_CTX_set0_ecdh_kdf_ukm(ctx, p, plen) \
         EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_EC, \
                                 EVP_PKEY_OP_DERIVE, \
-                                EVP_PKEY_CTRL_EC_KDF_UKM, plen, (void *)p)
+                                EVP_PKEY_CTRL_EC_KDF_UKM, plen, (void *)(p))
 
 # define EVP_PKEY_CTX_get0_ecdh_kdf_ukm(ctx, p) \
         EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_EC, \
                                 EVP_PKEY_OP_DERIVE, \
-                                EVP_PKEY_CTRL_GET_EC_KDF_UKM, 0, (void *)p)
+                                EVP_PKEY_CTRL_GET_EC_KDF_UKM, 0, (void *)(p))
 
 # define EVP_PKEY_CTRL_EC_PARAMGEN_CURVE_NID             (EVP_PKEY_ALG_CTRL + 1)
 # define EVP_PKEY_CTRL_EC_PARAM_ENC                      (EVP_PKEY_ALG_CTRL + 2)
@@ -1380,6 +1384,7 @@ int ERR_load_EC_strings(void);
 # define EC_F_ECDSA_SIGN_SETUP                            248
 # define EC_F_ECDSA_SIG_NEW                               265
 # define EC_F_ECDSA_VERIFY                                253
+# define EC_F_ECD_ITEM_VERIFY                             272
 # define EC_F_ECKEY_PARAM2TYPE                            223
 # define EC_F_ECKEY_PARAM_DECODE                          212
 # define EC_F_ECKEY_PRIV_DECODE                           213
@@ -1396,6 +1401,9 @@ int ERR_load_EC_strings(void);
 # define EC_F_ECP_NISTZ256_POINTS_MUL                     241
 # define EC_F_ECP_NISTZ256_PRE_COMP_NEW                   244
 # define EC_F_ECP_NISTZ256_WINDOWED_MUL                   242
+# define EC_F_ECX_KEY_OP                                  266
+# define EC_F_ECX_PRIV_ENCODE                             267
+# define EC_F_ECX_PUB_ENCODE                              268
 # define EC_F_EC_ASN1_GROUP2CURVE                         153
 # define EC_F_EC_ASN1_GROUP2FIELDID                       154
 # define EC_F_EC_GF2M_MONTGOMERY_POINT_MULTIPLY           208
@@ -1500,6 +1508,9 @@ int ERR_load_EC_strings(void);
 # define EC_F_OSSL_ECDH_COMPUTE_KEY                       247
 # define EC_F_OSSL_ECDSA_SIGN_SIG                         249
 # define EC_F_OSSL_ECDSA_VERIFY_SIG                       250
+# define EC_F_PKEY_ECD_CTRL                               270
+# define EC_F_PKEY_ECD_DIGESTSIGN                         271
+# define EC_F_PKEY_ECX_DERIVE                             269
 # define EC_F_PKEY_EC_CTRL                                197
 # define EC_F_PKEY_EC_CTRL_STR                            198
 # define EC_F_PKEY_EC_DERIVE                              217
@@ -1534,7 +1545,9 @@ int ERR_load_EC_strings(void);
 # define EC_R_INVALID_FIELD                               103
 # define EC_R_INVALID_FORM                                104
 # define EC_R_INVALID_GROUP_ORDER                         122
+# define EC_R_INVALID_KEY                                 116
 # define EC_R_INVALID_OUTPUT_LENGTH                       161
+# define EC_R_INVALID_PEER_KEY                            133
 # define EC_R_INVALID_PENTANOMIAL_BASIS                   132
 # define EC_R_INVALID_PRIVATE_KEY                         123
 # define EC_R_INVALID_TRINOMIAL_BASIS                     137
