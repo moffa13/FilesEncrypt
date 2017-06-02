@@ -13,8 +13,11 @@
 #include "utilities.h"
 #include <QDesktopServices>
 #include <QDesktopWidget>
+#include <cassert>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
+
+QMutex MainWindow::ENCRYTPT_MUTEX;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -279,7 +282,7 @@ void MainWindow::addWhateverToList(QString const& item){
             FilesAndSize f{FilesEncrypt::getFilesFromDirRecursive(QDir(item))};
             QStringList &files = f.files;
             auto size = f.size;
-            foreach(auto file, files){
+            foreach(auto const& file, files){
                 filesAndState[file] = new EncryptDecrypt{NOT_FINISHED};
             }
 
@@ -429,7 +432,7 @@ void MainWindow::action(EncryptDecrypt action){
 
                 QFutureWatcher<void>* watcher = new QFutureWatcher<void>;
 
-                QStringList *l = new QStringList{item.files.keys()};
+                QStringList const *l = new QStringList{item.files.keys()};
 
                 connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, &item, l](){
                     delete l;
@@ -438,7 +441,12 @@ void MainWindow::action(EncryptDecrypt action){
                     watcher->deleteLater();
                 });
 
-                std::function<void(QString const &)> func = [this, action, &item, key](QString const &file){
+                std::function<void(QString const &)> func = [this, action, &item, key, l](QString const &file){
+
+                    ENCRYTPT_MUTEX.lock();
+
+                    assert(item.files.contains(file));
+
                     EncryptDecrypt *current_state = item.files[file];
                     if(*current_state != action){
                         finfo_s state = encrypt(file, action, current_state);
@@ -452,6 +460,8 @@ void MainWindow::action(EncryptDecrypt action){
                         }
 
                     }
+
+                    ENCRYTPT_MUTEX.unlock();
                 };
 
                 QFuture<void> future = QtConcurrent::map(*l, func);

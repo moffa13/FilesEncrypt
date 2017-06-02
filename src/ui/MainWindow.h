@@ -74,6 +74,7 @@ private:
     void set_base_dir(QString const &dir);
     void showInGraphicalShell(const QString &pathIn);
     QString getCurrentDir() const;
+    static QMutex ENCRYTPT_MUTEX;
     void openInExplorer(const QString& pathIn);
     void openInNautilus(const QString& pathIn);
 protected:
