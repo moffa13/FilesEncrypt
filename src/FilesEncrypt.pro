@@ -54,7 +54,8 @@ HEADERS += \
 win32{
     QMAKE_CFLAGS_RELEASE = -MD
     QMAKE_CFLAGS_DEBUG = -MD
-    QMAKE_CXXFLAGS_RELEASE = -O2
+    QMAKE_CXXFLAGS_DEBUG = -MD -O2
+    QMAKE_CXXFLAGS_RELEASE = -O2 -MD
     INCLUDEPATH += "$$PWD/../include/windows/"
     DEPENDPATH += "$$PWD/../include/windows/"
     !contains(QMAKE_TARGET.arch, x86_64) {
