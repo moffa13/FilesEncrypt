@@ -17,6 +17,7 @@ class TestFilesEncrypt : public QObject
         void init();
         void cleanup();
         void shouldRecognizeFileState();
+        void shouldReadFromFile();
 };
 
 #endif // TESTFILESENCRYPT_H
