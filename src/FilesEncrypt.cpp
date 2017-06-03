@@ -212,7 +212,6 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
     // Write rsa to RSA container (RSA_st)
     bio = BIO_new(BIO_s_mem());
     BIO_write(bio, m_private_key_crypted.c_str(), m_private_key_crypted.length());
-    container = EVP_PKEY_new();
     container = PEM_read_bio_PrivateKey(bio, NULL, NULL, const_cast<char*>(password.c_str()));
     if(container == NULL){
         if(passOk != NULL)
