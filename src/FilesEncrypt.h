@@ -56,6 +56,7 @@ public:
     static FilesAndSize getFilesFromDirRecursive(QDir const& dir);
     bool requestAesDecrypt(std::string const& password, bool* passOk = NULL);
     bool isAesDecrypted() const;
+    inline bool isFileKeyLoaded() const { return m_key_file_loaded; }
     const unsigned char* getAES() const;
     void setAES(const char* aes);
     void unsetAES();
@@ -66,12 +67,14 @@ public:
     static const size_t SIZE_BEFORE_CONTENT;
     static const char PRIVATE_ENCRYPT_AES_SEPARATOR;
     static size_t getEncryptedSize(int message_length);
+    static QByteArray getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, const char* newFilename, int newFilename_size);
 private:
     std::string m_key_file;
     unsigned char* m_aes_crypted;
     bool m_aes_decrypted_set = false;
     size_t m_aes_crypted_length;
     unsigned char* m_aes_decrypted = nullptr;
+    bool m_key_file_loaded = false;
     std::string m_private_key_crypted;
     static unsigned m_pendingCrypt;
     static QMutex m_mutex;
@@ -79,7 +82,6 @@ private:
     void addPendingCrypt();
     void removePendingCrypt();
     void startDeleteAesTimer();
-    static QByteArray getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, const char* newFilename, int newFilename_size);
 Q_SIGNALS:
     void encrypt_updated(qint32 progress);
     void decrypt_updated(qint32 progress);

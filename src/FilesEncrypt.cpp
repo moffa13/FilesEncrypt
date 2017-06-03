@@ -32,7 +32,7 @@ const char FilesEncrypt::PRIVATE_ENCRYPT_AES_SEPARATOR = 0x10;
  */
 FilesEncrypt::FilesEncrypt(std::string const &key_file) : m_key_file(key_file){
     init();
-    readFromFile();
+    m_key_file_loaded = readFromFile();
 }
 
 /**

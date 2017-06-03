@@ -62,7 +62,7 @@ namespace utilities{
             speed2 = speed / pow(1024, 3);
         }else{
             letter = "To";
-            speed2 = speed / pow(1024, 3);
+            speed2 = speed / pow(1024, 4);
         }
 
         return QString().sprintf("%.3f", speed2) + " " + letter;

@@ -1,13 +1,5 @@
 QT += core gui widgets concurrent
 
-CONFIG(debug, debug|release) {
-    QT += testlib
-    SOURCES += tests/TestCrypt.cpp \
-        tests/TestFilesEncrypt.cpp
-    HEADERS += tests/TestCrypt.h \
-        tests/TestFilesEncrypt.h
-}
-
 CONFIG += c++11
 
 TARGET = FilesEncrypt
@@ -54,7 +46,8 @@ HEADERS += \
 win32{
     QMAKE_CFLAGS_RELEASE = -MD
     QMAKE_CFLAGS_DEBUG = -MD
-    QMAKE_CXXFLAGS_RELEASE = -O2
+    QMAKE_CXXFLAGS_DEBUG = -MD -Z7
+    QMAKE_CXXFLAGS_RELEASE = -MD -O2
     INCLUDEPATH += "$$PWD/../include/windows/"
     DEPENDPATH += "$$PWD/../include/windows/"
     !contains(QMAKE_TARGET.arch, x86_64) {
@@ -83,3 +76,12 @@ FORMS += \
     ui/Progress.ui \
     ui/ChooseKey.ui \
     ui/SettingsWindow.ui
+
+
+CONFIG(debug, debug|release) {
+    QT += testlib
+    SOURCES += tests/TestCrypt.cpp \
+        tests/TestFilesEncrypt.cpp
+    HEADERS += tests/TestCrypt.h \
+        tests/TestFilesEncrypt.h
+}
