@@ -30,7 +30,6 @@ SOURCES += main.cpp \
     ui/Progress.cpp \
     ui/MainWindow.cpp \
     FilesEncrypt.cpp \
-    Settings.cpp \
     ui/SettingsWindow.cpp
 HEADERS += \
     Crypt.h \
@@ -40,7 +39,6 @@ HEADERS += \
     ui/Progress.h \
     FilesEncrypt.h \
     ui/MainWindow.h \
-    Settings.h \
     ui/SettingsWindow.h
 
 win32{
