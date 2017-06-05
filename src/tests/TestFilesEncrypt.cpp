@@ -51,7 +51,7 @@ void TestFilesEncrypt::shouldRecognizeFileState(){
 }
 
 void TestFilesEncrypt::shouldReadFromFile(){
-    FilesEncrypt::genKey("Test.key.unit", "12345");
+    QVERIFY(FilesEncrypt::genKey("Test.key.unit", "12345"));
     FilesEncrypt f{std::string{"Test.key.unit"}};
     QVERIFY(f.isFileKeyLoaded());
 

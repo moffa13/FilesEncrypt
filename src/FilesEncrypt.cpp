@@ -215,13 +215,13 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
     bio = BIO_new(BIO_s_mem());
     BIO_write(bio, m_private_key_crypted.c_str(), m_private_key_crypted.length());
     container = PEM_read_bio_PrivateKey(bio, NULL, NULL, const_cast<char*>(password.c_str()));
-    if(container == NULL){
-        if(passOk != NULL)
+    if(container == nullptr){
+        if(passOk != nullptr)
             *passOk = false;
         Logger::error("Incorrect password or something else");
         goto end;
     }else{
-        if(passOk != NULL)
+        if(passOk != nullptr)
             *passOk = true;
     }
 

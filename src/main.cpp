@@ -6,6 +6,9 @@
 int main(int argc, char *argv[])
 {
 
+    OpenSSL_add_all_algorithms();
+    ERR_load_BIO_strings();
+
 #ifdef QT_DEBUG
     TestCrypt::runTests();
     TestFilesEncrypt::runTests();
@@ -17,9 +20,6 @@ int main(int argc, char *argv[])
     a.setOrganizationDomain("filesencrypt.com");
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
-
-    OpenSSL_add_all_algorithms();
-    ERR_load_BIO_strings();
 
     MainWindow w;
 
