@@ -5,6 +5,7 @@
 #include <QTemporaryFile>
 #include <QThread>
 #include <QTimer>
+#include <QSettings>
 #include "FilesEncrypt.h"
 #include "utilities.h"
 #include "openssl/err.h"
@@ -14,6 +15,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <cassert>
+#include "ui/SettingsWindow.h"
 
 #define TIME_MIN_REMOVE_AES 3
 #define CURRENT_VERSION 2
@@ -315,22 +317,30 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
         QString nameWithoutPath{fileInfo.fileName()};
 
-        {
-            QString newName;
+        QSettings settings;
 
-            do{
-                newName = "/" + utilities::randomString(15);
-            }while(QFile::exists(fileInfo.absolutePath() + newName + ".filesencrypt"));
+        bool filenameNeedsEncryption{settings.value("encrypt_filenames", SettingsWindow::getDefaultSetting("encrypt_filenames")).toBool()};
 
-            name = fileInfo.absolutePath() + newName + ".filesencrypt";
+        unsigned char* encrypted_filename = nullptr;
+
+        if(filenameNeedsEncryption){
+
+            {
+                QString newName;
+
+                do{
+                    newName = "/" + utilities::randomString(15);
+                }while(QFile::exists(fileInfo.absolutePath() + newName + ".filesencrypt"));
+
+                name = fileInfo.absolutePath() + newName + ".filesencrypt";
+            }
+
+            encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length())));
+            crypt.aes_crypt(reinterpret_cast<const unsigned char*>(nameWithoutPath.toStdString().c_str()), nameWithoutPath.length(), encrypted_filename, m_aes_decrypted, iv);
         }
 
-        unsigned char* encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length())));
-
-        crypt.aes_crypt(reinterpret_cast<const unsigned char*>(nameWithoutPath.toStdString().c_str()), nameWithoutPath.length(), encrypted_filename, m_aes_decrypted, iv);
-
         // Add Header
-        auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, true, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(nameWithoutPath.length()));
+        auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, filenameNeedsEncryption, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(nameWithoutPath.length()));
         QByteArray fileContentEncrypted{blob};
         tmpFile.write(fileContentEncrypted);
 

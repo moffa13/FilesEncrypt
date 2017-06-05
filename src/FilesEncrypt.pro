@@ -30,7 +30,6 @@ SOURCES += main.cpp \
     ui/Progress.cpp \
     ui/MainWindow.cpp \
     FilesEncrypt.cpp \
-    Settings.cpp \
     ui/SettingsWindow.cpp
 HEADERS += \
     Crypt.h \
@@ -40,14 +39,11 @@ HEADERS += \
     ui/Progress.h \
     FilesEncrypt.h \
     ui/MainWindow.h \
-    Settings.h \
     ui/SettingsWindow.h
 
 win32{
-    QMAKE_CFLAGS_RELEASE = -MD
-    QMAKE_CFLAGS_DEBUG = -MD
-    QMAKE_CXXFLAGS_DEBUG = -MD -Z7
-    QMAKE_CXXFLAGS_RELEASE = -MD -O2
+    QMAKE_CXXFLAGS += -MD
+    QMAKE_CXXFLAGS_RELEASE = -O2
     INCLUDEPATH += "$$PWD/../include/windows/"
     DEPENDPATH += "$$PWD/../include/windows/"
     !contains(QMAKE_TARGET.arch, x86_64) {
