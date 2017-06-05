@@ -55,16 +55,14 @@ FilesEncrypt::~FilesEncrypt(){
 }
 
 void FilesEncrypt::addPendingCrypt(){
-    m_mutex.lock();
+    QMutexLocker{&m_mutex};
     ++m_pendingCrypt;
-    m_mutex.unlock();
 }
 
 void FilesEncrypt::removePendingCrypt(){
-    m_mutex.lock();
+    QMutexLocker{&m_mutex};
     --m_pendingCrypt;
     emit file_done();
-    m_mutex.unlock();
 }
 
 void FilesEncrypt::setAES(const char* aes){
@@ -82,6 +80,7 @@ const unsigned char* FilesEncrypt::getAES() const{
 }
 
 unsigned FilesEncrypt::getPendingCrypt(){
+    QMutexLocker{&m_mutex};
     return m_pendingCrypt;
 }
 
@@ -480,7 +479,7 @@ EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
     state.offsetBeforeContent = 0;
     state.filenameChanged = false;
 
-    if(header.mid(0, COMPARE_SIZE) != compare){
+    if(memcmp(header.mid(0, COMPARE_SIZE).constData(), &compare[0], COMPARE_SIZE) != 0){
         return state;
     }
 

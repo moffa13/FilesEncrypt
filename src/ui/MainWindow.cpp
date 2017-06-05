@@ -449,8 +449,15 @@ void MainWindow::action(EncryptDecrypt action){
                     assert(item.files.contains(file));
 
                     EncryptDecrypt *current_state = item.files[file];
+
+
+
                     if(*current_state != action){
+
+                        ENCRYTPT_MUTEX.unlock();
                         finfo_s state = encrypt(file, action, current_state);
+                        ENCRYTPT_MUTEX.lock();
+
                         if(state.success){
                             // Because the filename changed, we delete the concerned file and recreate it with the appropriate name
                             item.files.remove(file);
@@ -460,9 +467,11 @@ void MainWindow::action(EncryptDecrypt action){
                             }
                         }
 
+                        ENCRYTPT_MUTEX.unlock();
+
                     }
 
-                    ENCRYTPT_MUTEX.unlock();
+
                 };
 
                 QFuture<void> future = QtConcurrent::map(*l, func);
