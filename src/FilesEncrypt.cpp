@@ -15,6 +15,7 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <cassert>
+#include "ui/SettingsWindow.h"
 
 #define TIME_MIN_REMOVE_AES 3
 #define CURRENT_VERSION 2
@@ -319,7 +320,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
 
         QSettings settings;
 
-        bool filenameNeedsEncryption{settings.value("encrypt_filenames", true).toBool()};
+        bool filenameNeedsEncryption{settings.value("encrypt_filenames", SettingsWindow::getDefaultSetting("encrypt_filenames")).toBool()};
 
         unsigned char* encrypted_filename = nullptr;
 

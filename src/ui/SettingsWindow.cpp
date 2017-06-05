@@ -6,6 +6,16 @@
 #include "SettingsWindow.h"
 #include "ui/ui_SettingsWindow.h"
 
+QMap<QString, QPair<QString, QVariant>> SettingsWindow::checkNames;
+bool SettingsWindow::defaultValuesInit = false;
+
+void SettingsWindow::init(){
+    if(!defaultValuesInit){
+        defaultValuesInit = true;
+        checkNames.insert("encrypt_filenames", QPair<QString, QVariant>{"Crypter les noms de fichiers", true});
+    }
+}
+
 SettingsWindow::SettingsWindow(QWidget *parent) :
     QDialog(parent), m_refuseClose{false},
     ui(new Ui::SettingsWindow),
@@ -15,8 +25,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
 
     setWindowTitle("Paramètres");
 
-    QMap<QString, QPair<QString, QVariant>> checkNames;
-    checkNames.insert("encrypt_filenames", QPair<QString, QVariant>{"Crypter les noms de fichiers", true});
+    init();
 
     QSet<QCheckBox*> boxes;
 
@@ -27,13 +36,19 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
         connect(box, &QCheckBox::toggled, [this, key](bool checked){
             m_settings->setValue(key, checked);
         });
-        box->setChecked(m_settings->value(it.key(), it.value().second).toBool());
+        box->setChecked(m_settings->value(it.key(), getDefaultSetting(it.key())).toBool());
         boxes.insert(box);
     }
 
     for(QSet<QCheckBox*>::iterator it{boxes.begin()}; it != boxes.end(); ++it){
         layout()->addWidget(*it);
     }
+}
+
+QVariant SettingsWindow::getDefaultSetting(QString const& name){
+    init();
+    if(!checkNames.contains(name)) throw std::runtime_error("There is no default setting with this name");
+    return checkNames[name].second;
 }
 
 SettingsWindow::~SettingsWindow(){

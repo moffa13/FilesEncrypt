@@ -154,6 +154,7 @@ void MainWindow::keySelected(){
 
 void MainWindow::closeEvent(QCloseEvent *event){
     QMainWindow::closeEvent(event);
+    EVP_cleanup();
     QApplication::quit();
 }
 
