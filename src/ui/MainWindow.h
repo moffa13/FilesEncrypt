@@ -11,6 +11,7 @@
 #include "ChooseKey.h"
 #include <UpdateManager.h>
 #include "SettingsWindow.h"
+#include <functional>
 
 #define QPAIR_CRYPT_DEF QPair<QString, EncryptDecrypt>
 
@@ -49,7 +50,7 @@ private Q_SLOTS:
     void on_cryptAll_clicked();
     void on_remove_clicked();
     void keySelected();
-    void displayKey();
+    void displayKey(bool forceAsk = true);
     void openSettings();
     void closeSettings();
     void openSelectedRowInDir();
@@ -79,6 +80,7 @@ private:
     static QMutex ENCRYTPT_MUTEX;
     void openInExplorer(const QString& pathIn);
     void openInNautilus(const QString& pathIn);
+    bool beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey = false);
 protected:
     void closeEvent(QCloseEvent* event);
 

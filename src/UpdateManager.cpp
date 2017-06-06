@@ -12,7 +12,7 @@ void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnN
         auto response = QMessageBox::information(
             parent,
             QObject::tr("Mise à jour"),
-            QObject::tr(qPrintable(QString{"Une mise a jour est disponible (v " + updInfos.version + "), voulez-vous l'installer ?"})),
+            QObject::tr(qPrintable(QString{"Une mise à jour est disponible (v " + updInfos.version + "), voulez-vous l'installer ?"})),
             QMessageBox::Yes | QMessageBox::No
         );
 

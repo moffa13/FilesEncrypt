@@ -22,12 +22,10 @@ ChooseKey::~ChooseKey()
 }
 
 void ChooseKey::closeEvent(QCloseEvent *e){
-    if(m_close){
+    QDialog::closeEvent(e);
+    if(m_done)
         emit keyDone();
-        e->accept();
-    }else{
-        QApplication::quit();
-    }
+    e->accept();
 }
 
 void ChooseKey::on_newKey_clicked()
@@ -53,7 +51,7 @@ void ChooseKey::on_newKey_clicked()
         FilesEncrypt::genKey(ui->key->text(), password);
         *m_filesEncrypt = new FilesEncrypt(ui->key->text().toStdString());
         (*m_filesEncrypt)->requestAesDecrypt(password.toStdString());
-        m_close = true;
+        m_done = true;
         close();
     }
 }
@@ -75,7 +73,7 @@ req:
             if(!(*m_filesEncrypt)->requestAesDecrypt(pass.toStdString())){
                 goto req;
             }
-            m_close = true;
+            m_done = true;
             close();
         }
     }
@@ -133,7 +131,7 @@ void ChooseKey::on_pushButton_clicked()
         }
 
         *m_filesEncrypt = new FilesEncrypt(&e[0]);
-        m_close = okCond;
+        m_done = okCond;
         close();
     }
 

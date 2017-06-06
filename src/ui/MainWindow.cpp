@@ -62,7 +62,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_choose_key = new ChooseKey(&m_filesEncrypt, this);
     connect(m_choose_key, SIGNAL(keyDone()), this, SLOT(keySelected()));
     m_choose_key->setWindowModality(Qt::WindowModal);
-    m_choose_key->show();
 
     correctResize();
 
@@ -123,14 +122,36 @@ void MainWindow::openInExplorer(const QString &pathIn){
       process->start("explorer.exe", args);
 }
 
-void MainWindow::displayKey(){
-    bool passOk = false;
-    while(!passOk){
-        bool ok;
-        QString const pass{ChooseKey::askPassword(false, &ok, this)};
-        if(!ok) return;
-        m_filesEncrypt->requestAesDecrypt(pass.toStdString(), &passOk);
+bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey){
+    if(m_filesEncrypt != nullptr && m_filesEncrypt->isAesDecrypted() && !forceAskKey)
+        return true;
+
+    // Key is encrypted but selected
+    if(m_filesEncrypt != nullptr){
+        bool passOk = false;
+        while(!passOk){
+            bool ok;
+            QString const pass{ChooseKey::askPassword(false, &ok, this)};
+            if(!ok) return false;
+            m_filesEncrypt->requestAesDecrypt(pass.toStdString(), &passOk);
+        }
+        return true;
+    }else{ // Key is not selected
+        static QMetaObject::Connection oldConnection;
+        disconnect(oldConnection);
+        oldConnection = connect(m_choose_key, &ChooseKey::keyDone, [this, func]{
+            func();
+            disconnect(oldConnection);
+        });
+        m_choose_key->show();
     }
+
+    return false;
+}
+
+void MainWindow::displayKey(bool forceAsk){
+
+    if(!beSureKeyIsSelectedAndValid([this]{displayKey(false);}, forceAsk)) return;
 
     const auto aes = m_filesEncrypt->getAES();
     QString key;
@@ -376,7 +397,11 @@ void MainWindow::on_cryptAll_clicked()
 
 void MainWindow::action(EncryptDecrypt action){
 
-    if(m_encrypting) return;
+    if(m_encrypting || m_dirs.isEmpty()) return;
+
+    if(!beSureKeyIsSelectedAndValid([this, action]{
+        this->action(action);
+    })) return;
 
     m_encrypting = true;
 

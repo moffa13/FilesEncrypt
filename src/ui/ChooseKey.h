@@ -31,7 +31,7 @@ private slots:
     private:
     Ui::ChooseKey *ui;
     FilesEncrypt** m_filesEncrypt;
-    bool m_close = false;
+    bool m_done = false;
     QString showInputKeyDialog();
 protected:
     void closeEvent(QCloseEvent *e);
