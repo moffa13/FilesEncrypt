@@ -9,6 +9,7 @@
 #include <QSettings>
 #include "Progress.h"
 #include "ChooseKey.h"
+#include <UpdateManager.h>
 #include "SettingsWindow.h"
 
 #define QPAIR_CRYPT_DEF QPair<QString, EncryptDecrypt>
@@ -56,6 +57,7 @@ private:
     Ui::MainWindow *ui;
     Progress* m_progress = NULL;
     ChooseKey* m_choose_key;
+    UpdateManager m_update;
     SettingsWindow* m_settings_window;
     QMap<QString, CryptInfos> m_dirs;
     FilesEncrypt* m_filesEncrypt = NULL;

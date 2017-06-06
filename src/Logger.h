@@ -16,7 +16,7 @@ public:
     static void warn(QString const &message);
     static void error(QString const &message);
 private:
-    static QMutex m_mutex;
+    static QMutex s_mutex;
 };
 
 #endif // LOGGER_H

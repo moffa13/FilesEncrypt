@@ -80,27 +80,33 @@
      <x>0</x>
      <y>0</y>
      <width>734</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
      <string>Options</string>
     </property>
-    <addaction name="actionObtenir_la_cl"/>
-    <addaction name="actionParam_tres"/>
+    <addaction name="action_retrieveKey"/>
+    <addaction name="action_openSettings"/>
+    <addaction name="action_checkForUpdates"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionObtenir_la_cl">
+  <action name="action_retrieveKey">
    <property name="text">
     <string>Obtenir la clé</string>
    </property>
   </action>
-  <action name="actionParam_tres">
+  <action name="action_openSettings">
    <property name="text">
     <string>Paramètres</string>
+   </property>
+  </action>
+  <action name="action_checkForUpdates">
+   <property name="text">
+    <string>Vérifier les mises à jour</string>
    </property>
   </action>
  </widget>

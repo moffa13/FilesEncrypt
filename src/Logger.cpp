@@ -7,7 +7,7 @@
 
 using namespace std;
 
-QMutex Logger::m_mutex;
+QMutex Logger::s_mutex;
 
 QDateTime Logger::getDateTime(){
     return QDateTime::currentDateTime();
@@ -18,9 +18,8 @@ QString Logger::getDateFormatted(){
 }
 
 void Logger::write(QString const &prefix, QString const &message){
-    m_mutex.lock();
+    QMutexLocker{&s_mutex};
     qDebug() << Logger::getDateFormatted() << " ["+prefix+"] " << message;
-    m_mutex.unlock();
 }
 
 void Logger::info(QString const &message){

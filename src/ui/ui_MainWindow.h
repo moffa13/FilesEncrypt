@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.8.0
+** Created by: Qt User Interface Compiler version 5.9.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -30,8 +30,9 @@ QT_BEGIN_NAMESPACE
 class Ui_MainWindow
 {
 public:
-    QAction *actionObtenir_la_cl;
-    QAction *actionParam_tres;
+    QAction *action_retrieveKey;
+    QAction *action_openSettings;
+    QAction *action_checkForUpdates;
     QWidget *centralwidget;
     QVBoxLayout *verticalLayout_4;
     QTableWidget *tableWidget;
@@ -52,10 +53,12 @@ public:
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->resize(734, 300);
         MainWindow->setMinimumSize(QSize(500, 300));
-        actionObtenir_la_cl = new QAction(MainWindow);
-        actionObtenir_la_cl->setObjectName(QStringLiteral("actionObtenir_la_cl"));
-        actionParam_tres = new QAction(MainWindow);
-        actionParam_tres->setObjectName(QStringLiteral("actionParam_tres"));
+        action_retrieveKey = new QAction(MainWindow);
+        action_retrieveKey->setObjectName(QStringLiteral("action_retrieveKey"));
+        action_openSettings = new QAction(MainWindow);
+        action_openSettings->setObjectName(QStringLiteral("action_openSettings"));
+        action_checkForUpdates = new QAction(MainWindow);
+        action_checkForUpdates->setObjectName(QStringLiteral("action_checkForUpdates"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         verticalLayout_4 = new QVBoxLayout(centralwidget);
@@ -102,7 +105,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 734, 20));
+        menubar->setGeometry(QRect(0, 0, 734, 22));
         menuOptions = new QMenu(menubar);
         menuOptions->setObjectName(QStringLiteral("menuOptions"));
         MainWindow->setMenuBar(menubar);
@@ -111,8 +114,9 @@ public:
         MainWindow->setStatusBar(statusbar);
 
         menubar->addAction(menuOptions->menuAction());
-        menuOptions->addAction(actionObtenir_la_cl);
-        menuOptions->addAction(actionParam_tres);
+        menuOptions->addAction(action_retrieveKey);
+        menuOptions->addAction(action_openSettings);
+        menuOptions->addAction(action_checkForUpdates);
 
         retranslateUi(MainWindow);
 
@@ -122,8 +126,9 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Encrypter", Q_NULLPTR));
-        actionObtenir_la_cl->setText(QApplication::translate("MainWindow", "Obtenir la cl\303\251", Q_NULLPTR));
-        actionParam_tres->setText(QApplication::translate("MainWindow", "Param\303\250tres", Q_NULLPTR));
+        action_retrieveKey->setText(QApplication::translate("MainWindow", "Obtenir la cl\303\251", Q_NULLPTR));
+        action_openSettings->setText(QApplication::translate("MainWindow", "Param\303\250tres", Q_NULLPTR));
+        action_checkForUpdates->setText(QApplication::translate("MainWindow", "V\303\251rifier les mises \303\240 jour", Q_NULLPTR));
         cryptAll->setText(QApplication::translate("MainWindow", "Crypter", Q_NULLPTR));
         decryptAll->setText(QApplication::translate("MainWindow", "D\303\251crypter", Q_NULLPTR));
         remove->setText(QApplication::translate("MainWindow", "Supprimer", Q_NULLPTR));

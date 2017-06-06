@@ -21,8 +21,8 @@
 #define CURRENT_VERSION 2
 
 // Current crpyts number
-unsigned FilesEncrypt::m_pendingCrypt = 0;
-QMutex FilesEncrypt::m_mutex;
+unsigned FilesEncrypt::s_pendingCrypt = 0;
+QMutex FilesEncrypt::s_mutex;
 const char FilesEncrypt::compare[] = {'E', 0x31, 'N', 0x31, 'C', 0x31, 'R', 0x31, 'Y', 0x31, 'P', 0x31, 'T', 0x31, 'E', 0x31, 'D', 0x31};
 const size_t FilesEncrypt::COMPARE_SIZE = sizeof(compare)/sizeof(*compare);
 const size_t FilesEncrypt::VERSION_LENGTH = 1 + 5 + 1; // V00000;
@@ -55,14 +55,18 @@ FilesEncrypt::~FilesEncrypt(){
 }
 
 void FilesEncrypt::addPendingCrypt(){
-    QMutexLocker{&m_mutex};
-    ++m_pendingCrypt;
+    QMutexLocker{&s_mutex};
+    ++s_pendingCrypt;
 }
 
 void FilesEncrypt::removePendingCrypt(){
-    QMutexLocker{&m_mutex};
-    --m_pendingCrypt;
-    emit file_done();
+    QMutexLocker{&s_mutex};
+    --s_pendingCrypt;
+}
+
+unsigned FilesEncrypt::getPendingCrypt(){
+    QMutexLocker{&s_mutex};
+    return s_pendingCrypt;
 }
 
 void FilesEncrypt::setAES(const char* aes){
@@ -77,11 +81,6 @@ void FilesEncrypt::unsetAES(){
 
 const unsigned char* FilesEncrypt::getAES() const{
     return m_aes_decrypted;
-}
-
-unsigned FilesEncrypt::getPendingCrypt(){
-    QMutexLocker{&m_mutex};
-    return m_pendingCrypt;
 }
 
 /**
@@ -262,17 +261,17 @@ end:
 
 void FilesEncrypt::startDeleteAesTimer(){
     QTimer::singleShot(1000 * 60 * TIME_MIN_REMOVE_AES, [this](){
-        if(m_pendingCrypt == 0){
+        if(s_pendingCrypt == 0){
             unsetAES();
             Logger::info("AES key deleted from ram");
         }else{
-            Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(m_pendingCrypt) + " file(s)");
+            Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(s_pendingCrypt) + " file(s)");
             startDeleteAesTimer();
         }
     });
 }
 
-finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
+finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op) const{
 
     finfo_s result;
     result.state = op;
@@ -380,6 +379,8 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op){
     }
 
     removePendingCrypt();
+    emit file_done();
+
     result.success = true;
 
     result.name = name;
@@ -405,12 +406,11 @@ size_t FilesEncrypt::getEncryptedSize(int message_length){
     return (message_length / AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
 }
 
-EncryptDecrypt FilesEncrypt::guessEncrypted(QDir& dir){
+EncryptDecrypt FilesEncrypt::guessEncrypted(QDir const& dir){
 
     unsigned crypted = 0;
     unsigned uncrypted = 0;
     unsigned total = 0;
-
     foreach(QFileInfo const& f, dir.entryInfoList()){
         if(f.isFile()){
             total++;

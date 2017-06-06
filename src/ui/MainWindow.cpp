@@ -16,12 +16,15 @@
 #include <cassert>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
+#define CURRENT_VERSION "0.1beta"
+#define UPDATE_FETCH_URL "http://www.filesencrypt.com/update/current.xml"
 
 QMutex MainWindow::ENCRYTPT_MUTEX;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_update{CURRENT_VERSION, UPDATE_FETCH_URL}
 {
     ui->setupUi(this);
 
@@ -63,8 +66,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     correctResize();
 
-    connect(ui->actionObtenir_la_cl, SIGNAL(triggered(bool)), this, SLOT(displayKey()));
-    connect(ui->actionParam_tres, SIGNAL(triggered(bool)), this, SLOT(openSettings()));
+    connect(ui->action_retrieveKey, SIGNAL(triggered(bool)), this, SLOT(displayKey()));
+    connect(ui->action_openSettings, SIGNAL(triggered(bool)), this, SLOT(openSettings()));
+    connect(ui->action_checkForUpdates, &QAction::triggered, [this]{
+        m_update.showUpdateDialogIfUpdateAvailable(false, true, this);
+    });
 
     m_addWhateverMenu = new QMenu(this);
     QAction* dir = new QAction("Importer des dossiers", m_addWhateverMenu);
