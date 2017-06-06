@@ -30,7 +30,8 @@ SOURCES += main.cpp \
     ui/Progress.cpp \
     ui/MainWindow.cpp \
     FilesEncrypt.cpp \
-    ui/SettingsWindow.cpp
+    ui/SettingsWindow.cpp \
+    UpdateManager.cpp
 HEADERS += \
     Crypt.h \
     Logger.h \
@@ -39,7 +40,8 @@ HEADERS += \
     ui/Progress.h \
     FilesEncrypt.h \
     ui/MainWindow.h \
-    ui/SettingsWindow.h
+    ui/SettingsWindow.h \
+    UpdateManager.h
 
 win32{
     QMAKE_CXXFLAGS += -MD
