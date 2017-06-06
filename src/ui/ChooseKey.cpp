@@ -21,6 +21,11 @@ ChooseKey::~ChooseKey()
     delete ui;
 }
 
+void ChooseKey::showEvent(QShowEvent *e){
+    QDialog::showEvent(e);
+    ui->select->setFocus();
+}
+
 void ChooseKey::closeEvent(QCloseEvent *e){
     QDialog::closeEvent(e);
     if(m_done)
@@ -94,7 +99,7 @@ QString ChooseKey::askPassword(bool newKey, bool* okCond, QWidget* parent){
 }
 
 QString ChooseKey::showInputKeyDialog(){
-    return QFileDialog::getSaveFileName(
+    auto filename = QFileDialog::getSaveFileName(
         this,
         "Emplacement de la clé",
         QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
@@ -102,6 +107,11 @@ QString ChooseKey::showInputKeyDialog(){
         NULL,
         QFileDialog::DontConfirmOverwrite
     );
+
+    if(!filename.isEmpty())
+        ui->choose->setFocus();
+
+    return filename;
 }
 
 void ChooseKey::on_select_clicked()

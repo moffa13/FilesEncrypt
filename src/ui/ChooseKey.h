@@ -34,6 +34,7 @@ private slots:
     bool m_done = false;
     QString showInputKeyDialog();
 protected:
+    void showEvent(QShowEvent *e);
     void closeEvent(QCloseEvent *e);
 };
 
