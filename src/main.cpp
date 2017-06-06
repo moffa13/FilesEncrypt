@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QTextCodec>
 #include "ui/MainWindow.h"
 #include "tests/TestCrypt.h"
 #include "tests/TestFilesEncrypt.h"
@@ -18,6 +19,8 @@ int main(int argc, char *argv[])
     a.setApplicationName("FilesEncrypt");
     a.setOrganizationName("FilesEncrypt");
     a.setOrganizationDomain("filesencrypt.com");
+
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
 

@@ -3,13 +3,13 @@
 #include "utilities.h"
 #include <QTimer>
 #include <QtDebug>
+#include <QMutexLocker>
 #include "Logger.h"
 
 #define TIME_REFRESH_MS 500
 #define TIME_RESET_COUNTER_SEC 10
 
-QMutex Progress::m_mutex;
-QMutex Progress::m_mutex2;
+QMutex Progress::s_mutex;
 
 Progress::Progress(FilesEncrypt** f, QWidget *parent) :
     QDialog(parent),
@@ -32,7 +32,7 @@ Progress::~Progress()
 
 void Progress::progressed(qint32 progress){
 
-    m_mutex.lock();
+    QMutexLocker{&s_mutex};
     qint32 percent = 0;
     m_done += progress;
     m_done_tmp += progress;
@@ -49,7 +49,6 @@ void Progress::progressed(qint32 progress){
         });
     }
     renderLabels();
-    m_mutex.unlock();
 }
 
 void Progress::reset(){
@@ -63,10 +62,9 @@ void Progress::setMax(qint64 max){
 }
 
 void Progress::addFile(){
-    m_mutex2.lock();
+    QMutexLocker{&s_mutex};
     ++m_current_file;
     renderLabels();
-    m_mutex2.unlock();
 }
 
 void Progress::setFileMax(quint32 n){
@@ -77,7 +75,7 @@ void Progress::setFileMax(quint32 n){
 
 void Progress::renderLabels(){
     if(QDateTime::currentMSecsSinceEpoch() > m_last_update + TIME_REFRESH_MS){ // Update every TIME_REFRESH_MS
-        ui->file_out_of->setText("Fichier : " + QString::number(m_current_file) + "/" + QString::number(m_files_max) + " (" +  utilities::speed_to_human(m_max) + ")");
+        ui->file_out_of->setText("Fichier : " + QString::number(m_current_file) + "/" + QString::number(m_files_max) + " (" + utilities::speed_to_human(m_done) + " / " +  utilities::speed_to_human(m_max) + ")");
         ui->threads_n->setText("Threads : " + QString::number((*m_f)->getPendingCrypt()));
         ui->speed->setText("Vitesse : " + utilities::speed_to_human(get_speed()) + "/s");
         m_last_update = QDateTime::currentMSecsSinceEpoch();

@@ -69,9 +69,9 @@ private:
     QMenu* m_listRowMenu;
     bool m_encrypting = false;
     static QPAIR_CRYPT_DEF guessEncrypted(QString const& file);
-    finfo_s encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action);
-    void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item);
-    void encryptFinished(CryptInfos const &item, EncryptDecrypt action);
+    finfo_s encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action) const;
+    void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item) const;
+    void encryptFinished(CryptInfos const &item, EncryptDecrypt action) const;
     void action(EncryptDecrypt action);
     QString get_base_dir() const;
     void set_base_dir(QString const &dir);

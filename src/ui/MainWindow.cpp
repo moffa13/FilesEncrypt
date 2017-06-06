@@ -212,7 +212,7 @@ void MainWindow::addWhateverToList(QStringList const& items){
     }
 }
 
-void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item){
+void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item) const{
     // Retrieve results
     QList<QPAIR_CRYPT_DEF> res{watcher->future().results()};
 
@@ -241,7 +241,7 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
     }
 }
 
-void MainWindow::encryptFinished(CryptInfos const &item, EncryptDecrypt action){
+void MainWindow::encryptFinished(CryptInfos const &item, EncryptDecrypt action) const{
 
     *item.state = action;
 
@@ -266,7 +266,7 @@ QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
     return QPAIR_CRYPT_DEF{file, res.state};
 }
 
-finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action){
+finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action) const{
     QFile f(file);
     finfo_s res;
     res.success = false;
@@ -380,18 +380,15 @@ void MainWindow::set_base_dir(QString const &dir){
     m_settings->setValue(BASE_DIR_PARAM_NAME, dir);
 }
 
-void MainWindow::on_importButton_clicked()
-{
+void MainWindow::on_importButton_clicked(){
     m_addWhateverMenu->exec(QCursor::pos());
 }
 
-void MainWindow::on_decryptAll_clicked()
-{
+void MainWindow::on_decryptAll_clicked(){
     action(EncryptDecrypt::DECRYPT);
 }
 
-void MainWindow::on_cryptAll_clicked()
-{
+void MainWindow::on_cryptAll_clicked(){
     action(EncryptDecrypt::ENCRYPT);
 }
 
@@ -475,19 +472,12 @@ void MainWindow::action(EncryptDecrypt action){
 
                 std::function<void(QString const &)> func = [this, action, &item, key, l](QString const &file){
 
-                    ENCRYTPT_MUTEX.lock();
-
-                    assert(item.files.contains(file));
+                    QMutexLocker{&ENCRYTPT_MUTEX}; // Lock this
 
                     EncryptDecrypt *current_state = item.files[file];
-
-
-
                     if(*current_state != action){
 
-                        ENCRYTPT_MUTEX.unlock();
                         finfo_s state = encrypt(file, action, current_state);
-                        ENCRYTPT_MUTEX.lock();
 
                         if(state.success){
                             // Because the filename changed, we delete the concerned file and recreate it with the appropriate name
@@ -497,12 +487,7 @@ void MainWindow::action(EncryptDecrypt action){
                                 item.nameItem->setText(state.name);
                             }
                         }
-
-                        ENCRYTPT_MUTEX.unlock();
-
                     }
-
-
                 };
 
                 QFuture<void> future = QtConcurrent::map(*l, func);

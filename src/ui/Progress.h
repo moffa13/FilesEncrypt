@@ -35,8 +35,7 @@ private:
     void renderLabels();
     QString speed_to_human(quint64 speed) const;
     quint64 get_speed();
-    static QMutex m_mutex;
-    static QMutex m_mutex2;
+    static QMutex s_mutex;
 
 private Q_SLOTS:
     void progressed(qint32);
