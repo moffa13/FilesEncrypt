@@ -16,6 +16,7 @@
 #include <QRegularExpressionMatch>
 #include <cassert>
 #include "ui/SettingsWindow.h"
+#include <QApplication>
 
 #define TIME_MIN_REMOVE_AES 3
 #define CURRENT_VERSION 2
@@ -439,6 +440,7 @@ FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
     QFileInfoList objects = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs | QDir::Hidden);
     QStringList files;
     quint64 size{0};
+
     foreach(auto object, objects){
         if(object.isDir()){
            //qDebug() << "Entering recursive " << object.absoluteFilePath();

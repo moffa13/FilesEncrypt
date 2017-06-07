@@ -14,6 +14,7 @@
 #include <QDesktopServices>
 #include <QDesktopWidget>
 #include <cassert>
+#include <iostream>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
 #define CURRENT_VERSION "0.1beta"
@@ -281,66 +282,103 @@ finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptD
 }
 
 void MainWindow::addWhateverToList(QString const& item){
-    if(!m_dirs.contains(item) && !item.isEmpty()){
+
+    if(!m_dirs.contains(item) && !item.isEmpty()){ // Pre-conditions
 
         // Add a row
         int rCount = ui->tableWidget->rowCount();
         ui->tableWidget->insertRow(rCount);
 
-        CryptInfos infos;
+        // Init items
+        QTableWidgetItem* encryptedVal = new QTableWidgetItem("...");
+        QTableWidgetItem* nameItem = new QTableWidgetItem(item);
+        QTableWidgetItem* sizeItem = new QTableWidgetItem("...");
+        QTableWidgetItem* typeItem = new QTableWidgetItem("...");
+
+        ui->tableWidget->setItem(rCount, 2, encryptedVal);
+        ui->tableWidget->setItem(rCount, 3, nameItem);
+        ui->tableWidget->setItem(rCount, 0, typeItem);
+        ui->tableWidget->setItem(rCount, 1, sizeItem);
+
+        CryptInfos infos; // All the informations about an entry (a complete recursive directory or a file)
 
         QFileInfo info(item);
 
+        // Will be directly filled with one file if item is not a directory or with a thread if it is a directory
         QMap<QString, EncryptDecrypt*> filesAndState;
 
         // Create the watcher
         QFutureWatcher<QPAIR_CRYPT_DEF>* watcher = new QFutureWatcher<QPAIR_CRYPT_DEF>;
 
-        QTableWidgetItem* encryptedVal = new QTableWidgetItem("...");
-        QTableWidgetItem* sizeItem = new QTableWidgetItem("0");
-        QTableWidgetItem* nameItem = new QTableWidgetItem("---");
+        // Store items to re-use them later
         infos.encryptedItem = encryptedVal;
-        infos.sizeItem = sizeItem;
         infos.nameItem  = nameItem;
+        infos.sizeItem = sizeItem;
+        infos.typeItem = typeItem;
         infos.isFile = false;
+        infos.watcher = nullptr;
+        infos.recursiveWatcher = nullptr;
+
+        // Method called when we know the crypt state of each file
+        connect(watcher, &QFutureWatcher<QPAIR_CRYPT_DEF>::finished, [this, watcher, item](){
+
+            if(!watcher->isCanceled()){
+                auto &infos{m_dirs[item]};
+                guessEncryptedFinished(watcher, infos);
+                infos.watcher = nullptr;
+            }
+
+            watcher->deleteLater();
+        });
 
         if(info.isDir()){
 
-            // Add the files to the list
-            FilesAndSize f{FilesEncrypt::getFilesFromDirRecursive(QDir(item))};
-            QStringList &files = f.files;
-            auto size = f.size;
-            foreach(auto const& file, files){
-                filesAndState[file] = new EncryptDecrypt{NOT_FINISHED};
-            }
 
-            // Show the type
-            ui->tableWidget->setItem(rCount, 0, new QTableWidgetItem("Dossier"));
-            ui->tableWidget->setItem(rCount, 1, new QTableWidgetItem(utilities::speed_to_human(size)));
+            QFutureWatcher<FilesAndSize>* watcherRecursiveFilesDiscover = new QFutureWatcher<FilesAndSize>;
+            infos.recursiveWatcher = watcherRecursiveFilesDiscover;
+
+            connect(watcherRecursiveFilesDiscover, &QFutureWatcher<FilesAndSize>::finished, [this, item, watcher, watcherRecursiveFilesDiscover](){
+
+                if(!watcherRecursiveFilesDiscover->isCanceled()){
+                    CryptInfos &infos{m_dirs[item]};
+                    FilesAndSize res{watcherRecursiveFilesDiscover->result()};
+                    infos.sizeItem->setText(utilities::speed_to_human(res.size));
+                    QStringList &files = res.files;
+                    foreach(auto const& file, files){
+                        infos.files[file] = new EncryptDecrypt{NOT_FINISHED};
+                    }
+                    QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(infos.files.keys(), &MainWindow::guessEncrypted);
+                    watcher->setFuture(future);
+                    infos.recursiveWatcher = nullptr;
+                }
+
+                watcherRecursiveFilesDiscover->deleteLater();
+            });
+
+            // Add the files to the list
+            QFuture<FilesAndSize> future{QtConcurrent::run(FilesEncrypt::getFilesFromDirRecursive, QDir{item})};
+            watcherRecursiveFilesDiscover->setFuture(future);
+
+            typeItem->setText("Dossier");
 
         }else{
             infos.isFile = true;
             // Add the single file to the list
             filesAndState[info.absoluteFilePath()] = new EncryptDecrypt{NOT_FINISHED};
             // Show the type
-            ui->tableWidget->setItem(rCount, 0, new QTableWidgetItem("Fichier"));
+            typeItem->setText("Fichier");
             sizeItem->setText(utilities::speed_to_human(info.size()));
-            ui->tableWidget->setItem(rCount, 1, sizeItem);
+
+            QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(filesAndState.keys(), &MainWindow::guessEncrypted);
+            watcher->setFuture(future);
         }
 
         infos.files = filesAndState;
         infos.state = new EncryptDecrypt(NOT_FINISHED);
 
-        connect(watcher, &QFutureWatcher<QPAIR_CRYPT_DEF>::finished, [this, watcher, infos](){
-            guessEncryptedFinished(watcher, infos);
-            watcher->deleteLater();
-        });
+        // Attach the watcher
+        infos.watcher = watcher;
 
-        QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(filesAndState.keys(), &MainWindow::guessEncrypted);
-        watcher->setFuture(future);
-        ui->tableWidget->setItem(rCount, 2, encryptedVal);
-        nameItem->setText(item);
-        ui->tableWidget->setItem(rCount, 3, nameItem);
         m_dirs.insert(item, infos);
     }
 }
@@ -509,6 +547,13 @@ void MainWindow::on_remove_clicked(){
     int const row = ui->tableWidget->currentRow();
     if(row >= 0){
         CryptInfos c = m_dirs[getCurrentDir()];
+        if(c.recursiveWatcher != nullptr){
+            c.recursiveWatcher->cancel();
+        }
+        if(c.watcher != nullptr){
+            c.watcher->cancel();
+        }
+
         m_dirs.remove(getCurrentDir());
         delete c.encryptedItem;
         for(QMap<QString, EncryptDecrypt*>::const_iterator it{c.files.begin()}; it != c.files.end(); ++it){
@@ -516,6 +561,7 @@ void MainWindow::on_remove_clicked(){
         }
         delete c.nameItem;
         delete c.sizeItem;
+        delete c.typeItem;
         delete c.state;
 
         ui->tableWidget->removeRow(row);

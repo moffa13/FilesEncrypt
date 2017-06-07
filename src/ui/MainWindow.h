@@ -26,7 +26,10 @@ struct CryptInfos{
     QTableWidgetItem* encryptedItem;
     QTableWidgetItem* sizeItem;
     QTableWidgetItem* nameItem;
+    QTableWidgetItem* typeItem;
     EncryptDecrypt* state;
+    QFutureWatcher<QPAIR_CRYPT_DEF>* watcher;
+    QFutureWatcher<FilesAndSize>* recursiveWatcher;
 };
 
 class MainWindow : public QMainWindow
