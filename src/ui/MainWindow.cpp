@@ -213,7 +213,7 @@ void MainWindow::addWhateverToList(QStringList const& items){
     }
 }
 
-void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos const &item) const{
+void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item) const{
     // Retrieve results
     QList<QPAIR_CRYPT_DEF> res{watcher->future().results()};
 
@@ -221,8 +221,12 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
     unsigned crypted = 0;
     unsigned uncrypted = 0;
 
-    foreach(auto i, res){
-        *(item.files[i.first].state) = i.second.state;
+    foreach(auto const i, res){
+
+        EncryptDecrypt_light& fInfo{item.files[i.first]};
+
+        fInfo.offsetBeforeContent = i.second.offsetBeforeContent;
+        *(fInfo.state) = i.second.state;
         if(i.second.state == EncryptDecrypt::ENCRYPT){
             ++crypted;
         }else if(i.second.state == EncryptDecrypt::DECRYPT){
@@ -244,7 +248,7 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
 
 void MainWindow::encryptFinished(CryptInfos const &item, EncryptDecrypt action) const{
 
-    *item.state = action;
+    *(item.state) = action;
 
     switch(action){
         case EncryptDecrypt::ENCRYPT:
@@ -348,7 +352,7 @@ void MainWindow::addWhateverToList(QString const& item){
                     QStringList &files = res.files;
                     foreach(auto const& file, files){
                         EncryptDecrypt_light state;
-                        state.offsetBeforeContent = 0;
+                        state.offsetBeforeContent = 0; // Will be set in guessEncryptedFinished
                         state.state = new EncryptDecrypt{NOT_FINISHED};
                         infos.files[file] = state;
                     }
@@ -535,7 +539,7 @@ void MainWindow::action(EncryptDecrypt action){
 
                     QMutexLocker{&ENCRYTPT_MUTEX}; // Lock this
 
-                    EncryptDecrypt_light const& state = item.files[file]; // Current infos of the file
+                    EncryptDecrypt_light state = item.files[file]; // Current infos of the file
 
                     if(*state.state != action){
 
