@@ -91,6 +91,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_listRowMenu->addAction(openDir);
 }
 
+MainWindow::~MainWindow(){
+    delete m_progress;
+    delete m_choose_key;
+    delete m_filesEncrypt;
+    delete ui;
+}
+
 void MainWindow::openSelectedRowInDir(){
     showInGraphicalShell(getCurrentDir());
 }
@@ -200,13 +207,6 @@ void MainWindow::showEvent(QShowEvent *event){
     correctResize();
 }
 
-MainWindow::~MainWindow(){
-    delete m_progress;
-    delete m_choose_key;
-    delete m_filesEncrypt;
-    delete ui;
-}
-
 void MainWindow::addWhateverToList(QStringList const& items){
     foreach(const auto& item, items){
         addWhateverToList(item);
@@ -248,11 +248,13 @@ void MainWindow::encryptFinished(CryptInfos const &item, EncryptDecrypt action) 
 
     switch(action){
         case EncryptDecrypt::ENCRYPT:
-        item.encryptedItem->setText("Oui");
+            item.encryptedItem->setText("Oui");
             break;
         case EncryptDecrypt::DECRYPT:
-        item.encryptedItem->setText("Non");
+            item.encryptedItem->setText("Non");
             break;
+        default:
+             item.encryptedItem->setText("-");
     }
 }
 
@@ -307,9 +309,6 @@ void MainWindow::addWhateverToList(QString const& item){
         // Will be directly filled with one file if item is not a directory or with a thread if it is a directory
         QMap<QString, EncryptDecrypt*> filesAndState;
 
-        // Create the watcher
-        QFutureWatcher<QPAIR_CRYPT_DEF>* watcher = new QFutureWatcher<QPAIR_CRYPT_DEF>;
-
         // Store items to re-use them later
         infos.encryptedItem = encryptedVal;
         infos.nameItem  = nameItem;
@@ -319,23 +318,26 @@ void MainWindow::addWhateverToList(QString const& item){
         infos.watcher = nullptr;
         infos.recursiveWatcher = nullptr;
 
-        // Method called when we know the crypt state of each file
-        connect(watcher, &QFutureWatcher<QPAIR_CRYPT_DEF>::finished, [this, watcher, item](){
-
-            if(!watcher->isCanceled()){
-                auto &infos{m_dirs[item]};
-                guessEncryptedFinished(watcher, infos);
-                infos.watcher = nullptr;
-            }
-
-            watcher->deleteLater();
-        });
-
         if(info.isDir()){
 
-
+            // Create the watchers
+            QFutureWatcher<QPAIR_CRYPT_DEF>* watcher = new QFutureWatcher<QPAIR_CRYPT_DEF>;
             QFutureWatcher<FilesAndSize>* watcherRecursiveFilesDiscover = new QFutureWatcher<FilesAndSize>;
+
+            // Attach the watchers
+            infos.watcher = watcher;
             infos.recursiveWatcher = watcherRecursiveFilesDiscover;
+
+            connect(watcher, &QFutureWatcher<QPAIR_CRYPT_DEF>::finished, [this, watcher, item](){
+
+                if(!watcher->isCanceled()){
+                    auto &infos{m_dirs[item]};
+                    guessEncryptedFinished(watcher, infos);
+                    infos.watcher = nullptr;
+                }
+
+                watcher->deleteLater();
+            });
 
             connect(watcherRecursiveFilesDiscover, &QFutureWatcher<FilesAndSize>::finished, [this, item, watcher, watcherRecursiveFilesDiscover](){
 
@@ -360,24 +362,25 @@ void MainWindow::addWhateverToList(QString const& item){
             watcherRecursiveFilesDiscover->setFuture(future);
 
             typeItem->setText("Dossier");
+            infos.state = new EncryptDecrypt(NOT_FINISHED);
 
         }else{
             infos.isFile = true;
             // Add the single file to the list
-            filesAndState[info.absoluteFilePath()] = new EncryptDecrypt{NOT_FINISHED};
+
+            QPAIR_CRYPT_DEF guess{guessEncrypted(item)};
+
+            filesAndState[info.absoluteFilePath()] = new EncryptDecrypt{guess.second};
+            infos.state = new EncryptDecrypt{guess.second};
+            encryptFinished(infos, *infos.state);
+
             // Show the type
             typeItem->setText("Fichier");
             sizeItem->setText(utilities::speed_to_human(info.size()));
 
-            QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(filesAndState.keys(), &MainWindow::guessEncrypted);
-            watcher->setFuture(future);
         }
 
         infos.files = filesAndState;
-        infos.state = new EncryptDecrypt(NOT_FINISHED);
-
-        // Attach the watcher
-        infos.watcher = watcher;
 
         m_dirs.insert(item, infos);
     }
