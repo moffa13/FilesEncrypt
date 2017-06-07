@@ -16,6 +16,11 @@ enum EncryptDecrypt{
 };
 
 typedef struct {
+    EncryptDecrypt *state;
+     quint8 offsetBeforeContent;
+} EncryptDecrypt_light;
+
+typedef struct {
     EncryptDecrypt state;
     quint32 version;
     QByteArray iv;
@@ -26,6 +31,7 @@ typedef struct {
 
 typedef struct {
     QString name;
+    quint8 offsetBeforeContent;
     unsigned size;
     EncryptDecrypt state;
     bool success;

@@ -222,10 +222,10 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
     unsigned uncrypted = 0;
 
     foreach(auto i, res){
-        *(item.files[i.first]) = i.second;
-        if(i.second == EncryptDecrypt::ENCRYPT){
+        *(item.files[i.first].state) = i.second.state;
+        if(i.second.state == EncryptDecrypt::ENCRYPT){
             ++crypted;
-        }else if(i.second == EncryptDecrypt::DECRYPT){
+        }else if(i.second.state == EncryptDecrypt::DECRYPT){
             ++uncrypted;
         }
     }
@@ -266,7 +266,7 @@ QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
     if(res.state == EncryptDecrypt::ENCRYPT){
         Logger::info("File " + fInfo.absoluteFilePath() + " is encrypted");
     }
-    return QPAIR_CRYPT_DEF{file, res.state};
+    return QPAIR_CRYPT_DEF{file, res};
 }
 
 finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action) const{
@@ -307,7 +307,7 @@ void MainWindow::addWhateverToList(QString const& item){
         QFileInfo info(item);
 
         // Will be directly filled with one file if item is not a directory or with a thread if it is a directory
-        QMap<QString, EncryptDecrypt*> filesAndState;
+        QMap<QString, EncryptDecrypt_light> filesAndState;
 
         // Store items to re-use them later
         infos.encryptedItem = encryptedVal;
@@ -347,7 +347,10 @@ void MainWindow::addWhateverToList(QString const& item){
                     infos.sizeItem->setText(utilities::speed_to_human(res.size));
                     QStringList &files = res.files;
                     foreach(auto const& file, files){
-                        infos.files[file] = new EncryptDecrypt{NOT_FINISHED};
+                        EncryptDecrypt_light state;
+                        state.offsetBeforeContent = 0;
+                        state.state = new EncryptDecrypt{NOT_FINISHED};
+                        infos.files[file] = state;
                     }
                     QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(infos.files.keys(), &MainWindow::guessEncrypted);
                     watcher->setFuture(future);
@@ -370,8 +373,12 @@ void MainWindow::addWhateverToList(QString const& item){
 
             QPAIR_CRYPT_DEF guess{guessEncrypted(item)};
 
-            filesAndState[info.absoluteFilePath()] = new EncryptDecrypt{guess.second};
-            infos.state = new EncryptDecrypt{guess.second};
+            EncryptDecrypt_light state;
+            state.offsetBeforeContent = guess.second.offsetBeforeContent;
+            state.state = new EncryptDecrypt{guess.second.state};
+
+            filesAndState[info.absoluteFilePath()] = state;
+            infos.state = new EncryptDecrypt{guess.second.state};
             encryptFinished(infos, *infos.state);
 
             // Show the type
@@ -461,25 +468,38 @@ void MainWindow::action(EncryptDecrypt action){
 
     for(auto const& item : m_dirs.values()){
 
+        bool problemWrite{false};
+
         // For each file in the dir, or one file
-        for(QMap<QString, EncryptDecrypt*>::const_iterator it = item.files.begin(); it != item.files.end(); ++it) {
+        for(QMap<QString, EncryptDecrypt_light>::const_iterator it = item.files.begin(); it != item.files.end(); ++it) {
             ++items_number;
             QFileInfo f{it.key()};
-            QFile ff{it.key()};
-            ff.open(QFile::ReadOnly);
-            EncryptDecrypt_s state = FilesEncrypt::guessEncrypted(ff);
+            EncryptDecrypt_light const& state{it.value()};
             // If current state != from what you'd do
 
-            if(*it.value() != action && f.isWritable()){
+            if(*state.state != action && f.isWritable()){
+                qDebug() << state.offsetBeforeContent;
                 if(action == EncryptDecrypt::ENCRYPT){
                     max += f.size();
                 }else{
                     max += f.size() - state.offsetBeforeContent;
                 }
             }else{
+                if(!f.isWritable()){
+                    qDebug() << "!!!"  << it.key();
+                    problemWrite = true;
+                }
                 ++item_does_not_need_action;
             }
             QCoreApplication::processEvents();
+        }
+
+        if(problemWrite){
+            QMessageBox::warning(
+                this,
+                "Write protection",
+                "Some files are write protected (perhaps privileges too low), they won't be encrypted/decrypted"
+            );
         }
     }
 
@@ -515,17 +535,18 @@ void MainWindow::action(EncryptDecrypt action){
 
                     QMutexLocker{&ENCRYTPT_MUTEX}; // Lock this
 
-                    EncryptDecrypt *current_state = item.files[file];
-                    if(*current_state != action){
+                    EncryptDecrypt_light const& state = item.files[file]; // Current infos of the file
 
-                        finfo_s state = encrypt(file, action, current_state);
+                    if(*state.state != action){
 
-                        if(state.success){
+                        finfo_s encrypt_result = encrypt(file, action, state.state);
+
+                        if(encrypt_result.success){
                             // Because the filename changed, we delete the concerned file and recreate it with the appropriate name
                             item.files.remove(file);
-                            item.files.insert(state.name, current_state);
+                            item.files.insert(encrypt_result.name, {state.state, encrypt_result.offsetBeforeContent});
                             if(item.isFile){
-                                item.nameItem->setText(state.name);
+                                item.nameItem->setText(encrypt_result.name);
                             }
                         }
                     }
@@ -559,8 +580,8 @@ void MainWindow::on_remove_clicked(){
 
         m_dirs.remove(getCurrentDir());
         delete c.encryptedItem;
-        for(QMap<QString, EncryptDecrypt*>::const_iterator it{c.files.begin()}; it != c.files.end(); ++it){
-            delete it.value();
+        for(QMap<QString, EncryptDecrypt_light>::const_iterator it{c.files.begin()}; it != c.files.end(); ++it){
+            delete it.value().state;
         }
         delete c.nameItem;
         delete c.sizeItem;

@@ -13,7 +13,7 @@
 #include "SettingsWindow.h"
 #include <functional>
 
-#define QPAIR_CRYPT_DEF QPair<QString, EncryptDecrypt>
+#define QPAIR_CRYPT_DEF QPair<QString, EncryptDecrypt_s>
 
 namespace Ui {
 class MainWindow;
@@ -21,7 +21,7 @@ class MainWindow;
 
 typedef struct CryptInfos CryptInfos;
 struct CryptInfos{
-    QMap<QString, EncryptDecrypt*> files;
+    QMap<QString, EncryptDecrypt_light> files;
     bool isFile;
     QTableWidgetItem* encryptedItem;
     QTableWidgetItem* sizeItem;

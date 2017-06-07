@@ -277,6 +277,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op) const{
     finfo_s result;
     result.state = op;
     result.success = false;
+    result.offsetBeforeContent = 0;
 
     // Create a temporary file
     QTemporaryFile tmpFile;
@@ -340,6 +341,8 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op) const{
 
         // Add Header
         auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, filenameNeedsEncryption, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(nameWithoutPath.length()));
+        result.offsetBeforeContent = blob.size();
+
         QByteArray fileContentEncrypted{blob};
         tmpFile.write(fileContentEncrypted);
 
