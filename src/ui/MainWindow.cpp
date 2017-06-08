@@ -159,7 +159,7 @@ bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool fo
 
 void MainWindow::displayKey(bool forceAsk){
 
-    if(!beSureKeyIsSelectedAndValid([this]{displayKey(false);}, forceAsk)) return;
+    if(!beSureKeyIsSelectedAndValid([this]{displayKey(false);}, forceAsk && (m_filesEncrypt != nullptr && m_filesEncrypt->isFileKeyLoaded()))) return;
 
     const auto aes = m_filesEncrypt->getAES();
     QString key;
