@@ -32,7 +32,7 @@ Progress::~Progress()
 
 void Progress::progressed(qint32 progress){
 
-    QMutexLocker{&s_mutex};
+    QMutexLocker locker{&s_mutex};
     qint32 percent = 0;
     m_done += progress;
     m_done_tmp += progress;
@@ -62,7 +62,7 @@ void Progress::setMax(qint64 max){
 }
 
 void Progress::addFile(){
-    QMutexLocker{&s_mutex};
+    QMutexLocker locker{&s_mutex};
     ++m_current_file;
     renderLabels();
 }

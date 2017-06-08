@@ -56,17 +56,17 @@ FilesEncrypt::~FilesEncrypt(){
 }
 
 void FilesEncrypt::addPendingCrypt(){
-    QMutexLocker{&s_mutex};
+    QMutexLocker locker{&s_mutex};
     ++s_pendingCrypt;
 }
 
 void FilesEncrypt::removePendingCrypt(){
-    QMutexLocker{&s_mutex};
+    QMutexLocker locker{&s_mutex};
     --s_pendingCrypt;
 }
 
 unsigned FilesEncrypt::getPendingCrypt(){
-    QMutexLocker{&s_mutex};
+    QMutexLocker locker{&s_mutex};
     return s_pendingCrypt;
 }
 
