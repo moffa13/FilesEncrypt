@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>105</height>
+    <height>106</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,6 +71,13 @@
         <widget class="QLabel" name="threads_n">
          <property name="text">
           <string>Threads : 0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="timePassed">
+         <property name="text">
+          <string>Temps ecoulé : 00h 00m 00s</string>
          </property>
         </widget>
        </item>

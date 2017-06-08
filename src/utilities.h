@@ -8,6 +8,7 @@ namespace utilities{
     QString speed_to_human(quint64 speed);
     QString randomString(unsigned size);
     unsigned random(unsigned a, unsigned b);
+    QString ms_to_time(unsigned msecs);
 }
 
 #if defined(Q_OS_WINRT) || defined(Q_OS_WIN32)

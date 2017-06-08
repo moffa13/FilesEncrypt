@@ -1,5 +1,5 @@
 /********************************************************************************
-** Form generated from reading UI file 'progress.ui'
+** Form generated from reading UI file 'Progress.ui'
 **
 ** Created by: Qt User Interface Compiler version 5.8.0
 **
@@ -35,6 +35,7 @@ public:
     QLabel *speed;
     QLabel *file_out_of;
     QLabel *threads_n;
+    QLabel *timePassed;
     QSpacerItem *horizontalSpacer;
     QPushButton *pause_button;
     QPushButton *cancel_button;
@@ -43,7 +44,7 @@ public:
     {
         if (Progress->objectName().isEmpty())
             Progress->setObjectName(QStringLiteral("Progress"));
-        Progress->resize(400, 105);
+        Progress->resize(400, 106);
         verticalLayout = new QVBoxLayout(Progress);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         progress = new QProgressBar(Progress);
@@ -79,6 +80,11 @@ public:
 
         verticalLayout_2->addWidget(threads_n);
 
+        timePassed = new QLabel(Progress);
+        timePassed->setObjectName(QStringLiteral("timePassed"));
+
+        verticalLayout_2->addWidget(timePassed);
+
 
         horizontalLayout_4->addLayout(verticalLayout_2);
 
@@ -111,6 +117,7 @@ public:
         speed->setText(QApplication::translate("Progress", "Vitesse : 0 o", Q_NULLPTR));
         file_out_of->setText(QApplication::translate("Progress", "Fichier 0/0", Q_NULLPTR));
         threads_n->setText(QApplication::translate("Progress", "Threads : 0", Q_NULLPTR));
+        timePassed->setText(QApplication::translate("Progress", "Temps ecoul\303\251 : 00h 00m 00s", Q_NULLPTR));
         pause_button->setText(QApplication::translate("Progress", "Pause", Q_NULLPTR));
         cancel_button->setText(QApplication::translate("Progress", "Annuler", Q_NULLPTR));
     } // retranslateUi

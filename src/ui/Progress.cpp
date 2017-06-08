@@ -32,7 +32,7 @@ Progress::~Progress()
 
 void Progress::progressed(qint32 progress){
 
-    QMutexLocker{&s_mutex};
+    QMutexLocker locker{&s_mutex};
     qint32 percent = 0;
     m_done += progress;
     m_done_tmp += progress;
@@ -62,7 +62,7 @@ void Progress::setMax(qint64 max){
 }
 
 void Progress::addFile(){
-    QMutexLocker{&s_mutex};
+    QMutexLocker locker{&s_mutex};
     ++m_current_file;
     renderLabels();
 }
@@ -78,6 +78,7 @@ void Progress::renderLabels(){
         ui->file_out_of->setText("Fichier : " + QString::number(m_current_file) + "/" + QString::number(m_files_max) + " (" + utilities::speed_to_human(m_done) + " / " +  utilities::speed_to_human(m_max) + ")");
         ui->threads_n->setText("Threads : " + QString::number((*m_f)->getPendingCrypt()));
         ui->speed->setText("Vitesse : " + utilities::speed_to_human(get_speed()) + "/s");
+        ui->timePassed->setText("Temps écoulé : " + utilities::ms_to_time(QDateTime::currentMSecsSinceEpoch() - (m_time_started * 1000)));
         m_last_update = QDateTime::currentMSecsSinceEpoch();
     }
 }
@@ -105,11 +106,12 @@ void Progress::encryptionStarted(){
     auto now = QDateTime::currentMSecsSinceEpoch();
     m_time_started = now / 1000; // never changes
     m_download_update = now;
+    renderLabels();
 }
 
 void Progress::on_cancel_button_clicked()
 {
-    qDebug() << "cc";
+    qDebug() << "cancel function not made";
 }
 
 void Progress::on_pause_button_clicked()

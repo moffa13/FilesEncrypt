@@ -81,6 +81,7 @@ private:
     void showInGraphicalShell(const QString &pathIn);
     QString getCurrentDir() const;
     static QMutex ENCRYTPT_MUTEX;
+    static QMutex ENCRYTPT_MUTEX2;
     void openInExplorer(const QString& pathIn);
     void openInNautilus(const QString& pathIn);
     bool beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey = false);

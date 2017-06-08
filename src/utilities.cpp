@@ -68,4 +68,22 @@ namespace utilities{
         return QString().sprintf("%.3f", speed2) + " " + letter;
     }
 
+    QString ms_to_time(unsigned msecs){
+        QString formattedTime;
+
+        int hours = msecs/(1000*60*60);
+        int minutes = (msecs-(hours*1000*60*60))/(1000*60);
+        int seconds = (msecs-(minutes*1000*60)-(hours*1000*60*60))/1000;
+        int milliseconds = msecs-(seconds*1000)-(minutes*1000*60)-(hours*1000*60*60);
+
+        formattedTime.append(
+            QString("%1").arg(hours, 2, 10, QLatin1Char('0')) + "h " +
+            QString( "%1" ).arg(minutes, 2, 10, QLatin1Char('0')) + "m " +
+            QString( "%1" ).arg(seconds, 2, 10, QLatin1Char('0')) + "s"/* +
+            QString( "%1" ).arg(milliseconds, 3, 10, QLatin1Char('0'))*/
+        );
+
+        return formattedTime;
+    }
+
 }

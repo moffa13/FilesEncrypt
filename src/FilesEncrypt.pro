@@ -31,7 +31,8 @@ SOURCES += main.cpp \
     ui/MainWindow.cpp \
     FilesEncrypt.cpp \
     ui/SettingsWindow.cpp \
-    UpdateManager.cpp
+    UpdateManager.cpp \
+    AccurateTimer.cpp
 HEADERS += \
     Crypt.h \
     Logger.h \
@@ -41,7 +42,8 @@ HEADERS += \
     FilesEncrypt.h \
     ui/MainWindow.h \
     ui/SettingsWindow.h \
-    UpdateManager.h
+    UpdateManager.h \
+    AccurateTimer.h
 
 win32{
     QMAKE_CXXFLAGS += -MD
