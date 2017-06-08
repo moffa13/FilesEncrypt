@@ -1,6 +1,8 @@
 #ifndef Progress_H
 #define Progress_H
 
+#include <AccurateTimer.h>
+
 #include <QDialog>
 #include "FilesEncrypt.h"
 #include <QMutex>
@@ -26,9 +28,9 @@ private:
     quint64 m_speed = 0;
     quint32 m_current_file = 0;
     quint32 m_files_max = 0;
-    qint64 m_time_started = 0;
     qint64 m_download_update = 0;
     qint64 m_last_update = 0;
+    AccurateTimer m_timer;
     Ui::Progress *ui;
     FilesEncrypt** m_f;
     void reset();

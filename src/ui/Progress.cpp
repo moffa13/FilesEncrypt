@@ -78,7 +78,7 @@ void Progress::renderLabels(){
         ui->file_out_of->setText("Fichier : " + QString::number(m_current_file) + "/" + QString::number(m_files_max) + " (" + utilities::speed_to_human(m_done) + " / " +  utilities::speed_to_human(m_max) + ")");
         ui->threads_n->setText("Threads : " + QString::number((*m_f)->getPendingCrypt()));
         ui->speed->setText("Vitesse : " + utilities::speed_to_human(get_speed()) + "/s");
-        ui->timePassed->setText("Temps écoulé : " + utilities::ms_to_time(QDateTime::currentMSecsSinceEpoch() - (m_time_started * 1000)));
+        ui->timePassed->setText("Temps écoulé : " + utilities::ms_to_time(m_timer.elapsed()));
         m_last_update = QDateTime::currentMSecsSinceEpoch();
     }
 }
@@ -103,9 +103,10 @@ quint64 Progress::get_speed(){
 }
 
 void Progress::encryptionStarted(){
-    auto now = QDateTime::currentMSecsSinceEpoch();
-    m_time_started = now / 1000; // never changes
-    m_download_update = now;
+    m_download_update = QDateTime::currentMSecsSinceEpoch();;
+    m_last_update = 0;
+    m_timer.reset();
+    m_timer.start();
     renderLabels();
 }
 
@@ -118,8 +119,10 @@ void Progress::on_pause_button_clicked()
 {
     Crypt::paused ^= 1;
     if(Crypt::paused){
+        m_timer.pause();
         ui->pause_button->setText("Play");
     }else{
+        m_timer.start();
         ui->pause_button->setText("Pause");
         m_download_update = 0;
     }

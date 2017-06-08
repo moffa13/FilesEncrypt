@@ -20,7 +20,7 @@
 #define CURRENT_VERSION "0.1beta"
 #define UPDATE_FETCH_URL "http://www.filesencrypt.com/update/current.xml"
 
-QMutex MainWindow::ENCRYTPT_MUTEX;
+QMutex MainWindow::s_encryptMutex;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -273,13 +273,12 @@ QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
     return QPAIR_CRYPT_DEF{file, res};
 }
 
-finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action, EncryptDecrypt* current_action) const{
+finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action) const{
     QFile f(file);
     finfo_s res;
     res.success = false;
     if(f.open(QFile::ReadWrite)){
         res = m_filesEncrypt->encryptFile(&f, action);
-        *current_action = action;
         f.close();
     }else{
         Logger::error("Can't open file " + file);
@@ -513,11 +512,9 @@ void MainWindow::action(EncryptDecrypt action){
         // Show the progress bar and set the max
         m_progress->setFileMax(items_number - item_does_not_need_action);
         m_progress->setMax(max);
-        m_progress->show();
 
         for(QMap<QString, CryptInfos>::iterator it = m_dirs.begin(); it != m_dirs.end(); ++it){
 
-            const QString& key{it.key()};
             CryptInfos& item{it.value()};
 
             if(*item.state != action){ // Check again and avoid to do any action if it's not needed
@@ -535,23 +532,29 @@ void MainWindow::action(EncryptDecrypt action){
                     watcher->deleteLater();
                 });
 
-                std::function<void(QString const &)> func = [this, action, &item, key, l](QString const &file){
+                std::function<void(QString const &)> func = [this, action, &item](QString const &file){
 
-                    QMutexLocker locker{&ENCRYTPT_MUTEX}; // Lock this
+                    s_encryptMutex.lock(); // Lock this
 
                     EncryptDecrypt_light state = item.files[file]; // Current infos of the file
 
+                    s_encryptMutex.unlock();
+
                     if(*state.state != action){
 
-                        finfo_s encrypt_result = encrypt(file, action, state.state);
+                        finfo_s encrypt_result = encrypt(file, action);
+
+                        *state.state = encrypt_result.state;
 
                         if(encrypt_result.success){
+                            s_encryptMutex.lock(); // Lock this
                             // Because the filename changed, we delete the concerned file and recreate it with the appropriate name
                             item.files.remove(file);
                             item.files.insert(encrypt_result.name, {state.state, encrypt_result.offsetBeforeContent});
                             if(item.isFile){
                                 item.nameItem->setText(encrypt_result.name);
                             }
+                            s_encryptMutex.unlock();
                         }
                     }
                 };
@@ -559,6 +562,7 @@ void MainWindow::action(EncryptDecrypt action){
                 QFuture<void> future = QtConcurrent::map(*l, func);
                 watcher->setFuture(future);
                 m_progress->encryptionStarted();
+                m_progress->show();
             }
         }
     }else{
@@ -577,9 +581,11 @@ void MainWindow::on_remove_clicked(){
         CryptInfos c = m_dirs[getCurrentDir()];
         if(c.recursiveWatcher != nullptr){
             c.recursiveWatcher->cancel();
+            c.recursiveWatcher->waitForFinished();
         }
         if(c.watcher != nullptr){
             c.watcher->cancel();
+            c.recursiveWatcher->waitForFinished();
         }
 
         m_dirs.remove(getCurrentDir());

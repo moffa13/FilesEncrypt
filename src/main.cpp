@@ -3,6 +3,8 @@
 #include "ui/MainWindow.h"
 #include "tests/TestCrypt.h"
 #include "tests/TestFilesEncrypt.h"
+#include "AccurateTimer.h"
+#include <QThread>
 
 int main(int argc, char *argv[])
 {
