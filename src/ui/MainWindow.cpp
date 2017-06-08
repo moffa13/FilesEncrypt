@@ -159,7 +159,7 @@ bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool fo
 
 void MainWindow::displayKey(bool forceAsk){
 
-    if(!beSureKeyIsSelectedAndValid([this]{displayKey(false);}, forceAsk)) return;
+    if(!beSureKeyIsSelectedAndValid([this]{displayKey(false);}, forceAsk && (m_filesEncrypt != nullptr && m_filesEncrypt->isFileKeyLoaded()))) return;
 
     const auto aes = m_filesEncrypt->getAES();
     QString key;
@@ -537,7 +537,7 @@ void MainWindow::action(EncryptDecrypt action){
 
                 std::function<void(QString const &)> func = [this, action, &item, key, l](QString const &file){
 
-                    QMutexLocker{&ENCRYTPT_MUTEX}; // Lock this
+                    QMutexLocker locker{&ENCRYTPT_MUTEX}; // Lock this
 
                     EncryptDecrypt_light state = item.files[file]; // Current infos of the file
 

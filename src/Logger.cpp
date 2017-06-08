@@ -18,7 +18,7 @@ QString Logger::getDateFormatted(){
 }
 
 void Logger::write(QString const &prefix, QString const &message){
-    QMutexLocker{&s_mutex};
+    QMutexLocker locker{&s_mutex};
     qDebug() << Logger::getDateFormatted() << " ["+prefix+"] " << message;
 }
 
