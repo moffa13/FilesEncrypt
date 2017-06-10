@@ -17,6 +17,7 @@
 #include <cassert>
 #include "ui/SettingsWindow.h"
 #include <QApplication>
+#include <QStack>
 
 #define TIME_MIN_REMOVE_AES 3
 #define CURRENT_VERSION 2
@@ -440,24 +441,33 @@ EncryptDecrypt FilesEncrypt::guessEncrypted(QDir const& dir){
 }
 
 FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
-    QFileInfoList objects = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs | QDir::Hidden);
+    QDir::Filters entryFlags{QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs | QDir::Hidden};
+    QFileInfoList objects = dir.entryInfoList(entryFlags);
     QStringList files;
     quint64 size{0};
+    QStack<QFileInfo> stack;
 
-    foreach(auto object, objects){
-        if(object.isDir()){
-           //qDebug() << "Entering recursive " << object.absoluteFilePath();
-           FilesAndSize f_tmp{getFilesFromDirRecursive(QDir{object.absoluteFilePath()})};
-           size += f_tmp.size;
-           files.append(f_tmp.files);
+    for(QFileInfo const& fInfo : objects){
+        stack.push(fInfo);
+    }
+
+    while(!stack.isEmpty()){
+        QFileInfo info{stack.pop()};
+        if(!info.isDir()){
+            files.append(info.absoluteFilePath());
+            size += info.size();
         }else{
-            files.append(object.absoluteFilePath());
-            size += object.size();
+            QFileInfoList newFiles{QDir{info.absoluteFilePath()}.entryInfoList(entryFlags)};
+            for(QFileInfo const& file : newFiles){
+                stack.push(file);
+            }
         }
     }
+
     FilesAndSize f;
-    f.files = files;
     f.size = size;
+    f.files = files;
+
     return f;
 }
 
