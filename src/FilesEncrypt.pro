@@ -51,10 +51,10 @@ win32{
     INCLUDEPATH += "$$PWD/../include/windows/"
     DEPENDPATH += "$$PWD/../include/windows/"
     !contains(QMAKE_TARGET.arch, x86_64) {
-        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcryptox86MDd
-        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibsslx86MDd
-        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcryptox86MD
-        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibsslx86MD
+        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86d
+        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86d
+        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86
+        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86
     } else {
         CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64d
         CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64d
