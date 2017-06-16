@@ -1,1 +1,27 @@
 IDI_ICON1               ICON    DISCARDABLE     "FilesEncrypt.ico"
+
+#include <windows.h>
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     APP_VERSION_COMMA
+PRODUCTVERSION  APP_VERSION_COMMA
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName",        "FilesEncrypt"
+            VALUE "FileDescription",    "FilesEncrypt"
+            VALUE "FileVersion",        APP_VERSION
+            VALUE "InternalName",       "FilesEncrypt"
+            VALUE "OriginalFilename",   "FilesEncrypt.exe"
+            VALUE "ProductName",        "FilesEncrypt"
+            VALUE "ProductVersion",     APP_VERSION
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x040C, 1252
+    END
+END
