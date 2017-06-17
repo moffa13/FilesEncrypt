@@ -18,14 +18,16 @@ class UpdateManager : public QObject
      Q_OBJECT
 
     public:
-        UpdateManager(QString const& fetchUrl);
+        UpdateManager(QString const& fetchUrl, QString const& downloadUrl);
         inline void changeFetchUrl(QString const& url) { _fetchUrl = url; }
+        inline void changeDownloadUrl(QString const& url) { _downloadUrl = url; }
         QUrl const getFetchUrl() const { return _fetchUrl; }
         void showUpdateDialogIfUpdateAvailable(bool checkBeta = false, bool warnNoUpdate = false, QWidget *parent = nullptr);
     private:
         update_t updateAvailable(bool checkBeta) const;
-        void update(const Version &v);
+        void update(const Version &v, QWidget *parent = nullptr);
         QUrl _fetchUrl;
+        QUrl _downloadUrl;
         mutable Downloader _nManager;
 };
 

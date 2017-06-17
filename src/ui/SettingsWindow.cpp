@@ -23,6 +23,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     m_settings(new QSettings)
 {
     ui->setupUi(this);
+    ui->verticalLayout->setAlignment(Qt::AlignTop);
 
     setWindowTitle("Paramètres");
 
@@ -42,8 +43,10 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     }
 
     for(QSet<QCheckBox*>::iterator it{boxes.begin()}; it != boxes.end(); ++it){
-        layout()->addWidget(*it);
+        ui->verticalLayout->addWidget(*it);
     }
+
+    setFixedSize(sizeHint());
 }
 
 QVariant SettingsWindow::getDefaultSetting(QString const& name){

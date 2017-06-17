@@ -5,10 +5,16 @@
 #include <QDomNode>
 #include <QSettings>
 #include <QApplication>
+#include <QFile>
 #include "ui/SettingsWindow.h"
 #include "Version.h"
 
-UpdateManager::UpdateManager(QString const& fetchUrl) : _fetchUrl{fetchUrl}, _nManager{_fetchUrl}{}
+UpdateManager::UpdateManager(QString const& fetchUrl, QString const& downloadUrl) : _fetchUrl{fetchUrl}, _downloadUrl{downloadUrl}, _nManager{_fetchUrl}{
+
+    // Delete old
+    QFile::remove(qApp->applicationFilePath() + ".old");
+
+}
 
 void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnNoUpdate, QWidget* parent){
     update_t updInfos{updateAvailable(checkBeta)};
@@ -22,7 +28,7 @@ void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnN
         );
 
         if(response == QMessageBox::Yes){
-            update();
+            update(updInfos.version, parent);
         }
     }else if (!updInfos.newUpdate && warnNoUpdate) {
         QMessageBox::information(
@@ -42,10 +48,10 @@ update_t UpdateManager::updateAvailable(bool checkBeta) const{
 
     static QMetaObject::Connection connect1;
     static QMetaObject::Connection connect2;
+    disconnect(connect1);
+    disconnect(connect2);
 
     connect1 = QObject::connect(&_nManager, &Downloader::downloaded, [&upd, this, &loop, checkBeta](QByteArray const& res){
-
-        disconnect(connect1);
 
         QDomDocument dom{qApp->applicationName()};
         dom.setContent(res);
@@ -77,12 +83,14 @@ update_t UpdateManager::updateAvailable(bool checkBeta) const{
 
         loop.quit();
 
+        disconnect(connect1);
+
 
     });
 
     connect2 = QObject::connect(&_nManager, &Downloader::error, [&loop, this](){
-        disconnect(connect2);
         loop.quit();
+        disconnect(connect2);
     });
 
     _nManager.download();
@@ -92,6 +100,21 @@ update_t UpdateManager::updateAvailable(bool checkBeta) const{
     return upd;
 }
 
-void UpdateManager::update(Version const& v){
-    //TODO
+void UpdateManager::update(Version const& v, QWidget* parent){
+    Downloader *downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + ".rar"};
+    connect(downloader, &Downloader::downloaded, [downloader, parent](QByteArray const& res){
+        QFile::rename(qApp->applicationFilePath(), qApp->applicationFilePath() + ".old");
+        QFile f{qApp->applicationFilePath()};
+        if(!f.open(QFile::ReadWrite)){
+            QMessageBox::critical(parent, "Download error", "We were unable to install the new update. Could not write new file", QMessageBox::Ok);
+        }
+        f.write(res);
+        f.close();
+        downloader->deleteLater();
+    });
+    connect(downloader, &Downloader::error, [downloader, parent](){
+         QMessageBox::critical(parent, "Download error", "We were unable to download the update, please try again later.", QMessageBox::Ok);
+         downloader->deleteLater();
+    });
+    downloader->download();
 }

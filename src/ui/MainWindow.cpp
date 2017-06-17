@@ -18,13 +18,14 @@
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
 #define UPDATE_FETCH_URL "http://www.filesencrypt.com/update/current.xml"
+#define UPDATE_DOWNLOAD_URL "http://www.filesencrypt.com/update/"
 
 QMutex MainWindow::s_encryptMutex;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_update{UPDATE_FETCH_URL}
+    m_update{UPDATE_FETCH_URL, UPDATE_DOWNLOAD_URL}
 {
     ui->setupUi(this);
 
@@ -72,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_retrieveKey, SIGNAL(triggered(bool)), this, SLOT(displayKey()));
     connect(ui->action_openSettings, SIGNAL(triggered(bool)), this, SLOT(openSettings()));
     connect(ui->action_checkForUpdates, &QAction::triggered, [this]{
-        m_update.showUpdateDialogIfUpdateAvailable(false, true, this);
+        m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), true, this);
     });
 
     m_addWhateverMenu = new QMenu(this);
