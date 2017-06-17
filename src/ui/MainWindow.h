@@ -9,7 +9,7 @@
 #include <QSettings>
 #include "Progress.h"
 #include "ChooseKey.h"
-#include <UpdateManager.h>
+#include "network/UpdateManager.h"
 #include "SettingsWindow.h"
 #include <functional>
 

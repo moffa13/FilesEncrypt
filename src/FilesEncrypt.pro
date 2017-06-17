@@ -1,4 +1,4 @@
-QT += core gui widgets concurrent network
+QT += core gui widgets concurrent network xml
 
 CONFIG += c++11
 
@@ -35,8 +35,10 @@ SOURCES += main.cpp \
     ui/MainWindow.cpp \
     FilesEncrypt.cpp \
     ui/SettingsWindow.cpp \
-    UpdateManager.cpp \
-    AccurateTimer.cpp
+    network/UpdateManager.cpp \
+    network/Downloader.cpp \
+    AccurateTimer.cpp \
+    Version.cpp
 HEADERS += \
     Crypt.h \
     Logger.h \
@@ -46,8 +48,10 @@ HEADERS += \
     FilesEncrypt.h \
     ui/MainWindow.h \
     ui/SettingsWindow.h \
-    UpdateManager.h \
-    AccurateTimer.h
+    network/UpdateManager.h \
+    network/Downloader.h \
+    AccurateTimer.h \
+    Version.h
 
 win32{
     QMAKE_CXXFLAGS += -MD
@@ -85,7 +89,9 @@ FORMS += \
 CONFIG(debug, debug|release) {
     QT += testlib
     SOURCES += tests/TestCrypt.cpp \
-        tests/TestFilesEncrypt.cpp
+        tests/TestFilesEncrypt.cpp \
+        tests/TestVersion.cpp
     HEADERS += tests/TestCrypt.h \
-        tests/TestFilesEncrypt.h
+        tests/TestFilesEncrypt.h \
+        tests/TestVersion.h
 }

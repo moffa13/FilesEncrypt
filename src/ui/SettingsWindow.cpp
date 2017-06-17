@@ -13,6 +13,7 @@ void SettingsWindow::init(){
     if(!defaultValuesInit){
         defaultValuesInit = true;
         checkNames.insert("encrypt_filenames", QPair<QString, QVariant>{"Crypter les noms de fichiers", true});
+        checkNames.insert("check_beta", QPair<QString, QVariant>{"Autoriser les mises à jour beta (risqué)", false});
     }
 }
 

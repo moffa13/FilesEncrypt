@@ -17,7 +17,6 @@
 #include <iostream>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
-#define CURRENT_VERSION "0.1beta"
 #define UPDATE_FETCH_URL "http://www.filesencrypt.com/update/current.xml"
 
 QMutex MainWindow::s_encryptMutex;
@@ -25,13 +24,17 @@ QMutex MainWindow::s_encryptMutex;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_update{CURRENT_VERSION, UPDATE_FETCH_URL}
+    m_update{UPDATE_FETCH_URL}
 {
     ui->setupUi(this);
 
     show();
 
+    setWindowTitle(qApp->applicationName() + " v" + Version{qApp->applicationVersion()}.getVersionStr().c_str());
+
     m_settings = new QSettings;
+
+    m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), false, this);
 
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableWidget->insertColumn(0);
