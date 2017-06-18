@@ -29,8 +29,6 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
 
     init();
 
-    QSet<QCheckBox*> boxes;
-
     // Add checkboxes to a QSet and set their correct checked values regarding the config
     for(QMap<QString, QPair<QString, QVariant>>::iterator it{checkNames.begin()}; it != checkNames.end(); ++it){
         QCheckBox *box = new QCheckBox{it.value().first, this};
@@ -39,11 +37,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
             m_settings->setValue(key, checked);
         });
         box->setChecked(m_settings->value(it.key(), getDefaultSetting(it.key())).toBool());
-        boxes.insert(box);
-    }
-
-    for(QSet<QCheckBox*>::iterator it{boxes.begin()}; it != boxes.end(); ++it){
-        ui->verticalLayout->addWidget(*it);
+        ui->verticalLayout->addWidget(box);
     }
 
     setFixedSize(sizeHint());
