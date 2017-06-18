@@ -10,12 +10,7 @@
 #include "ui/SettingsWindow.h"
 #include "Version.h"
 
-UpdateManager::UpdateManager(QString const& fetchUrl, QString const& downloadUrl) : _fetchUrl{fetchUrl}, _downloadUrl{downloadUrl}, _nManager{_fetchUrl}{
-
-    // Delete old
-    QFile::remove(qApp->applicationFilePath() + ".old");
-
-}
+UpdateManager::UpdateManager(QString const& fetchUrl, QString const& downloadUrl) : _fetchUrl{fetchUrl}, _downloadUrl{downloadUrl}, _nManager{_fetchUrl}{}
 
 void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnNoUpdate, QWidget* parent){
     update_t updInfos{updateAvailable(checkBeta)};
@@ -110,12 +105,20 @@ void UpdateManager::update(Version const& v, QWidget* parent){
     //TODO: debian, OSX, ...
     //TODO: re-add release to github
 
+#ifdef Q_PROCESSOR_X86_64
+    QString arch_folder{"x64"};
+#else
+    QString arch_folder{"x86"};
+#endif
+
+
 #if defined(Q_OS_WIN)
-    Downloader *downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + ".exe"};
+    downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + "/" + arch_folder + "/windows/" + qApp->applicationName() + ".exe"};
 #else
     QMessageBox::critical(parent, "Update error", "Update is not supported yet on this system", QMessageBox::Ok);
     return;
 #endif
+
     connect(downloader, &Downloader::downloaded, [downloader, parent](QByteArray const& res){
         QFile::rename(qApp->applicationFilePath(), qApp->applicationFilePath() + ".old");
         QFile f{qApp->applicationFilePath()};
@@ -125,10 +128,14 @@ void UpdateManager::update(Version const& v, QWidget* parent){
         f.write(res);
         f.close();
 
-        QProcess::startDetached(qApp->applicationFilePath());
-        qApp->exit(0);
+        QStringList update_done_arg;
+        update_done_arg << "update_done";
+        QProcess::startDetached(qApp->applicationFilePath(), update_done_arg);
+
         downloader->deleteLater();
+        qApp->exit(0);
     });
+
     connect(downloader, &Downloader::error, [downloader, parent](){
          QMessageBox::critical(parent, "Download error", "We were unable to download the update, please try again later.", QMessageBox::Ok);
          downloader->deleteLater();

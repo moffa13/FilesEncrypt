@@ -6,6 +6,7 @@
 #include "tests/TestVersion.h"
 #include "AccurateTimer.h"
 #include "Version.h"
+#include <QMessageBox>
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
 
+
     a.setApplicationName("FilesEncrypt");
     a.setApplicationVersion(APP_VERSION);
     a.setOrganizationName("FilesEncrypt");
@@ -33,6 +35,12 @@ int main(int argc, char *argv[])
     QSettings::setDefaultFormat(QSettings::IniFormat);
 
     MainWindow w;
+    if(argc > 1 && strcmp(argv[1], "update_done") == 0){
+        // Delete old
+        QFile::remove(qApp->applicationFilePath() + ".old");
+        QMessageBox::information(&w, "Mise à jour", "La mise a jour a correctement été installée.", QMessageBox::Ok);
+    }
+
 
     return a.exec();
 }
