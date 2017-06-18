@@ -6,6 +6,7 @@
 #include <QSettings>
 #include <QApplication>
 #include <QFile>
+#include <QProcess>
 #include "ui/SettingsWindow.h"
 #include "Version.h"
 
@@ -101,7 +102,20 @@ update_t UpdateManager::updateAvailable(bool checkBeta) const{
 }
 
 void UpdateManager::update(Version const& v, QWidget* parent){
-    Downloader *downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + ".rar"};
+
+    Downloader *downloader = nullptr;
+
+    //TODO: x64 or x86 folder download
+    //TODO: ubuntu folder
+    //TODO: debian, OSX, ...
+    //TODO: re-add release to github
+
+#if defined(Q_OS_WIN)
+    Downloader *downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + ".exe"};
+#else
+    QMessageBox::critical(parent, "Update error", "Update is not supported yet on this system", QMessageBox::Ok);
+    return;
+#endif
     connect(downloader, &Downloader::downloaded, [downloader, parent](QByteArray const& res){
         QFile::rename(qApp->applicationFilePath(), qApp->applicationFilePath() + ".old");
         QFile f{qApp->applicationFilePath()};
@@ -110,6 +124,9 @@ void UpdateManager::update(Version const& v, QWidget* parent){
         }
         f.write(res);
         f.close();
+
+        QProcess::startDetached(qApp->applicationFilePath());
+        qApp->exit(0);
         downloader->deleteLater();
     });
     connect(downloader, &Downloader::error, [downloader, parent](){
