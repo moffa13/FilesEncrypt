@@ -44,14 +44,80 @@ namespace Logging {
             template<typename ...Rest>
             static void write(const QString &prefix, int act, Rest&&... rest);
 
-            static void error(QString const &message, int act = PRINT);
-            static void warn(QString const &message, int act = PRINT);
-            static void debug(QString const &message, int act = PRINT);
-            static void log(int log_level, QString const& message, int act = PRINT);
+            template<typename ...Args>
+            static void error(Args&&... args);
+            template<typename ...Args>
+            static void warn(Args&&... args);
+            template<typename ...Args>
+            static void debug(Args&&... args);
+
+            template<typename ...Args>
+            static void error(ACTION act = PRINT, Args&&... args);
+            template<typename ...Args>
+            static void warn(ACTION act = PRINT, Args&&... args);
+            template<typename ...Args>
+            static void debug(ACTION act = PRINT, Args&&... args);
+
+            template<typename ...Args>
+            static void Logger::log(int log_level, int act = PRINT, Args&&... args);
+
             static void setLogLevel(int level){ _log_level = level; }
         private:
             static int _log_level;
     };
+
+    template<typename ...Args>
+    void Logger::debug(Args&&... args){
+        debug(PRINT, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void Logger::warn(Args&&... args){
+        warn(PRINT, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void Logger::error(Args&&... args){
+        error(PRINT, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void Logger::debug(ACTION act, Args&&... args){
+        Logger::write("Info", act, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void Logger::warn(ACTION act, Args&&... args){
+        Logger::write("Warn", act, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void Logger::error(ACTION act, Args&&... args){
+        int act_int = static_cast<int>(act);
+        act_int |= ERROR_OUT;
+        Logger::write("ERROR", act_int, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void Logger::log(int log_level, int act, Args&&... args){
+
+        if(_log_level < log_level) return;
+
+        switch (log_level) {
+            case ERROR:
+                error(act, std::forward<Args>(args)...);
+                break;
+            case WARN:
+                warn(act, std::forward<Args>(args)...);
+                break;
+            case DEBUG:
+                debug(act, std::forward<Args>(args)...);
+                break;
+            default:
+                throw std::runtime_error{"Unknown log level"};
+                break;
+        }
+    }
 
     template<typename Arg>
     void Logger::write(QTextStream &os, Arg&& arg)

@@ -28,7 +28,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     Crypt.cpp \
-    Logger.cpp \
     utilities.cpp \
     ui/ChooseKey.cpp \
     ui/Progress.cpp \
@@ -38,7 +37,8 @@ SOURCES += main.cpp \
     network/UpdateManager.cpp \
     network/Downloader.cpp \
     AccurateTimer.cpp \
-    Version.cpp
+    Version.cpp \
+    Logger.cpp
 HEADERS += \
     Crypt.h \
     Logger.h \
