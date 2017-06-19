@@ -144,10 +144,10 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
         f.write(&PRIVATE_ENCRYPT_AES_SEPARATOR, 1);
         f.write(reinterpret_cast<char*>(aes_encrypted), RSA_size(public_key));
         f.close();
-        Logger::info("Key successfully created");
+        Logging::Logger::debug("Key successfully created");
         success = true;
     }else{
-        Logger::info("Can't write aes key to file");
+        Logging::Logger::debug("Can't write aes key to file");
     }
 
     free(aes);
@@ -177,7 +177,7 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
 bool FilesEncrypt::readFromFile(){
     QFile f(m_key_file.c_str());
     if(!f.exists() || !f.open(QFile::ReadOnly)){
-        Logger::error("Cannot retrieve key");
+        Logging::Logger::error("Cannot retrieve key");
         f.close();
         return false;
     }
@@ -194,7 +194,7 @@ bool FilesEncrypt::readFromFile(){
     memcpy(reinterpret_cast<void*>(m_aes_crypted), aes_crypted.constData(), aes_crypted.length()); // Save the crypted aes
     m_private_key_crypted = private_key.toStdString(); // Save the crypted private key
 
-    Logger::info("Crypted aes and crypted private key saved");
+    Logging::Logger::debug("Crypted aes and crypted private key saved");
 
     f.close();
     return true;
@@ -218,7 +218,7 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
     if(container == nullptr){
         if(passOk != nullptr)
             *passOk = false;
-        Logger::error("Incorrect password or something else");
+        Logging::Logger::error("Incorrect password or something else");
         goto end;
     }else{
         if(passOk != nullptr)
@@ -234,15 +234,15 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
             m_aes_decrypted
         ) != -1 ){
             success = true;
-            Logger::info("AES successfully decrypted");
+            Logging::Logger::debug("AES successfully decrypted");
             m_aes_decrypted_set = true;
             startDeleteAesTimer();
 
         }else{
-            Logger::info("AES not successfully decrypted");
+            Logging::Logger::debug("AES not successfully decrypted");
         }
     }else{
-        Logger::error("AES already decrypted");
+        Logging::Logger::error("AES already decrypted");
         success = true;
     }
 
@@ -265,9 +265,9 @@ void FilesEncrypt::startDeleteAesTimer(){
     QTimer::singleShot(1000 * 60 * TIME_MIN_REMOVE_AES, [this](){
         if(s_pendingCrypt == 0){
             unsetAES();
-            Logger::info("AES key deleted from ram");
+            Logging::Logger::debug("AES key deleted from ram");
         }else{
-            Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(s_pendingCrypt) + " file(s)");
+            Logging::Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(s_pendingCrypt) + " file(s)");
             startDeleteAesTimer();
         }
     });
@@ -299,7 +299,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op) const{
 
     // If there is no action to do to the file
     if(op == fileState.state){
-        Logger::warn("Trying to encrypt/decrypt a file maybe already encrypted/uncrypted");
+        Logging::Logger::warn("Trying to encrypt/decrypt a file maybe already encrypted/uncrypted");
         goto end;
     }
 

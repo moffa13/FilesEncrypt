@@ -1,35 +1,47 @@
 #include "Logger.h"
 #include <iostream>
+#include <QCoreApplication>
 #include <QDateTime>
-#include <QMutexLocker>
-#include <QMutex>
-#include <QtDebug>
+#include <QFile>
+#include <QTextStream>
 
 using namespace std;
 
-QMutex Logger::s_mutex;
+namespace Logging {
 
-QDateTime Logger::getDateTime(){
-    return QDateTime::currentDateTime();
-}
+    int Logger::_log_level = DEBUG;
 
-QString Logger::getDateFormatted(){
-    return Logger::getDateTime().toString("yyyy-MM-dd hh:mm:ss");
-}
+    void Logger::debug(QString const &message, int act){
+        Logger::write("Info", act, message);
+    }
 
-void Logger::write(QString const &prefix, QString const &message){
-    QMutexLocker locker{&s_mutex};
-    qDebug() << Logger::getDateFormatted() << " ["+prefix+"] " << message;
-}
+    void Logger::warn(QString const &message, int act){
+        Logger::write("Warn", act, message);
+    }
 
-void Logger::info(QString const &message){
-    Logger::write("Info", message);
-}
+    void Logger::error(QString const &message, int act){
+        act |= ERROR_OUT;
+        Logger::write("ERROR", act, message);
+    }
 
-void Logger::warn(QString const &message){
-    Logger::write("Warn", message);
-}
+    void Logger::log(int log_level, const QString &message, int act){
 
-void Logger::error(QString const &message){
-    Logger::write("ERROR", message);
+        if(_log_level < log_level) return;
+
+        switch (log_level) {
+            case ERROR:
+                error(message, act);
+                break;
+            case WARN:
+                warn(message, act);
+                break;
+            case DEBUG:
+                debug(message, act);
+                break;
+            default:
+                throw std::runtime_error{"Unknown log level"};
+                break;
+        }
+    }
+
 }

@@ -272,7 +272,7 @@ QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
     f.open(QFile::ReadOnly);
     auto res = FilesEncrypt::guessEncrypted(f);
     if(res.state == EncryptDecrypt::ENCRYPT){
-        Logger::info("File " + fInfo.absoluteFilePath() + " is encrypted");
+        Logging::Logger::debug("File " + fInfo.absoluteFilePath() + " is encrypted");
     }
     return QPAIR_CRYPT_DEF{file, res};
 }
@@ -285,7 +285,7 @@ finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action) const{
         res = m_filesEncrypt->encryptFile(&f, action);
         f.close();
     }else{
-        Logger::error("Can't open file " + file);
+        Logging::Logger::error("Can't open file " + file);
     }
     return res;
 }

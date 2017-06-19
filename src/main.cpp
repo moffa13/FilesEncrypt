@@ -4,13 +4,11 @@
 #include "tests/TestCrypt.h"
 #include "tests/TestFilesEncrypt.h"
 #include "tests/TestVersion.h"
-#include "AccurateTimer.h"
 #include "Version.h"
 #include <QMessageBox>
 
 int main(int argc, char *argv[])
 {
-
 
     OpenSSL_add_all_algorithms();
     ERR_load_BIO_strings();
@@ -22,8 +20,6 @@ int main(int argc, char *argv[])
 #endif
 
     QApplication a(argc, argv);
-
-
 
     a.setApplicationName("FilesEncrypt");
     a.setApplicationVersion(APP_VERSION);
@@ -40,7 +36,6 @@ int main(int argc, char *argv[])
         QFile::remove(qApp->applicationFilePath() + ".old");
         QMessageBox::information(&w, "Mise à jour", "La mise a jour a correctement été installée.", QMessageBox::Ok);
     }
-
 
     return a.exec();
 }

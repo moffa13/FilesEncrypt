@@ -39,7 +39,7 @@ Crypt::~Crypt(){
 }
 
 EVP_PKEY* Crypt::genRSA(int keyLength){
-    Logger::info("Generating RSA keypair");
+    Logging::Logger::debug("Generating RSA keypair");
     //Private key container
     EVP_PKEY* prvKey = EVP_PKEY_new();
     // RSA
@@ -47,7 +47,7 @@ EVP_PKEY* Crypt::genRSA(int keyLength){
     RSA* rsa = RSA_generate_key(keyLength, RSA_F4, NULL, NULL);
     auto t2 = chrono::high_resolution_clock::now();
     auto timeToGenRSAKeyPair = chrono::duration_cast<std::chrono::microseconds>(t2-t1);
-    Logger::info("Took " + QString::number((double)(timeToGenRSAKeyPair.count() / double(1000000))) + "s");
+    Logging::Logger::debug("Took " + QString::number((double)(timeToGenRSAKeyPair.count() / double(1000000))) + "s");
 
     // Assign rsa to container
     EVP_PKEY_assign_RSA(prvKey, rsa);
@@ -95,10 +95,10 @@ void Crypt::writePublicKey(EVP_PKEY* x) const{
 void Crypt::genCert(CertInfos const &infos, int keyLength) const{
 
     if(keyLength < MINIMUM_KEY_LENGTH){
-        Logger::warn("The key length is to small ("+QString::number(keyLength)+"). Must be at least " + QString::number(MINIMUM_KEY_LENGTH) + " bits");
+        Logging::Logger::warn("The key length is to small ("+QString::number(keyLength)+"). Must be at least " + QString::number(MINIMUM_KEY_LENGTH) + " bits");
     }
 
-    Logger::info("Generating Cert file...");
+    Logging::Logger::debug("Generating Cert file...");
 
     //Private key container
     EVP_PKEY* prvKey = genRSA(keyLength);
@@ -140,7 +140,7 @@ void Crypt::genCert(CertInfos const &infos, int keyLength) const{
     writePrivateKey(prvKey);
     EVP_PKEY_free(prvKey);
 
-    Logger::info("Private key successfully written.");
+    Logging::Logger::debug("Private key successfully written.");
     // Write cert
     FILE* certFile = fopen(m_cert.c_str(), "wb");
     PEM_write_X509(
@@ -150,7 +150,7 @@ void Crypt::genCert(CertInfos const &infos, int keyLength) const{
     fclose(certFile);
     X509_free(x509);
 
-    Logger::info("Certificate successfully written.");
+    Logging::Logger::debug("Certificate successfully written.");
 }
 
 X509* Crypt::loadCert() const{
@@ -199,7 +199,7 @@ int Crypt::encrypt(RSA* public_key, const unsigned char* message, int len, unsig
     int ret = RSA_public_encrypt(len, message, encrypted, public_key, RSA_PKCS1_OAEP_PADDING);
     if(ret == -1){
         ulong error = ERR_peek_last_error();
-        Logger::error("Error while crypting RSA : " + QString(ERR_error_string(error, NULL)));
+        Logging::Logger::error("Error while crypting RSA : " + QString(ERR_error_string(error, NULL)));
     }
     return ret;
 }
@@ -208,7 +208,7 @@ int Crypt::decrypt(RSA* private_key, const unsigned char* encrypted, int len, un
     int ret = RSA_private_decrypt(len, encrypted, message, private_key, RSA_PKCS1_OAEP_PADDING);
     if(ret == -1){
         ulong error = ERR_peek_last_error();
-        Logger::error("Error while decrypting RSA : " + QString(ERR_error_string(error, NULL)));
+        Logging::Logger::error("Error while decrypting RSA : " + QString(ERR_error_string(error, NULL)));
     }
     return ret;
 }
@@ -413,11 +413,11 @@ bool Crypt::checkCert(){
     RSA* pubKeyRSA;
     if(m_certsExists){
         foundOnDisk = true;
-        Logger::info("Key and cert found on disk, checking integrity...");
+        Logging::Logger::debug("Key and cert found on disk, checking integrity...");
 
         X509* certificate = loadCert();
         if(certificate == NULL){
-            Logger::error("Certificate corrupted");
+            Logging::Logger::error("Certificate corrupted");
             integrityOk = false;
             goto end;
         }
@@ -427,18 +427,18 @@ bool Crypt::checkCert(){
 
         RSA* prvKey = getPrivateKeyFromFile();
 
-        Logger::info("The RSA size is "+ QString::number( RSA_size(pubKeyRSA) * 8) + " bits length");
+        Logging::Logger::debug("The RSA size is "+ QString::number( RSA_size(pubKeyRSA) * 8) + " bits length");
         if(prvKey == NULL){
-            Logger::error("Private key corrupted");
+            Logging::Logger::error("Private key corrupted");
             integrityOk = false;
             goto end;
         }
 
         if(!BN_cmp(pubKeyRSA->n, prvKey->n)){
-            Logger::info("Keys pair modulus matches");
+            Logging::Logger::debug("Keys pair modulus matches");
              integrityOk = true;
         }else{
-            Logger::error("Keys pair modulus does not match");
+            Logging::Logger::error("Keys pair modulus does not match");
         }
 
         RSA_free(prvKey);
@@ -447,14 +447,14 @@ bool Crypt::checkCert(){
     }
 end:
     if(!integrityOk && foundOnDisk){
-        Logger::error("... Integrity problem, needs to regenerate");
+        Logging::Logger::error("... Integrity problem, needs to regenerate");
         return false;
     }else if(!integrityOk && !foundOnDisk){
-        Logger::info("Certificate generating");
+        Logging::Logger::debug("Certificate generating");
         return false;
     }else{
-        Logger::info("... Integrity OK");
-        Logger::info("Server public key is : ");
+        Logging::Logger::debug("... Integrity OK");
+        Logging::Logger::debug("Server public key is : ");
         PEM_write_PUBKEY(stdout, pubKey);
         pubKey = NULL;
         RSA_free(pubKeyRSA);
