@@ -31,23 +31,25 @@ using namespace std;
 
 bool Crypt::paused = false;
 
-Crypt::Crypt()
-{
-}
+Crypt::Crypt(){}
 
-Crypt::~Crypt(){
-}
+Crypt::~Crypt(){}
 
 EVP_PKEY* Crypt::genRSA(int keyLength){
     Logging::Logger::debug("Generating RSA keypair");
     //Private key container
     EVP_PKEY* prvKey = EVP_PKEY_new();
     // RSA
+
+#ifdef QT_DEBUG
     auto t1 = chrono::high_resolution_clock::now();
+#endif
     RSA* rsa = RSA_generate_key(keyLength, RSA_F4, NULL, NULL);
+#ifdef QT_DEBUG
     auto t2 = chrono::high_resolution_clock::now();
     auto timeToGenRSAKeyPair = chrono::duration_cast<std::chrono::microseconds>(t2-t1);
     Logging::Logger::debug("Took " + QString::number((double)(timeToGenRSAKeyPair.count() / double(1000000))) + "s");
+#endif
 
     // Assign rsa to container
     EVP_PKEY_assign_RSA(prvKey, rsa);

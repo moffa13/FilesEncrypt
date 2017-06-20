@@ -65,22 +65,25 @@ namespace utilities{
             speed2 = speed / pow(1024, 4);
         }
 
-        return QString().sprintf("%.3f", speed2) + " " + letter;
+        QString res;
+        res = res.sprintf("%.3f", speed2);
+        res += " ";
+        res += letter;
+
+        return res;
     }
 
-    QString ms_to_time(unsigned msecs){
+    QString ms_to_time(int msecs){
         QString formattedTime;
 
-        int hours = msecs/(1000*60*60);
-        int minutes = (msecs-(hours*1000*60*60))/(1000*60);
-        int seconds = (msecs-(minutes*1000*60)-(hours*1000*60*60))/1000;
-        int milliseconds = msecs-(seconds*1000)-(minutes*1000*60)-(hours*1000*60*60);
+        int hours{msecs / (1000 * 60 * 60)};
+        int minutes{(msecs - (hours * 1000 * 60 * 60)) / (1000 * 60)};
+        int seconds{(msecs - (minutes * 1000 * 60) - (hours * 1000 * 60 * 60)) / 1000};
 
         formattedTime.append(
-            QString("%1").arg(hours, 2, 10, QLatin1Char('0')) + "h " +
-            QString( "%1" ).arg(minutes, 2, 10, QLatin1Char('0')) + "m " +
-            QString( "%1" ).arg(seconds, 2, 10, QLatin1Char('0')) + "s"/* +
-            QString( "%1" ).arg(milliseconds, 3, 10, QLatin1Char('0'))*/
+            QString("%1").arg(hours, 2, 10, QLatin1Char{'0'}) + "h " +
+            QString( "%1" ).arg(minutes, 2, 10, QLatin1Char{'0'}) + "m " +
+            QString( "%1" ).arg(seconds, 2, 10, QLatin1Char{'0'}) + "s"
         );
 
         return formattedTime;

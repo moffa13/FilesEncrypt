@@ -164,9 +164,6 @@ namespace Logging {
                 throw std::runtime_error("Impossible to write in log file");
             }
         }
-
-
     }
-
 }
 #endif // LOGGER_H
