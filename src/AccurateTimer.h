@@ -1,7 +1,7 @@
 #ifndef ACCURATETIMER_H
 #define ACCURATETIMER_H
 
-#include <QDatetime>
+#include <QDateTime>
 #include <QTimer>
 
 class AccurateTimer : public QObject
