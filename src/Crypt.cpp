@@ -95,7 +95,7 @@ void Crypt::writePublicKey(EVP_PKEY* x) const{
 void Crypt::genCert(CertInfos const &infos, int keyLength) const{
 
     if(keyLength < MINIMUM_KEY_LENGTH){
-        Logging::Logger::warn("The key length is to small ("+QString::number(keyLength)+"). Must be at least " + QString::number(MINIMUM_KEY_LENGTH) + " bits");
+        Logging::Logger::warn("The key length is to small (", QString::number(keyLength), "). Must be at least ", QString::number(MINIMUM_KEY_LENGTH), " bits");
     }
 
     Logging::Logger::debug("Generating Cert file...");

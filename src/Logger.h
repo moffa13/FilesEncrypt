@@ -83,16 +83,19 @@ namespace Logging {
 
     template<typename ...Args>
     void Logger::debug(ACTION act, Args&&... args){
+        if(_log_level < DEBUG) return;
         Logger::write("Info", act, std::forward<Args>(args)...);
     }
 
     template<typename ...Args>
     void Logger::warn(ACTION act, Args&&... args){
+         if(_log_level < WARN) return;
         Logger::write("Warn", act, std::forward<Args>(args)...);
     }
 
     template<typename ...Args>
     void Logger::error(ACTION act, Args&&... args){
+        if(_log_level < ERROR) return;
         int act_int = static_cast<int>(act);
         act_int |= ERROR_OUT;
         Logger::write("ERROR", act_int, std::forward<Args>(args)...);

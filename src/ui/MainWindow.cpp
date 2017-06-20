@@ -589,7 +589,7 @@ void MainWindow::on_remove_clicked(){
         }
         if(c.watcher != nullptr){
             c.watcher->cancel();
-            c.recursiveWatcher->waitForFinished();
+            c.watcher->waitForFinished();
         }
 
         m_dirs.remove(getCurrentDir());

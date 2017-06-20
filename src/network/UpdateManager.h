@@ -18,7 +18,7 @@ class UpdateManager : public QObject
      Q_OBJECT
 
     public:
-        UpdateManager(QString const& fetchUrl, QString const& downloadUrl);
+        UpdateManager(QString fetchUrl, QString downloadUrl);
         inline void changeFetchUrl(QString const& url) { _fetchUrl = url; }
         inline void changeDownloadUrl(QString const& url) { _downloadUrl = url; }
         QUrl const getFetchUrl() const { return _fetchUrl; }
