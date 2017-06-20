@@ -48,7 +48,7 @@ class FilesEncrypt : public QObject
     Q_OBJECT
 
 public:
-    explicit FilesEncrypt(std::string const &key_file);
+    explicit FilesEncrypt(std::string key_file);
     explicit FilesEncrypt(const char* aes);
     FilesEncrypt(FilesEncrypt const&) = delete;
     FilesEncrypt& operator =(FilesEncrypt const&) = delete;

@@ -10,7 +10,7 @@
 #include "ui/SettingsWindow.h"
 #include "Version.h"
 
-UpdateManager::UpdateManager(QString const& fetchUrl, QString const& downloadUrl) : _fetchUrl{fetchUrl}, _downloadUrl{downloadUrl}, _nManager{_fetchUrl}{}
+UpdateManager::UpdateManager(QString fetchUrl, QString downloadUrl) : _fetchUrl{std::move(fetchUrl)}, _downloadUrl{std::move(downloadUrl)}, _nManager{_fetchUrl}{}
 
 void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnNoUpdate, QWidget* parent){
     update_t updInfos{updateAvailable(checkBeta)};

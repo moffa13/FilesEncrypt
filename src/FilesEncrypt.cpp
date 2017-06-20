@@ -34,7 +34,7 @@ const char FilesEncrypt::PRIVATE_ENCRYPT_AES_SEPARATOR = 0x10;
 /**
  * Constructs from a key path string
  */
-FilesEncrypt::FilesEncrypt(std::string const &key_file) : m_key_file(key_file){
+FilesEncrypt::FilesEncrypt(std::string key_file) : m_key_file{std::move(key_file)}{
     init();
     m_key_file_loaded = readFromFile();
 }
