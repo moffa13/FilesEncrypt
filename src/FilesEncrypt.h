@@ -53,7 +53,7 @@ public:
     FilesEncrypt(FilesEncrypt const&) = delete;
     FilesEncrypt& operator =(FilesEncrypt const&) = delete;
     ~FilesEncrypt();
-    finfo_s encryptFile(QFile* file, EncryptDecrypt op) const;
+    finfo_s encryptFile(QFile* file, EncryptDecrypt op, bool filenameNeedsEncryption) const;
     bool readFromFile();
     static bool genKey(QString const& file, QString const& password);
     static EncryptDecrypt_s guessEncrypted(QFile& f);

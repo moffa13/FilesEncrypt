@@ -282,7 +282,7 @@ finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action) const{
     finfo_s res;
     res.success = false;
     if(f.open(QFile::ReadWrite)){
-        res = m_filesEncrypt->encryptFile(&f, action);
+        res = m_filesEncrypt->encryptFile(&f, action, m_settings->value("encrypt_filenames", SettingsWindow::getDefaultSetting("encrypt_filenames")).toBool());
         f.close();
     }else{
         Logging::Logger::error("Can't open file " + file);

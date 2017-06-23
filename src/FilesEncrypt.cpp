@@ -273,7 +273,17 @@ void FilesEncrypt::startDeleteAesTimer(){
     });
 }
 
-finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op) const{
+
+/**
+ * @brief FilesEncrypt::encryptFile
+ * @param file The file must be open
+ * @param op
+ * @param filenameNeedsEncryption
+ * @return
+ */
+finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameNeedsEncryption) const{
+
+    file->seek(0);
 
     finfo_s result;
     result.state = op;
@@ -317,10 +327,6 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op) const{
 
 
         QString nameWithoutPath{fileInfo.fileName()};
-
-        QSettings settings;
-
-        bool filenameNeedsEncryption{settings.value("encrypt_filenames", SettingsWindow::getDefaultSetting("encrypt_filenames")).toBool()};
 
         unsigned char* encrypted_filename = nullptr;
 
@@ -472,6 +478,7 @@ FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
 }
 
 QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, const char* newFilename, int newFilename_size){
+    if(!filenameChanged) newFilename_size = 0;
     QByteArray content{};
     content.append(compare);
     content.append("V");
