@@ -7,8 +7,7 @@
 #include "Version.h"
 #include <QMessageBox>
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
 
     OpenSSL_add_all_algorithms();
     ERR_load_BIO_strings();
