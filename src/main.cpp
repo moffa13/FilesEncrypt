@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     if(argc > 1 && strcmp(argv[1], "update_done") == 0){
         // Delete old
         QFile::remove(qApp->applicationFilePath() + ".old");
-        QMessageBox::information(&w, "Mise à jour", "La mise a jour a correctement été installée.", QMessageBox::Ok);
+        QMessageBox::information(&w, "Mise à jour", "La mise à jour a correctement été installée.", QMessageBox::Ok);
     }
 
     return a.exec();
