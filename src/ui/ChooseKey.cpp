@@ -124,7 +124,7 @@ void ChooseKey::on_pushButton_clicked()
     bool okCond;
     QString key;
     do{
-        key = QInputDialog::getText(nullptr, "Clé", "Entrez une clé AES-256 en hexadécimal (64 caractères)", QLineEdit::Normal,
+        key = QInputDialog::getText(nullptr, "Clé", "Entrez une clé AES-256 en hexadécimal (32 bytes, 64 caractères)", QLineEdit::Normal,
                                     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
                                     &okCond);
 
