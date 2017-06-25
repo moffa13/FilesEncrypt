@@ -31,6 +31,7 @@ namespace Logging {
             static inline QDateTime getDateTime(){
                 return QDateTime::currentDateTime();
             }
+
             static inline QString getDateFormatted(){
                 return Logger::getDateTime().toString("yyyy-MM-dd hh:mm:ss");
             }

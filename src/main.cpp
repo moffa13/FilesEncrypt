@@ -7,7 +7,8 @@
 #include "Version.h"
 #include <QMessageBox>
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
 
     OpenSSL_add_all_algorithms();
     ERR_load_BIO_strings();
@@ -18,7 +19,7 @@ int main(int argc, char *argv[]){
     TestVersion::runTests();
 #endif
 
-    QApplication a(argc, argv);
+    QApplication a{argc, argv};
 
     a.setApplicationName("FilesEncrypt");
     a.setApplicationVersion(APP_VERSION);
