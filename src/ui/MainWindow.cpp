@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setAcceptDrops(true);
+
     show();
 
     setWindowTitle(qApp->applicationName() + " v" + Version{qApp->applicationVersion()}.getVersionStr().c_str());
@@ -88,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QAction* openDir = new QAction("Ouvrir le dossier", m_listRowMenu);
     connect(openDir, SIGNAL(triggered(bool)), this, SLOT(openSelectedRowInDir()));
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    //ui->tableWidget->acceptDrops();
     connect(ui->tableWidget, &QTableWidget::customContextMenuRequested, [this](const QPoint &p){
         Q_UNUSED(p);
         m_listRowMenu->exec(QCursor::pos());
@@ -195,6 +198,28 @@ void MainWindow::closeEvent(QCloseEvent *event){
     QMainWindow::closeEvent(event);
     EVP_cleanup();
     QApplication::quit();
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent * event){
+    event->accept();
+}
+
+void MainWindow::dragLeaveEvent(QDragLeaveEvent *event){
+    event->accept();
+}
+
+void MainWindow::dragMoveEvent(QDragMoveEvent *event){
+    event->accept();
+}
+
+void MainWindow::dropEvent(QDropEvent *event){
+    event->accept();
+    if(event->mimeData()->hasUrls()){
+        auto urls = event->mimeData()->urls();
+        for(QUrl const& url : urls){
+            addWhateverToList(url.path().remove(0, 1));
+        }
+    }
 }
 
 void MainWindow::correctResize(){

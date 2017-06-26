@@ -87,6 +87,10 @@ private:
     bool beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey = false);
 protected:
     void closeEvent(QCloseEvent* event);
+    void dragLeaveEvent(QDragLeaveEvent * event);
+    void dragMoveEvent(QDragMoveEvent * event);
+    void dropEvent(QDropEvent * event);
+    void dragEnterEvent(QDragEnterEvent * event);
 
 };
 
