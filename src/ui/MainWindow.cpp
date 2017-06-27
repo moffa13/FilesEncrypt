@@ -226,7 +226,11 @@ void MainWindow::dropEvent(QDropEvent *event){
     if(event->mimeData()->hasUrls()){
         auto urls = event->mimeData()->urls();
         for(QUrl const& url : urls){
-            addWhateverToList(url.path().remove(0, 1));
+            QString urlStr{url.path()};
+#ifdef Q_OS_WIN
+            urlStr = urlStr.remove(0, 1);
+#endif
+            addWhateverToList(urlStr);
         }
     }
 }
