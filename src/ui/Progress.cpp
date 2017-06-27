@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QtDebug>
 #include <QMutexLocker>
+#include <QMessageBox>
 #include "Logger.h"
 
 #define TIME_REFRESH_MS 500
@@ -79,6 +80,7 @@ void Progress::renderLabels(){
         ui->threads_n->setText("Threads : " + QString::number((*m_f)->getPendingCrypt()));
         ui->speed->setText("Vitesse : " + utilities::speed_to_human(get_speed()) + "/s");
         ui->timePassed->setText("Temps écoulé : " + utilities::ms_to_time(m_timer.elapsed()));
+        setFixedSize(sizeHint());
         m_last_update = QDateTime::currentMSecsSinceEpoch();
     }
 }
@@ -112,15 +114,26 @@ void Progress::encryptionStarted(){
 
 void Progress::on_cancel_button_clicked()
 {
-    qDebug() << "cancel function not made";
+    reject();
+}
+
+void Progress::reject(){
+    if(m_done < m_max){
+        auto resp = QMessageBox::warning(this, "Arrêt", "Etes-vous sur de vouloir arrêter l'action en cours ?", QMessageBox::Yes | QMessageBox::No);
+        if(resp == QMessageBox::Yes){
+            Crypt::abort();
+            QDialog::reject();
+        }
+    }else
+        QDialog::reject();
 }
 
 void Progress::on_pause_button_clicked()
 {
-    Crypt::paused ^= 1;
-    if(Crypt::paused){
+    Crypt::setPaused(Crypt::isPaused() ^ 1);
+    if(Crypt::isPaused()){
         m_timer.pause();
-        ui->pause_button->setText("Play");
+        ui->pause_button->setText("Resume");
     }else{
         m_timer.start();
         ui->pause_button->setText("Pause");

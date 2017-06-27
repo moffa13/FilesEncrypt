@@ -196,6 +196,11 @@ void MainWindow::keySelected(){
 
 void MainWindow::closeEvent(QCloseEvent *event){
     QMainWindow::closeEvent(event);
+    if(FilesEncrypt::getPendingCrypt() != 0){
+        event->ignore();
+        return;
+    }
+    QMainWindow::closeEvent(event);
     EVP_cleanup();
     QApplication::quit();
 }
@@ -556,6 +561,7 @@ void MainWindow::action(EncryptDecrypt action){
 
                 connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, &item, l](){
                     delete l;
+                    qDebug() << "mdrmdr";
                     encryptFinished(item, action);
                     m_encrypting = false;
                     watcher->deleteLater();
@@ -591,7 +597,7 @@ void MainWindow::action(EncryptDecrypt action){
                 QFuture<void> future = QtConcurrent::map(*l, func);
                 watcher->setFuture(future);
                 m_progress->encryptionStarted();
-                m_progress->show();
+                m_progress->exec();
             }
         }
     }else{

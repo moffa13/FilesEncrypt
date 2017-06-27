@@ -5,6 +5,7 @@
 #include <string>
 #include "openssl/x509.h"
 #include <QFile>
+#include <QMutex>
 
 typedef struct CertInfos CertInfos;
 struct CertInfos{
@@ -41,6 +42,10 @@ class Crypt : public QObject
         void writePublicKey(EVP_PKEY* x) const;
         static void genAES(AESSIZE length, unsigned char* p);
         static void genRandomIV(unsigned char* p);
+        static void abort();
+        static bool isPaused();
+        static void setPaused(bool value);
+        static bool isAborted();
         int aes_decrypt(const unsigned char *encrypted, unsigned encrypted_size, unsigned char *uncrypted, const unsigned char* key, unsigned char* iv);
         void aes_crypt(const unsigned char *uncrypted, unsigned uncrypted_size, unsigned char *encrypted, const unsigned char* key, unsigned char* iv);
         int aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
@@ -53,13 +58,13 @@ class Crypt : public QObject
         static EVP_PKEY* getPublicKeyFromCertificate(X509* cert);
         static RSA* getRSAFromEVP_PKEY(EVP_PKEY* pKey);
         static void init();
+    private:
         static bool paused;
-
+        static bool aborted;
+        static QMutex s_mutex;
     Q_SIGNALS:
         void aes_decrypt_updated(qint32 progress);
         void aes_encrypt_updated(qint32 progress);
-
-
 };
 
 #endif // SSL_H

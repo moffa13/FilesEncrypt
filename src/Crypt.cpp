@@ -20,6 +20,7 @@
 #include <QCoreApplication>
 #include <cassert>
 #include <QtDebug>
+#include <QMutexLocker>
 
 #if defined(Q_OS_WIN32)
 #include "openssl/applink.c"
@@ -30,6 +31,9 @@
 using namespace std;
 
 bool Crypt::paused = false;
+bool Crypt::aborted = false;
+
+QMutex Crypt::s_mutex;
 
 Crypt::Crypt(){}
 
@@ -93,6 +97,8 @@ void Crypt::writePublicKey(EVP_PKEY* x) const{
     );
     fclose(keyFile);
 }
+
+
 
 void Crypt::genCert(CertInfos const &infos, int keyLength) const{
 
@@ -242,16 +248,21 @@ void Crypt::aes_crypt(
             read = uncrypted_size - current_uncrypted_position;
         }
         EVP_EncryptUpdate(ctx, encrypted + current_crypted_position, &lastLength, uncrypted + current_uncrypted_position, read);
-        while(paused) QThread::msleep(100);
         current_uncrypted_position += read;
         current_crypted_position += lastLength;
         ++pass;
         readPass += read;
-        if(pass >= 64){
+        if(pass >= 2048){
+            if(isAborted()) return;
+            while(isPaused()){
+                if(isAborted()) return;
+                QThread::msleep(100);
+            }
             emit aes_encrypt_updated(readPass);
             pass = 0;
             readPass = 0;
         }
+
     }while(read == AES_BLOCK_SIZE);
 
     emit aes_encrypt_updated(readPass);
@@ -277,10 +288,14 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
     while((read = file->read(reinterpret_cast<char*>(buffer), 16)) > 0){
         EVP_EncryptUpdate(ctx, crypted, &lastLength, buffer, read);
         tmpFile->write(reinterpret_cast<char*>(crypted), lastLength);
-        while(paused) QThread::msleep(100);
         ++pass;
         readPass += read;
-        if(pass >= 64){
+        if(pass >= 2048){
+            if(isAborted()) return;
+            while(isPaused()){
+                if(isAborted()) return;
+                QThread::msleep(100);
+            }
             emit aes_encrypt_updated(readPass);
             pass = 0;
             readPass = 0;
@@ -323,10 +338,14 @@ int Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, un
         EVP_DecryptUpdate(ctx, uncrypted, &lastLength, buffer, read);
         uncrypted_size += lastLength;
         tmpFile->write(reinterpret_cast<char*>(uncrypted), lastLength);
-        while(paused) QThread::msleep(100);
         ++pass;
         readPass += read;
-        if(pass >= 64){
+        if(pass >= 2048){
+            if(isAborted()) return -1;
+            while(isPaused()){
+                if(isAborted()) return -1;
+                QThread::msleep(100);
+            }
             emit aes_decrypt_updated(readPass);
             pass = 0;
             readPass = 0;
@@ -378,12 +397,16 @@ int Crypt::aes_decrypt(
             read = encrypted_size - current_crypted_position;
         }
         EVP_DecryptUpdate(ctx, uncrypted + current_uncrypted_position, &lastLength, encrypted + current_crypted_position, read);
-        while(paused) QThread::msleep(100);
         current_crypted_position += read;
         current_uncrypted_position += lastLength;
         ++pass;
         readPass += read;
-        if(pass >= 64){
+        if(pass >= 2048){
+            if(isAborted()) return -1;
+            while(isPaused()){
+                if(isAborted()) return -1;
+                QThread::msleep(100);
+            }
             emit aes_decrypt_updated(readPass);
             pass = 0;
             readPass = 0;
@@ -406,6 +429,24 @@ void Crypt::genAES(AESSIZE length, unsigned char* p){
 void Crypt::genRandomIV(unsigned char* p){
     memset(p, 0, AES_BLOCK_SIZE);
     RAND_bytes(p, AES_BLOCK_SIZE);
+}
+
+void Crypt::abort(){
+    aborted = true;
+}
+
+bool Crypt::isPaused(){
+    QMutexLocker locker{&s_mutex};
+    return paused;
+}
+
+void Crypt::setPaused(bool value){
+    paused = value;
+}
+
+bool Crypt::isAborted(){
+    QMutexLocker locker{&s_mutex};
+    return aborted;
 }
 
 bool Crypt::checkCert(){

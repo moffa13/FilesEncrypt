@@ -373,7 +373,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
         result.size = crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(fileState.iv.constData())));
 
         // If there is a new file name to apply
-        if(fileState.filenameChanged){
+        if(!Crypt::isAborted() && fileState.filenameChanged){
             char* uncrypted_filename = reinterpret_cast<char*>(malloc(fileState.newFilename.size()));
             auto nameSize = crypt.aes_decrypt(
                         reinterpret_cast<const unsigned char*>(fileState.newFilename.constData()),
@@ -392,18 +392,21 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
     removePendingCrypt();
     emit file_done();
 
-    result.success = true;
+    result.success = !Crypt::isAborted();
 
-    result.name = name;
+    if(result.success){
+        result.name = name;
 
-    qDebug() << "Future name : " << result.name;
-    qDebug() << "Future size : " << result.size;
-    qDebug() << "Future state : " << result.state;
+        qDebug() << "Future name : " << result.name;
+        qDebug() << "Future size : " << result.size;
+        qDebug() << "Future state : " << result.state;
 
 
-    file->remove();
-    tmpFile.copy(name);
-
+        file->remove();
+        tmpFile.copy(name);
+    }else{
+        result.state = fileState.state;
+    }
 end:
     return result;
 }
