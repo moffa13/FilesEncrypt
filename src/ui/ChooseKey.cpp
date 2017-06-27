@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QtDebug>
+#include <QMimeData>
 
 
 ChooseKey::ChooseKey(FilesEncrypt** filesEncrypt, QWidget *parent) :
@@ -14,10 +15,10 @@ ChooseKey::ChooseKey(FilesEncrypt** filesEncrypt, QWidget *parent) :
 {
     ui->setupUi(this);
     setFixedSize(size());
+    setAcceptDrops(true);
 }
 
-ChooseKey::~ChooseKey()
-{
+ChooseKey::~ChooseKey(){
     delete ui;
 }
 
@@ -33,8 +34,32 @@ void ChooseKey::closeEvent(QCloseEvent *e){
     e->accept();
 }
 
-void ChooseKey::on_newKey_clicked()
-{
+void ChooseKey::dragEnterEvent(QDragEnterEvent * event){
+    event->accept();
+}
+
+void ChooseKey::dragLeaveEvent(QDragLeaveEvent *event){
+    event->accept();
+}
+
+void ChooseKey::dragMoveEvent(QDragMoveEvent *event){
+    event->accept();
+}
+
+void ChooseKey::dropEvent(QDropEvent *event){
+    event->accept();
+    if(event->mimeData()->hasUrls()){
+        auto url = event->mimeData()->urls()[0];
+        QString urlStr{url.path()};
+#ifdef Q_OS_WIN
+        urlStr = urlStr.remove(0, 1);
+#endif
+        ui->key->setText(urlStr);
+        on_choose_clicked();
+    }
+}
+
+void ChooseKey::on_newKey_clicked(){
 
     if(ui->key->text().isEmpty()){
         ui->key->setText(showInputKeyDialog());
@@ -61,8 +86,7 @@ void ChooseKey::on_newKey_clicked()
     }
 }
 
-void ChooseKey::on_choose_clicked()
-{
+void ChooseKey::on_choose_clicked(){
     if(ui->key->text().isEmpty())
         return;
 
@@ -114,13 +138,11 @@ QString ChooseKey::showInputKeyDialog(){
     return filename;
 }
 
-void ChooseKey::on_select_clicked()
-{
+void ChooseKey::on_select_clicked(){
     ui->key->setText(showInputKeyDialog());
 }
 
-void ChooseKey::on_pushButton_clicked()
-{
+void ChooseKey::on_pushButton_clicked(){
     bool okCond;
     QString key;
     do{

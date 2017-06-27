@@ -36,6 +36,10 @@ private slots:
 protected:
     void showEvent(QShowEvent *e);
     void closeEvent(QCloseEvent *e);
+    void dragLeaveEvent(QDragLeaveEvent * event);
+    void dragMoveEvent(QDragMoveEvent * event);
+    void dropEvent(QDropEvent * event);
+    void dragEnterEvent(QDragEnterEvent * event);
 };
 
 #endif // CHOOSEKEY_H
