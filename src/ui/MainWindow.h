@@ -74,7 +74,7 @@ private:
     static QPAIR_CRYPT_DEF guessEncrypted(QString const& file);
     finfo_s encrypt(QString const &file, EncryptDecrypt action) const;
     void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item) const;
-    void encryptFinished(CryptInfos const &item, EncryptDecrypt action) const;
+    void encryptFinished(CryptInfos const &item) const;
     void action(EncryptDecrypt action);
     QString get_base_dir() const;
     void set_base_dir(QString const &dir);

@@ -174,8 +174,12 @@ void MainWindow::displayKey(bool forceAsk){
         key += QString{"%1"}.arg(*(aes + i), 2, 16, QChar{'0'}).toUpper() + " ";
     }
 
-    qApp->setStyleSheet("QMessageBox { messagebox-text-interaction-flags: 5 }");
-    QMessageBox::information(this, "Clé", "Votre clé est " + key, QMessageBox::Ok);
+    QMessageBox keyBox{this};
+    keyBox.setDefaultButton(QMessageBox::Ok);
+    keyBox.setText("Votre clé est " + key);
+    keyBox.setWindowTitle("Your key");
+    keyBox.setStyleSheet("*{ messagebox-text-interaction-flags: 5 }");
+    keyBox.exec();
 }
 
 void MainWindow::openSettings(){
@@ -251,22 +255,40 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
     // Retrieve results
     QList<QPAIR_CRYPT_DEF> res{watcher->future().results()};
 
-    size_t length = res.length();
-    unsigned crypted = 0;
-    unsigned uncrypted = 0;
-
     foreach(auto const i, res){
 
         EncryptDecrypt_light& fInfo{item.files[i.first]};
 
         fInfo.offsetBeforeContent = i.second.offsetBeforeContent;
         *(fInfo.state) = i.second.state;
-        if(i.second.state == EncryptDecrypt::ENCRYPT){
-            ++crypted;
-        }else if(i.second.state == EncryptDecrypt::DECRYPT){
-            ++uncrypted;
+    }
+
+    encryptFinished(item);
+}
+
+void MainWindow::encryptFinished(CryptInfos const &item) const{
+
+    auto length = item.isFile ? 1 : item.files.size();
+
+    unsigned crypted = 0;
+    unsigned uncrypted = 0;
+
+    if(!item.isFile){
+        for(auto const& i : item.files){
+            if(*(i.state) == EncryptDecrypt::ENCRYPT){
+                ++crypted;
+            }else if(*(i.state) == EncryptDecrypt::DECRYPT){
+                ++uncrypted;
+            }
+        }
+    }else{
+        if(*item.state == EncryptDecrypt::ENCRYPT){
+            crypted = 1;
+        }else if(*item.state == EncryptDecrypt::DECRYPT){
+            uncrypted = 1;
         }
     }
+
 
     if(crypted == length){
         item.encryptedItem->setText("Oui");
@@ -277,22 +299,6 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
     }else{
         item.encryptedItem->setText("-");
         *item.state = PARTIAL;
-    }
-}
-
-void MainWindow::encryptFinished(CryptInfos const &item, EncryptDecrypt action) const{
-
-    *(item.state) = action;
-
-    switch(action){
-        case EncryptDecrypt::ENCRYPT:
-            item.encryptedItem->setText("Oui");
-            break;
-        case EncryptDecrypt::DECRYPT:
-            item.encryptedItem->setText("Non");
-            break;
-        default:
-             item.encryptedItem->setText("-");
     }
 }
 
@@ -416,7 +422,7 @@ void MainWindow::addWhateverToList(QString const& item){
 
             filesAndState[info.absoluteFilePath()] = state;
             infos.state = new EncryptDecrypt{guess.second.state};
-            encryptFinished(infos, *infos.state);
+            encryptFinished(infos);
 
             // Show the type
             typeItem->setText("Fichier");
@@ -559,11 +565,15 @@ void MainWindow::action(EncryptDecrypt action){
 
                 QStringList const *l = new QStringList{item.files.keys()};
 
-                connect(watcher, &QFutureWatcher<void>::finished, [this, action, watcher, &item, l](){
+                connect(watcher, &QFutureWatcher<void>::finished, [this, watcher, &item, l](){
                     delete l;
-                    qDebug() << "mdrmdr";
-                    encryptFinished(item, action);
+                    encryptFinished(item);
                     m_encrypting = false;
+                    if(FilesEncrypt::getPendingCrypt() == 0){
+                        Crypt::setAborted(false);
+                        Crypt::setPaused(false);
+                    }
+
                     watcher->deleteLater();
                 });
 
@@ -581,6 +591,10 @@ void MainWindow::action(EncryptDecrypt action){
 
                         *state.state = encrypt_result.state;
 
+                        // If single file, also change global state
+                        if(item.isFile)
+                            *item.state = encrypt_result.state;
+
                         if(encrypt_result.success){
                             s_encryptMutex.lock(); // Lock this
                             // Because the filename changed, we delete the concerned file and recreate it with the appropriate name
@@ -597,7 +611,7 @@ void MainWindow::action(EncryptDecrypt action){
                 QFuture<void> future = QtConcurrent::map(*l, func);
                 watcher->setFuture(future);
                 m_progress->encryptionStarted();
-                m_progress->exec();
+                m_progress->show();
             }
         }
     }else{

@@ -6,6 +6,7 @@
 #include "tests/TestVersion.h"
 #include "Version.h"
 #include <QMessageBox>
+#include <Logger.h>
 
 int main(int argc, char *argv[])
 {
@@ -14,9 +15,12 @@ int main(int argc, char *argv[])
     ERR_load_BIO_strings();
 
 #ifdef QT_DEBUG
+    Logging::Logger::setLogLevel(Logging::DEBUG);
     TestCrypt::runTests();
     TestFilesEncrypt::runTests();
     TestVersion::runTests();
+#else
+    Logging::Logger::setLogLevel(Logging::ERROR);
 #endif
 
     QApplication a{argc, argv};

@@ -440,6 +440,7 @@ bool Crypt::isPaused(){
     return paused;
 }
 
+// SHOULD not be used in multi-threaded
 void Crypt::setPaused(bool value){
     paused = value;
 }
@@ -447,6 +448,11 @@ void Crypt::setPaused(bool value){
 bool Crypt::isAborted(){
     QMutexLocker locker{&s_mutex};
     return aborted;
+}
+
+// SHOULD not be used in multi-threaded
+void Crypt::setAborted(bool value){
+    aborted = value;
 }
 
 bool Crypt::checkCert(){

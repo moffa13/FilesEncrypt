@@ -19,6 +19,8 @@ Progress::Progress(FilesEncrypt** f, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setWindowModality(Qt::WindowModal);
+
     connect(*m_f, SIGNAL(encrypt_updated(qint32)), this, SLOT(progressed(qint32)));
     connect(*m_f, SIGNAL(decrypt_updated(qint32)), this, SLOT(progressed(qint32)));
     connect(*m_f, SIGNAL(file_done()), this, SLOT(addFile()));
