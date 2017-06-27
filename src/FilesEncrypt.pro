@@ -2,8 +2,8 @@ QT += core gui widgets concurrent network xml
 
 CONFIG += c++11
 
-VERSION = 0.2.0
-DEFINES += APP_VERSION_COMMA=0,2,0
+VERSION = 0.2.1
+DEFINES += APP_VERSION_COMMA=0,2,1
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 TARGET = FilesEncrypt
