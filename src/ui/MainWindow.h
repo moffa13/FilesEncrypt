@@ -82,9 +82,11 @@ private:
     QString getCurrentDir() const;
     static QMutex s_encryptMutex;
     static QMutex ENCRYTPT_MUTEX2;
+    static unsigned s_current_guess_encrypted_watchers;
     void openInExplorer(const QString& pathIn);
     void openInNautilus(const QString& pathIn);
     bool beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey = false);
+    void updateAvailableButtons();
 protected:
     void closeEvent(QCloseEvent* event);
     void dragLeaveEvent(QDragLeaveEvent * event);

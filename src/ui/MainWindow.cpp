@@ -21,6 +21,7 @@
 #define UPDATE_DOWNLOAD_URL "http://www.filesencrypt.com/update/"
 
 QMutex MainWindow::s_encryptMutex;
+unsigned MainWindow::s_current_guess_encrypted_watchers = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -46,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableWidget->insertColumn(3);
     QStringList type;
     type << "Type" << "Taille" << "Encrypté" << "Nom";
+    updateAvailableButtons();
 
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(
         0, QHeaderView::Stretch);
@@ -162,6 +164,51 @@ bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool fo
     }
 
     return false;
+}
+
+void MainWindow::updateAvailableButtons(){
+
+    unsigned decrypted{0};
+    unsigned encrypted{0};
+
+    // If no entries, all buttons must be greyed out
+    if(m_dirs.isEmpty()){
+        ui->remove->setEnabled(false);
+        ui->cryptAll->setEnabled(false);
+        ui->decryptAll->setEnabled(false);
+        return;
+    }
+
+    ui->remove->setEnabled(true);
+
+    for(auto const& dir : m_dirs){
+        if(*dir.state == PARTIAL){
+            ui->cryptAll->setEnabled(true);
+            ui->decryptAll->setEnabled(true);
+            return;
+        }else if(*dir.state == ENCRYPT){
+            encrypted++;
+        }else if(*dir.state == DECRYPT){
+            decrypted++;
+        }else{
+            assert(false && "This function must be called only when the state of each entry is known");
+        }
+    }
+
+    // All are encrypted
+    if(decrypted == 0){
+        ui->cryptAll->setEnabled(false);
+        ui->decryptAll->setEnabled(true);
+    }else if(encrypted == 0){
+        // All are decrypted
+        ui->cryptAll->setEnabled(true);
+        ui->decryptAll->setEnabled(false);
+    }else{
+        // We don't know
+        ui->cryptAll->setEnabled(true);
+        ui->decryptAll->setEnabled(true);
+    }
+
 }
 
 void MainWindow::displayKey(bool forceAsk){
@@ -369,6 +416,7 @@ void MainWindow::addWhateverToList(QString const& item){
 
             // Create the watchers
             QFutureWatcher<QPAIR_CRYPT_DEF>* watcher = new QFutureWatcher<QPAIR_CRYPT_DEF>;
+            s_current_guess_encrypted_watchers++;
             QFutureWatcher<FilesAndSize>* watcherRecursiveFilesDiscover = new QFutureWatcher<FilesAndSize>;
 
             // Attach the watchers
@@ -377,9 +425,15 @@ void MainWindow::addWhateverToList(QString const& item){
 
             connect(watcher, &QFutureWatcher<QPAIR_CRYPT_DEF>::finished, [this, watcher, item](){
 
+                s_current_guess_encrypted_watchers--;
+
                 if(!watcher->isCanceled()){
                     auto &infos{m_dirs[item]};
                     guessEncryptedFinished(watcher, infos);
+                    // All entries know if they are encrypted/decrypted so we can update the buttons
+                    if(s_current_guess_encrypted_watchers == 0){
+                        updateAvailableButtons();
+                    }
                     infos.watcher = nullptr;
                 }
 
@@ -427,6 +481,7 @@ void MainWindow::addWhateverToList(QString const& item){
             filesAndState[info.absoluteFilePath()] = state;
             infos.state = new EncryptDecrypt{guess.second.state};
             encryptFinished(infos);
+            updateAvailableButtons();
 
             // Show the type
             typeItem->setText("Fichier");
@@ -576,6 +631,7 @@ void MainWindow::action(EncryptDecrypt action){
                     if(FilesEncrypt::getPendingCrypt() == 0){
                         Crypt::setAborted(false);
                         Crypt::setPaused(false);
+                        updateAvailableButtons();
                     }
 
                     watcher->deleteLater();
@@ -642,6 +698,7 @@ void MainWindow::on_remove_clicked(){
         }
 
         m_dirs.remove(getCurrentDir());
+        updateAvailableButtons();
         delete c.encryptedItem;
         for(QMap<QString, EncryptDecrypt_light>::const_iterator it{c.files.begin()}; it != c.files.end(); ++it){
             delete it.value().state;
