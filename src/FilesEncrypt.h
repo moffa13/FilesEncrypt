@@ -78,10 +78,10 @@ public:
 private:
     void init();
     std::string m_key_file;
-    unsigned char* m_aes_crypted;
+    unsigned char* m_aes_crypted = nullptr;
+    unsigned char* m_aes_decrypted = nullptr;
     bool m_aes_decrypted_set = false;
     size_t m_aes_crypted_length;
-    unsigned char* m_aes_decrypted = nullptr;
     bool m_key_file_loaded = false;
     std::string m_private_key_crypted;
     QTimer m_deleteAESTimer;

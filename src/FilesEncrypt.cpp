@@ -40,7 +40,7 @@ FilesEncrypt::FilesEncrypt(std::string key_file) : m_key_file{std::move(key_file
 }
 
 /**
- * Directly constructs via an uncrypted aes key
+ * Directly constructs via a decrypted aes key
  * @param aes the 32-bytes aes key
  */
 FilesEncrypt::FilesEncrypt(const char* aes){
@@ -48,7 +48,14 @@ FilesEncrypt::FilesEncrypt(const char* aes){
     setAES(aes);
 }
 
+/**
+ * Allocates some vars and sets up the timer to delete the decrypted aes after TIME_MIN_REMOVE_AES. It DOES not start it
+ * @brief FilesEncrypt::init
+ */
 void FilesEncrypt::init(){
+    m_aes_crypted = reinterpret_cast<unsigned char*>(malloc(32));
+    m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(32));
+
     m_deleteAESTimer.setSingleShot(true);
     connect(&m_deleteAESTimer, &QTimer::timeout, [this](){
         if(s_pendingCrypt == 0){
@@ -59,12 +66,11 @@ void FilesEncrypt::init(){
             startDeleteAesTimer();
         }
     });
-
-    m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(32));
 }
 
 FilesEncrypt::~FilesEncrypt(){
     m_deleteAESTimer.stop();
+    free(m_aes_crypted);
     free(m_aes_decrypted);
 }
 
@@ -88,6 +94,10 @@ void FilesEncrypt::setAES(const char* aes){
     memcpy(m_aes_decrypted, aes, 32);
 }
 
+/**
+ * Fills the decrypted aes with zeros
+ * @brief FilesEncrypt::unsetAES
+ */
 void FilesEncrypt::unsetAES(){
     m_aes_decrypted_set = false;
     memset(m_aes_decrypted, 0, 32);
@@ -102,6 +112,7 @@ const unsigned char* FilesEncrypt::getAES() const{
  * Private key locked with a password and encrypted aes with public key are stored in the file
  * @param file The file where we write the keys
  * @param password The password which will lock the private key
+ * @param aes_copy If not nullptr, instead of generating a new aes, it copies it
  * @return true if everything happend right
  */
 bool FilesEncrypt::genKey(QString const& file, QString const& password, const unsigned char* aes_copy){
@@ -204,7 +215,6 @@ bool FilesEncrypt::readFromFile(){
     QByteArray private_key = arr.mid(0, split);
     QByteArray aes_crypted = arr.mid(split + 1, -1);
 
-    m_aes_crypted = reinterpret_cast<unsigned char*>(malloc(aes_crypted.length()));
     m_aes_crypted_length = aes_crypted.length();
 
     memcpy(reinterpret_cast<void*>(m_aes_crypted), aes_crypted.constData(), aes_crypted.length()); // Save the crypted aes
