@@ -72,7 +72,7 @@ win32{
 }
 
 unix{
-    QMAKE_CXXFLAGS += -Wno-reorder
+    QMAKE_CXXFLAGS += -Wno-reorder -g -fno-inline
     INCLUDEPATH += "$$PWD/../include/linux/"
     DEPENDPATH += "$$PWD/../include/linux/"
     INCLUDEPATH += "$$PWD/../include/"
