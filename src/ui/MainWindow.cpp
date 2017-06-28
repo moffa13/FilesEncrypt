@@ -141,12 +141,14 @@ void MainWindow::openInExplorer(const QString &pathIn){
 }
 
 bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey){
+
+    // If a key is properly loaded (decrypted aes can be accessed)
     if(m_filesEncrypt != nullptr && m_filesEncrypt->isAesDecrypted() && (!m_filesEncrypt->isFileKeyLoaded() || !forceAskKey))
         return true;
 
-    // Key is encrypted but selected
+    // Key is still encrypted
     if(m_filesEncrypt != nullptr){
-        bool passOk = false;
+        bool passOk{false};
         while(!passOk){
             bool ok;
             QString const pass{ChooseKey::askPassword(false, &ok, this)};
@@ -154,7 +156,7 @@ bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool fo
             m_filesEncrypt->requestAesDecrypt(pass.toStdString(), &passOk);
         }
         return true;
-    }else{ // Key is not selected
+    }else{ // There is no key
         static QMetaObject::Connection oldConnection;
         disconnect(oldConnection);
         oldConnection = connect(m_choose_key, &ChooseKey::keyDone, [this, func]{
@@ -169,6 +171,7 @@ bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool fo
 
 void MainWindow::updateAvailableButtons(){
 
+    // No key loaded
     if(m_filesEncrypt == nullptr){
         ui->action_saveKey->setEnabled(false);
     }else{
@@ -188,9 +191,11 @@ void MainWindow::updateAvailableButtons(){
 
     ui->remove->setEnabled(true);
 
+    // if there are workers guessing the entries's state, some entries might have a NOT_FINISHED state so we can't change the buttons state
     if(s_current_guess_encrypted_watchers > 0) return;
 
     for(auto const& dir : m_dirs){
+        // If at least one entry is partially encrypted, all the buttons have to be enabled so we can return after
         if(*dir.state == PARTIAL){
             ui->cryptAll->setEnabled(true);
             ui->decryptAll->setEnabled(true);
@@ -213,7 +218,7 @@ void MainWindow::updateAvailableButtons(){
         ui->cryptAll->setEnabled(true);
         ui->decryptAll->setEnabled(false);
     }else{
-        // We don't know
+        // Some are encrypted, some are decrypted, no partial
         ui->cryptAll->setEnabled(true);
         ui->decryptAll->setEnabled(true);
     }
@@ -279,6 +284,12 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event){
     event->accept();
 }
 
+/**
+ * Called when a/some file(s)/directory(ies) is/are dropped in the mainwindow
+ * Adds the entries in the list and process them
+ * @brief MainWindow::dropEvent
+ * @param event
+ */
 void MainWindow::dropEvent(QDropEvent *event){
     event->accept();
     if(event->mimeData()->hasUrls()){
