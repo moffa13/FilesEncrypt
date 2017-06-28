@@ -502,7 +502,6 @@ void MainWindow::addWhateverToList(QString const& item){
             filesAndState[info.absoluteFilePath()] = state;
             infos.state = new EncryptDecrypt{guess.second.state};
             encryptFinished(infos);
-            updateAvailableButtons();
 
             // Show the type
             typeItem->setText("Fichier");
@@ -513,6 +512,10 @@ void MainWindow::addWhateverToList(QString const& item){
         infos.files = filesAndState;
 
         m_dirs.insert(item, infos);
+
+        if(infos.isFile){
+            updateAvailableButtons();
+        }
     }
 }
 
