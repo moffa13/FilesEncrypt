@@ -104,6 +104,7 @@ MainWindow::~MainWindow(){
     delete m_progress;
     delete m_choose_key;
     delete m_filesEncrypt;
+    delete m_settings;
     delete ui;
 }
 
@@ -140,7 +141,7 @@ void MainWindow::openInExplorer(const QString &pathIn){
 }
 
 bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey){
-    if(m_filesEncrypt != nullptr && m_filesEncrypt->isAesDecrypted() && !forceAskKey)
+    if(m_filesEncrypt != nullptr && m_filesEncrypt->isAesDecrypted() && (!m_filesEncrypt->isFileKeyLoaded() || !forceAskKey))
         return true;
 
     // Key is encrypted but selected
@@ -168,6 +169,12 @@ bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool fo
 
 void MainWindow::updateAvailableButtons(){
 
+    if(m_filesEncrypt == nullptr){
+        ui->action_saveKey->setEnabled(false);
+    }else{
+        ui->action_saveKey->setEnabled(true);
+    }
+
     unsigned decrypted{0};
     unsigned encrypted{0};
 
@@ -180,6 +187,8 @@ void MainWindow::updateAvailableButtons(){
     }
 
     ui->remove->setEnabled(true);
+
+    if(s_current_guess_encrypted_watchers > 0) return;
 
     for(auto const& dir : m_dirs){
         if(*dir.state == PARTIAL){
@@ -241,8 +250,10 @@ void MainWindow::closeSettings(){
 }
 
 void MainWindow::keySelected(){
+    delete m_progress;
     m_progress = new Progress(&m_filesEncrypt, this);
     m_progress->setFixedSize(m_progress->size());
+    updateAvailableButtons();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event){
@@ -430,10 +441,9 @@ void MainWindow::addWhateverToList(QString const& item){
                 if(!watcher->isCanceled()){
                     auto &infos{m_dirs[item]};
                     guessEncryptedFinished(watcher, infos);
-                    // All entries know if they are encrypted/decrypted so we can update the buttons
-                    if(s_current_guess_encrypted_watchers == 0){
-                        updateAvailableButtons();
-                    }
+
+                    updateAvailableButtons();
+
                     infos.watcher = nullptr;
                 }
 
@@ -709,5 +719,18 @@ void MainWindow::on_remove_clicked(){
         delete c.state;
 
         ui->tableWidget->removeRow(row);
+    }
+}
+
+void MainWindow::on_action_newKey_triggered(){
+    if(FilesEncrypt::getPendingCrypt() > 0) return;
+    delete m_filesEncrypt;
+    m_filesEncrypt = nullptr;
+    beSureKeyIsSelectedAndValid([](){}, false);
+}
+
+void MainWindow::on_action_saveKey_triggered(){
+    if(beSureKeyIsSelectedAndValid([](){}, true)){
+        m_choose_key->saveAESToFile();
     }
 }

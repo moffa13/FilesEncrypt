@@ -59,6 +59,29 @@ void ChooseKey::dropEvent(QDropEvent *event){
     }
 }
 
+/**
+ * Opens a file save dialog, asks where to write the encrypted key and creates the encrypted key
+ * @brief ChooseKey::saveAESToFile
+ */
+void ChooseKey::saveAESToFile(){
+    QString filename{showInputKeyDialog()};
+    if(filename.isEmpty()) return;
+
+    QFile f(filename);
+    int rep;
+    if(f.exists()){
+        rep = QMessageBox::warning(this, "Existe dejà", "Un fichier existe déjà, voulez-vous écraser ?", QMessageBox::Yes | QMessageBox::No);
+    }
+    if(rep == QMessageBox::No){
+        return;
+    }
+    bool ok;
+    QString password(askPassword(true, &ok, this));
+    if(ok){
+        FilesEncrypt::genKey(filename, password, (*m_filesEncrypt)->getAES());
+    }
+}
+
 void ChooseKey::on_newKey_clicked(){
 
     if(ui->key->text().isEmpty()){
@@ -145,6 +168,7 @@ void ChooseKey::on_select_clicked(){
 void ChooseKey::on_pushButton_clicked(){
     bool okCond;
     QString key;
+
     do{
         key = QInputDialog::getText(nullptr, "Clé", "Entrez une clé AES-256 en hexadécimal (32 bytes, 64 caractères)", QLineEdit::Normal,
                                     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",

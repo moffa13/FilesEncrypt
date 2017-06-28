@@ -57,7 +57,11 @@ private Q_SLOTS:
     void openSettings();
     void closeSettings();
     void openSelectedRowInDir();
-private:
+    void on_action_newKey_triggered();
+
+    void on_action_saveKey_triggered();
+
+    private:
     Ui::MainWindow *ui;
     Progress* m_progress = NULL;
     ChooseKey* m_choose_key;

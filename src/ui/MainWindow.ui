@@ -80,7 +80,7 @@
      <x>0</x>
      <y>0</y>
      <width>734</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -88,9 +88,17 @@
      <string>Options</string>
     </property>
     <addaction name="action_retrieveKey"/>
-    <addaction name="action_openSettings"/>
     <addaction name="action_checkForUpdates"/>
+    <addaction name="action_openSettings"/>
    </widget>
+   <widget class="QMenu" name="menuFichier">
+    <property name="title">
+     <string>Fichier</string>
+    </property>
+    <addaction name="action_newKey"/>
+    <addaction name="action_saveKey"/>
+   </widget>
+   <addaction name="menuFichier"/>
    <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -107,6 +115,16 @@
   <action name="action_checkForUpdates">
    <property name="text">
     <string>Vérifier les mises à jour</string>
+   </property>
+  </action>
+  <action name="action_saveKey">
+   <property name="text">
+    <string>Sauvegarder la clé</string>
+   </property>
+  </action>
+  <action name="action_newKey">
+   <property name="text">
+    <string>Nouvelle clé</string>
    </property>
   </action>
  </widget>

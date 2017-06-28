@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.9.0
+** Created by: Qt User Interface Compiler version 5.8.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -33,6 +33,8 @@ public:
     QAction *action_retrieveKey;
     QAction *action_openSettings;
     QAction *action_checkForUpdates;
+    QAction *action_saveKey;
+    QAction *action_newKey;
     QWidget *centralwidget;
     QVBoxLayout *verticalLayout_4;
     QTableWidget *tableWidget;
@@ -45,6 +47,7 @@ public:
     QVBoxLayout *verticalLayout_3;
     QMenuBar *menubar;
     QMenu *menuOptions;
+    QMenu *menuFichier;
     QStatusBar *statusbar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -59,6 +62,10 @@ public:
         action_openSettings->setObjectName(QStringLiteral("action_openSettings"));
         action_checkForUpdates = new QAction(MainWindow);
         action_checkForUpdates->setObjectName(QStringLiteral("action_checkForUpdates"));
+        action_saveKey = new QAction(MainWindow);
+        action_saveKey->setObjectName(QStringLiteral("action_saveKey"));
+        action_newKey = new QAction(MainWindow);
+        action_newKey->setObjectName(QStringLiteral("action_newKey"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         verticalLayout_4 = new QVBoxLayout(centralwidget);
@@ -105,18 +112,23 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 734, 22));
+        menubar->setGeometry(QRect(0, 0, 734, 20));
         menuOptions = new QMenu(menubar);
         menuOptions->setObjectName(QStringLiteral("menuOptions"));
+        menuFichier = new QMenu(menubar);
+        menuFichier->setObjectName(QStringLiteral("menuFichier"));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QStringLiteral("statusbar"));
         MainWindow->setStatusBar(statusbar);
 
+        menubar->addAction(menuFichier->menuAction());
         menubar->addAction(menuOptions->menuAction());
         menuOptions->addAction(action_retrieveKey);
-        menuOptions->addAction(action_openSettings);
         menuOptions->addAction(action_checkForUpdates);
+        menuOptions->addAction(action_openSettings);
+        menuFichier->addAction(action_newKey);
+        menuFichier->addAction(action_saveKey);
 
         retranslateUi(MainWindow);
 
@@ -129,11 +141,14 @@ public:
         action_retrieveKey->setText(QApplication::translate("MainWindow", "Obtenir la cl\303\251", Q_NULLPTR));
         action_openSettings->setText(QApplication::translate("MainWindow", "Param\303\250tres", Q_NULLPTR));
         action_checkForUpdates->setText(QApplication::translate("MainWindow", "V\303\251rifier les mises \303\240 jour", Q_NULLPTR));
+        action_saveKey->setText(QApplication::translate("MainWindow", "Sauvegarder la cl\303\251", Q_NULLPTR));
+        action_newKey->setText(QApplication::translate("MainWindow", "Nouvelle cl\303\251", Q_NULLPTR));
         cryptAll->setText(QApplication::translate("MainWindow", "Crypter", Q_NULLPTR));
         decryptAll->setText(QApplication::translate("MainWindow", "D\303\251crypter", Q_NULLPTR));
         remove->setText(QApplication::translate("MainWindow", "Supprimer", Q_NULLPTR));
         importButton->setText(QApplication::translate("MainWindow", "Ajouter", Q_NULLPTR));
         menuOptions->setTitle(QApplication::translate("MainWindow", "Options", Q_NULLPTR));
+        menuFichier->setTitle(QApplication::translate("MainWindow", "Fichier", Q_NULLPTR));
     } // retranslateUi
 
 };

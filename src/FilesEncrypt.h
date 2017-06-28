@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <QMutex>
 #include "openssl/aes.h"
+#include <QTimer>
 
 enum EncryptDecrypt{
     NOT_FINISHED = - 1,
@@ -55,7 +56,7 @@ public:
     ~FilesEncrypt();
     finfo_s encryptFile(QFile* file, EncryptDecrypt op, bool filenameNeedsEncryption) const;
     bool readFromFile();
-    static bool genKey(QString const& file, QString const& password);
+    static bool genKey(QString const& file, QString const& password, const unsigned char *aes_copy = nullptr);
     static EncryptDecrypt_s guessEncrypted(QFile& f);
     static EncryptDecrypt guessEncrypted(QDir const& dir);
     static EncryptDecrypt_s guessEncrypted(QByteArray const& content);
@@ -83,6 +84,7 @@ private:
     unsigned char* m_aes_decrypted = nullptr;
     bool m_key_file_loaded = false;
     std::string m_private_key_crypted;
+    QTimer m_deleteAESTimer;
     static unsigned s_pendingCrypt;
     static QMutex s_mutex;
     static void addPendingCrypt();

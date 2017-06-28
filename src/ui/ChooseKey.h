@@ -19,7 +19,8 @@ public:
     ~ChooseKey();
     static QString askPassword(bool newKey, bool* okCond, QWidget* parent = 0);
 
-Q_SIGNALS:
+    void saveAESToFile();
+    Q_SIGNALS:
     void keyDone();
 
 private slots:

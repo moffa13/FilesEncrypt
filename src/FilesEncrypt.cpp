@@ -49,10 +49,22 @@ FilesEncrypt::FilesEncrypt(const char* aes){
 }
 
 void FilesEncrypt::init(){
+    m_deleteAESTimer.setSingleShot(true);
+    connect(&m_deleteAESTimer, &QTimer::timeout, [this](){
+        if(s_pendingCrypt == 0){
+            unsetAES();
+            Logging::Logger::debug("AES key deleted from ram");
+        }else{
+            Logging::Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(s_pendingCrypt) + " file(s)");
+            startDeleteAesTimer();
+        }
+    });
+
     m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(32));
 }
 
 FilesEncrypt::~FilesEncrypt(){
+    m_deleteAESTimer.stop();
     free(m_aes_decrypted);
 }
 
@@ -92,7 +104,7 @@ const unsigned char* FilesEncrypt::getAES() const{
  * @param password The password which will lock the private key
  * @return true if everything happend right
  */
-bool FilesEncrypt::genKey(QString const& file, QString const& password){
+bool FilesEncrypt::genKey(QString const& file, QString const& password, const unsigned char* aes_copy){
     bool success = false;
 
     // Vars to be unallocated after
@@ -131,7 +143,11 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password){
 
     // Gen aes key
     aes = reinterpret_cast<unsigned char*>(malloc(AESSIZE::S256));
-    Crypt::genAES(AESSIZE::S256, aes);
+    if(aes_copy == nullptr){
+        Crypt::genAES(AESSIZE::S256, aes);
+    }else{
+        memcpy(aes, aes_copy, 32);
+    }
 
     // Encrypt aes
     aes_encrypted = reinterpret_cast<unsigned char*>(malloc(RSA_size(public_key)));
@@ -262,15 +278,7 @@ end:
 }
 
 void FilesEncrypt::startDeleteAesTimer(){
-    QTimer::singleShot(1000 * 60 * TIME_MIN_REMOVE_AES, [this](){
-        if(s_pendingCrypt == 0){
-            unsetAES();
-            Logging::Logger::debug("AES key deleted from ram");
-        }else{
-            Logging::Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(s_pendingCrypt) + " file(s)");
-            startDeleteAesTimer();
-        }
-    });
+    m_deleteAESTimer.start(1000 * 60 * TIME_MIN_REMOVE_AES);
 }
 
 
