@@ -16,6 +16,7 @@ ChooseKey::ChooseKey(FilesEncrypt** filesEncrypt, QWidget *parent) :
     ui->setupUi(this);
     setFixedSize(size());
     setAcceptDrops(true);
+    ui->key->setAcceptDrops(false);
 }
 
 ChooseKey::~ChooseKey(){

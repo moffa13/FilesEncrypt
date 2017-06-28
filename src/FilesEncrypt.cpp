@@ -53,7 +53,7 @@ FilesEncrypt::FilesEncrypt(const char* aes){
  * @brief FilesEncrypt::init
  */
 void FilesEncrypt::init(){
-    m_aes_crypted = reinterpret_cast<unsigned char*>(malloc(32));
+    m_aes_crypted = reinterpret_cast<unsigned char*>(malloc(512));
     m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(32));
 
     m_deleteAESTimer.setSingleShot(true);
