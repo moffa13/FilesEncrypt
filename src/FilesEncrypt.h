@@ -9,40 +9,6 @@
 #include "openssl/aes.h"
 #include <QTimer>
 
-enum EncryptDecrypt{
-    NOT_FINISHED = - 1,
-    ENCRYPT = 0,
-    DECRYPT = 1,
-    PARTIAL = 2
-};
-
-typedef struct {
-    EncryptDecrypt *state;
-     quint8 offsetBeforeContent;
-} EncryptDecrypt_light;
-
-typedef struct {
-    EncryptDecrypt state;
-    quint32 version;
-    QByteArray iv;
-    quint8 offsetBeforeContent;
-    bool filenameChanged;
-    QByteArray newFilename;
-} EncryptDecrypt_s;
-
-typedef struct {
-    QString name;
-    quint8 offsetBeforeContent;
-    unsigned size;
-    EncryptDecrypt state;
-    bool success;
-} finfo_s;
-
-typedef struct{
-    QStringList files;
-    quint64 size;
-} FilesAndSize;
-
 class FilesEncrypt : public QObject
 {
 

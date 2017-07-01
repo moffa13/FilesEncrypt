@@ -12,25 +12,13 @@
 #include "network/UpdateManager.h"
 #include "SettingsWindow.h"
 #include <functional>
+#include "FilesListModel.h"
 
 #define QPAIR_CRYPT_DEF QPair<QString, EncryptDecrypt_s>
 
 namespace Ui {
 class MainWindow;
 }
-
-typedef struct CryptInfos CryptInfos;
-struct CryptInfos{
-    QMap<QString, EncryptDecrypt_light> files;
-    bool isFile;
-    QTableWidgetItem* encryptedItem;
-    QTableWidgetItem* sizeItem;
-    QTableWidgetItem* nameItem;
-    QTableWidgetItem* typeItem;
-    EncryptDecrypt* state;
-    QFutureWatcher<QPAIR_CRYPT_DEF>* watcher;
-    QFutureWatcher<FilesAndSize>* recursiveWatcher;
-};
 
 class MainWindow : public QMainWindow
 {
@@ -67,7 +55,6 @@ private Q_SLOTS:
     ChooseKey* m_choose_key;
     UpdateManager m_update;
     SettingsWindow* m_settings_window;
-    QMap<QString, CryptInfos> m_dirs;
     FilesEncrypt* m_filesEncrypt = NULL;
     QFuture<void> m_future_guessEncrypted;
     QFutureWatcher<void> m_future_guessEncrypted_watcher;
@@ -75,10 +62,11 @@ private Q_SLOTS:
     QMenu* m_addWhateverMenu;
     QMenu* m_listRowMenu;
     bool m_encrypting = false;
+    FilesListModel m_filesListModel;
     static QPAIR_CRYPT_DEF guessEncrypted(QString const& file);
     finfo_s encrypt(QString const &file, EncryptDecrypt action) const;
     void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item) const;
-    void encryptFinished(CryptInfos const &item) const;
+    void encryptFinished(CryptInfos &item) const;
     void action(EncryptDecrypt action);
     QString get_base_dir() const;
     void set_base_dir(QString const &dir);

@@ -6,20 +6,7 @@
 #include "openssl/x509.h"
 #include <QFile>
 #include <QMutex>
-
-typedef struct CertInfos CertInfos;
-struct CertInfos{
-    std::string country_code;
-    std::string organisation_name;
-    std::string website_url;
-    std::string password;
-};
-
-enum AESSIZE{
-    S128 = 16,
-    S192 = 24,
-    S256 = 32
-};
+#include "defines.h"
 
 class Crypt : public QObject
 {

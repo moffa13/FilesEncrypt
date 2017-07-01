@@ -22,7 +22,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
-     <widget class="QTableWidget" name="tableWidget"/>
+     <widget class="QTableView" name="filesList"/>
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
@@ -80,7 +80,7 @@
      <x>0</x>
      <y>0</y>
      <width>734</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">

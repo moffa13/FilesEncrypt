@@ -38,7 +38,8 @@ SOURCES += main.cpp \
     network/Downloader.cpp \
     AccurateTimer.cpp \
     Version.cpp \
-    Logger.cpp
+    Logger.cpp \
+    ui/FilesListModel.cpp
 HEADERS += \
     Crypt.h \
     Logger.h \
@@ -51,7 +52,9 @@ HEADERS += \
     network/UpdateManager.h \
     network/Downloader.h \
     AccurateTimer.h \
-    Version.h
+    Version.h \
+    defines.h \
+    ui/FilesListModel.h
 
 win32{
     QMAKE_CXXFLAGS += -MD

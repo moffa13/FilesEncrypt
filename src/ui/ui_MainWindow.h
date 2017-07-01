@@ -21,7 +21,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QStatusBar>
-#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QTableView>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -37,7 +37,7 @@ public:
     QAction *action_newKey;
     QWidget *centralwidget;
     QVBoxLayout *verticalLayout_4;
-    QTableWidget *tableWidget;
+    QTableView *filesList;
     QGridLayout *gridLayout;
     QPushButton *cryptAll;
     QPushButton *decryptAll;
@@ -70,10 +70,10 @@ public:
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         verticalLayout_4 = new QVBoxLayout(centralwidget);
         verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
-        tableWidget = new QTableWidget(centralwidget);
-        tableWidget->setObjectName(QStringLiteral("tableWidget"));
+        filesList = new QTableView(centralwidget);
+        filesList->setObjectName(QStringLiteral("filesList"));
 
-        verticalLayout_4->addWidget(tableWidget);
+        verticalLayout_4->addWidget(filesList);
 
         gridLayout = new QGridLayout();
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
@@ -112,7 +112,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 734, 20));
+        menubar->setGeometry(QRect(0, 0, 734, 25));
         menuOptions = new QMenu(menubar);
         menuOptions->setObjectName(QStringLiteral("menuOptions"));
         menuFichier = new QMenu(menubar);
