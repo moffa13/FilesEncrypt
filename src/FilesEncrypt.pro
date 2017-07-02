@@ -40,6 +40,7 @@ SOURCES += main.cpp \
     Version.cpp \
     Logger.cpp \
     ui/FilesListModel.cpp
+
 HEADERS += \
     Crypt.h \
     Logger.h \
@@ -87,7 +88,6 @@ FORMS += \
     ui/Progress.ui \
     ui/ChooseKey.ui \
     ui/SettingsWindow.ui
-
 
 CONFIG(debug, debug|release) {
     QT += testlib

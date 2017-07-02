@@ -689,13 +689,13 @@ void MainWindow::action(EncryptDecrypt action){
 
 QString MainWindow::getCurrentDir() const{
     int const row{ui->filesList->currentIndex().row()};
-    return m_filesListModel.getDirs().values().at(row).name;
+    return m_filesListModel.getDirs().keys().at(row);
 }
 
 void MainWindow::on_remove_clicked(){
     int const row{ ui->filesList->currentIndex().row() };
     if(row >= 0){
-        CryptInfos c = m_filesListModel.getDir(getCurrentDir());
+        CryptInfos const& c{m_filesListModel.getDir(getCurrentDir())};
         if(c.recursiveWatcher != nullptr){
             c.recursiveWatcher->cancel();
             c.recursiveWatcher->waitForFinished();
@@ -705,13 +705,13 @@ void MainWindow::on_remove_clicked(){
             c.watcher->waitForFinished();
         }
 
-        m_filesListModel.remove(getCurrentDir());
-        updateAvailableButtons();
-
-        for(QMap<QString, EncryptDecrypt_light>::const_iterator it{c.files.begin()}; it != c.files.end(); ++it){
+        for(QMap<QString, EncryptDecrypt_light>::const_iterator it{c.files.constBegin()}; it != c.files.constEnd(); ++it){
             delete it.value().state;
         }
         delete c.state;
+
+        m_filesListModel.remove(getCurrentDir());
+        updateAvailableButtons();
     }
 }
 

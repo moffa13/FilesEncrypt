@@ -16,9 +16,14 @@ int main(int argc, char *argv[])
 
 #ifdef QT_DEBUG
     Logging::Logger::setLogLevel(Logging::DEBUG);
-    TestCrypt::runTests();
-    TestFilesEncrypt::runTests();
-    TestVersion::runTests();
+    int result;
+    result = TestCrypt::runTests();
+    result |= TestFilesEncrypt::runTests();
+    result |= TestVersion::runTests();
+    if(result != 0){
+        Logging::Logger::error("Unit test has failed. Please fix errors");
+        return result;
+    }
 #else
     Logging::Logger::setLogLevel(Logging::ERROR);
 #endif

@@ -1,10 +1,11 @@
 #include "TestVersion.h"
 #include "Version.h"
 
-void TestVersion::runTests(){
+int TestVersion::runTests(){
     TestVersion *test = new TestVersion;
-    QTest::qExec(test);
+    int res = QTest::qExec(test);
     delete test;
+    return res;
 }
 
 void TestVersion::init(){

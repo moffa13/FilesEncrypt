@@ -3,10 +3,11 @@
 #include "openssl/aes.h"
 #include "FilesEncrypt.h"
 
-void TestCrypt::runTests(){
+int TestCrypt::runTests(){
     TestCrypt *test = new TestCrypt;
-    QTest::qExec(test);
+    int res = QTest::qExec(test);
     delete test;
+    return res;
 }
 
 void TestCrypt::init(){

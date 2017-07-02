@@ -9,7 +9,7 @@ class TestVersion : public QObject
     Q_OBJECT
 
     public:
-        static void runTests();
+        static int runTests();
     private:
 
     private slots:

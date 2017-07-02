@@ -10,7 +10,7 @@ class TestCrypt : public QObject
     Q_OBJECT
 
     public:
-        static void runTests();
+        static int runTests();
     private:
         Crypt* m_crypt = nullptr;
 

@@ -3,10 +3,11 @@
 #include <QTemporaryFile>
 #include <iostream>
 
-void TestFilesEncrypt::runTests(){
+int TestFilesEncrypt::runTests(){
     TestFilesEncrypt *test = new TestFilesEncrypt;
-    QTest::qExec(test);
+    int res = QTest::qExec(test);
     delete test;
+    return res;
 }
 
 void TestFilesEncrypt::init(){
