@@ -16,9 +16,11 @@ class FilesListModel : public QAbstractTableModel
         void update(QString const& name);
         void insert(const QString &key, const CryptInfos &infos);
         void remove(const QString &key);
+        void remove(int index);
+        void removeLast();
         CryptInfos& getDir(const QString &key);
         inline QMap<QString, CryptInfos> const& getDirs() const { return m_dirs; }
-    private:
+private:
         QMap<QString, CryptInfos> m_dirs;
         __int64 getIndex(QString const& name) const;
 };

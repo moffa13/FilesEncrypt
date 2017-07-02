@@ -65,6 +65,16 @@ void FilesListModel::remove(const QString &key){
     endRemoveRows();
 }
 
+void FilesListModel::remove(int index){
+    if(index > m_dirs.size() - 1) return;
+    remove(m_dirs.keys().at(index));
+}
+
+void FilesListModel::removeLast(){
+    if(m_dirs.isEmpty()) return;
+    remove(m_dirs.keys().at(m_dirs.size() - 1));
+}
+
 CryptInfos &FilesListModel::getDir(const QString &key){
     return m_dirs[key];
 }

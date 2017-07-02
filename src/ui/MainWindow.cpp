@@ -32,8 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setAcceptDrops(true);
 
-    show();
-
     setWindowTitle(qApp->applicationName() + " v" + Version{qApp->applicationVersion()}.getVersionStr().c_str());
 
     m_settings = new QSettings;
@@ -92,6 +90,8 @@ MainWindow::MainWindow(QWidget *parent) :
         m_listRowMenu->exec(QCursor::pos());
     });
     m_listRowMenu->addAction(openDir);
+
+    show();
 }
 
 MainWindow::~MainWindow(){
@@ -436,6 +436,8 @@ void MainWindow::addWhateverToList(QString const& item){
                     updateAvailableButtons();
 
                     infos.watcher = nullptr;
+                }else{
+                    Logging::Logger::debug("Encrypted guess watcher canceled");
                 }
 
                 watcher->deleteLater();
@@ -712,6 +714,8 @@ void MainWindow::on_remove_clicked(){
 
         m_filesListModel.remove(getCurrentDir());
         updateAvailableButtons();
+    }else if(m_filesListModel.getDirs().size() > 0){
+        m_filesListModel.removeLast();
     }
 }
 
