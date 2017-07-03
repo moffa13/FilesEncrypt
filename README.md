@@ -23,4 +23,4 @@ or
  
 	make
 
-Depending if you are on Linux or Windows.
+Depending if you are on Windows or Linux.
