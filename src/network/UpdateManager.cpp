@@ -115,7 +115,8 @@ void UpdateManager::update(Version const& v, QWidget* parent){
 #if defined(Q_OS_WIN)
     downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + "/" + arch_folder + "/windows/" + qApp->applicationName() + ".exe"};
 #elif defined(Q_OS_LINUX)
-    downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + "/" + arch_folder + "/linux/" + qApp->applicationName() + ".AppImage"};
+    downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + "/" + qApp->applicationName() + "-" + arch_folder + ".AppImage"};
+    qDebug() << _downloadUrl.toString() + v.getVersionStr().c_str() + "/" + qApp->applicationName() + "-" + arch_folder + ".AppImage";
 #else
     QMessageBox::critical(parent, "Update error", "Update is not supported yet on this system", QMessageBox::Ok);
     return;

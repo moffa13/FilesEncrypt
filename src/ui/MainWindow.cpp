@@ -36,8 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_settings = new QSettings;
 
-    m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), false, this);
-
     updateAvailableButtons();
 
     ui->filesList->setModel(&m_filesListModel);
@@ -92,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_listRowMenu->addAction(openDir);
 
     show();
+    m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), false, this);
 }
 
 MainWindow::~MainWindow(){
