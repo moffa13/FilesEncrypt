@@ -22,7 +22,7 @@ class FilesListModel : public QAbstractTableModel
         inline QMap<QString, CryptInfos> const& getDirs() const { return m_dirs; }
 private:
         QMap<QString, CryptInfos> m_dirs;
-        __int64 getIndex(QString const& name) const;
+        long long getIndex(QString const& name) const;
 };
 
 #endif // FILESLISTMODEL_H

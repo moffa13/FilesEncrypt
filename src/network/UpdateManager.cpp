@@ -114,6 +114,8 @@ void UpdateManager::update(Version const& v, QWidget* parent){
 
 #if defined(Q_OS_WIN)
     downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + "/" + arch_folder + "/windows/" + qApp->applicationName() + ".exe"};
+#elif defined(Q_OS_LINUX)
+    downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + "/" + arch_folder + "/linux/" + qApp->applicationName() + ".AppImage"};
 #else
     QMessageBox::critical(parent, "Update error", "Update is not supported yet on this system", QMessageBox::Ok);
     return;
@@ -126,6 +128,7 @@ void UpdateManager::update(Version const& v, QWidget* parent){
             QMessageBox::critical(parent, "Download error", "We were unable to install the new update. Could not write new file", QMessageBox::Ok);
         }
         f.write(res);
+        f.setPermissions(f.permissions() | QFile::ExeOwner | QFile::ExeUser | QFile::ExeGroup | QFile::ExeOther);
         f.close();
 
         QStringList update_done_arg;
