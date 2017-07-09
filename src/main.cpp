@@ -11,8 +11,10 @@
 int main(int argc, char *argv[])
 {
 
+#ifndef UNIT_TEST
     OpenSSL_add_all_algorithms();
     ERR_load_BIO_strings();
+#endif
 
 #ifdef QT_DEBUG
     Logging::Logger::setLogLevel(Logging::DEBUG);
@@ -24,10 +26,15 @@ int main(int argc, char *argv[])
         Logging::Logger::error("Unit test has failed. Please fix errors");
         return result;
     }
-#else
+#ifdef UNIT_TEST
+    return 0;
+#endif
+
+#else // QT_DEBUG
     Logging::Logger::setLogLevel(Logging::ERROR);
 #endif
 
+#ifndef UNIT_TEST
     QApplication a{argc, argv};
 
     a.setApplicationName("FilesEncrypt");
@@ -47,4 +54,5 @@ int main(int argc, char *argv[])
     }
 
     return a.exec();
+#endif
 }

@@ -17,6 +17,7 @@ addons:
     - g++-6
 script:
 - source /opt/qt55/bin/qt55-env.sh
-- /opt/qt55/bin/qmake src/FilesEncrypt.pro
+- /opt/qt55/bin/qmake CONFIG+=debug DEFINES+=UNIT_TEST src/FilesEncrypt.pro
 - make
+- ./FilesEncrypt
 

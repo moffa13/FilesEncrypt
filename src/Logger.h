@@ -60,7 +60,7 @@ namespace Logging {
             static void debug(ACTION act, Args&&... args);
 
             template<typename ...Args>
-            static void log(int log_level, int act = PRINT, Args&&... args);
+            static void log(int log_level, int act, Args&&... args);
 
             static void setLogLevel(int level){ _log_level = level; }
         private:
