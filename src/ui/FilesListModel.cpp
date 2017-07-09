@@ -3,10 +3,12 @@
 FilesListModel::FilesListModel(){}
 
 int FilesListModel::rowCount(const QModelIndex &parent) const{
+    Q_UNUSED(parent);
     return m_dirs.size();
 }
 
 int FilesListModel::columnCount(const QModelIndex &parent) const{
+    Q_UNUSED(parent);
     return 4;
 }
 

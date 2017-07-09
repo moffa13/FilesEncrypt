@@ -53,11 +53,11 @@ namespace Logging {
             static void debug(Args&&... args);
 
             template<typename ...Args>
-            static void error(ACTION act = PRINT, Args&&... args);
+            static void error(ACTION act, Args&&... args);
             template<typename ...Args>
-            static void warn(ACTION act = PRINT, Args&&... args);
+            static void warn(ACTION act, Args&&... args);
             template<typename ...Args>
-            static void debug(ACTION act = PRINT, Args&&... args);
+            static void debug(ACTION act, Args&&... args);
 
             template<typename ...Args>
             static void log(int log_level, int act = PRINT, Args&&... args);
