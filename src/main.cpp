@@ -11,10 +11,8 @@
 int main(int argc, char *argv[])
 {
 
-#ifndef UNIT_TEST
     OpenSSL_add_all_algorithms();
     ERR_load_BIO_strings();
-#endif
 
 #ifdef QT_DEBUG
     Logging::Logger::setLogLevel(Logging::DEBUG);
@@ -27,6 +25,7 @@ int main(int argc, char *argv[])
         return result;
     }
 #ifdef UNIT_TEST
+    EVP_cleanup();
     return 0;
 #endif
 
