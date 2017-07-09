@@ -1,6 +1,6 @@
 # FilesEncrypt
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ead1c31ffd0347f7a50e4a2724309fba)](https://www.codacy.com/app/moffa13/FilesEncrypt?utm_source=github.com&utm_medium=referral&utm_content=moffa13/FilesEncrypt&utm_campaign=badger)[![Build Status](https://travis-ci.org/moffa13/FilesEncrypt.svg?branch=master)](https://travis-ci.org/moffa13/FilesEncrypt)
+[![Build Status](https://travis-ci.org/moffa13/FilesEncrypt.svg?branch=master)](https://travis-ci.org/moffa13/FilesEncrypt) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ead1c31ffd0347f7a50e4a2724309fba)](https://www.codacy.com/app/moffa13/FilesEncrypt?utm_source=github.com&utm_medium=referral&utm_content=moffa13/FilesEncrypt&utm_campaign=badger)
 
 Application for files/dir encrypting, RSA-4096 & AES-256 CBC
 

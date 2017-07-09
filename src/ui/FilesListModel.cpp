@@ -14,6 +14,7 @@ int FilesListModel::columnCount(const QModelIndex &parent) const{
 
 QVariant FilesListModel::data(const QModelIndex &index, int role) const{
     if (role == Qt::DisplayRole){
+        int a = index.row();
         auto b = m_dirs.values();
         auto const& vals = m_dirs.values();
         auto const& infos{vals[index.row()]};
