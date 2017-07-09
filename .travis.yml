@@ -1,0 +1,22 @@
+language: cpp
+compiler: gcc
+dist: trusty
+sudo: require
+
+before_install:
+- sudo add-apt-repository --yes ppa:beineri/opt-qt551-trusty
+- sudo apt-get update -qq
+install:
+- sudo apt-get -y install qt55base
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-6
+    - g++-6
+script:
+- source /opt/qt55/bin/qt55-env.sh
+- /opt/qt55/bin/qmake
+- make
+
