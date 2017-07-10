@@ -60,6 +60,8 @@ Q_SIGNALS:
     void encrypt_updated(qint32 progress);
     void decrypt_updated(qint32 progress);
     void file_done() const;
+    void keyDecrypted() const;
+    void keyEncrypted() const;
 };
 
 #endif // FILESENCRYPT_H

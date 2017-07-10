@@ -60,6 +60,7 @@ void FilesEncrypt::init(){
     connect(&m_deleteAESTimer, &QTimer::timeout, [this](){
         if(s_pendingCrypt == 0){
             unsetAES();
+            emit keyEncrypted();
             Logging::Logger::debug("AES key deleted from ram");
         }else{
             Logging::Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(s_pendingCrypt) + " file(s)");
@@ -260,6 +261,7 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
             m_aes_decrypted
         ) != -1 ){
             success = true;
+            emit keyDecrypted();
             Logging::Logger::debug("AES successfully decrypted");
             m_aes_decrypted_set = true;
             startDeleteAesTimer();

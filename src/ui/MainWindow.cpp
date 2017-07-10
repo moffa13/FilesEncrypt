@@ -70,6 +70,12 @@ MainWindow::MainWindow(QWidget *parent) :
         m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), true, this);
     });
 
+    m_statusBarContent = new QLabel{};
+    m_statusBarContent->setAlignment(Qt::AlignLeft);
+    statusBar()->addPermanentWidget(m_statusBarContent, 1);
+    updateStatusBar();
+    statusBar()->show();
+
     m_addWhateverMenu = new QMenu(this);
     QAction* dir = new QAction("Importer des dossiers", m_addWhateverMenu);
     QAction* file = new QAction("Importer des fichiers", m_addWhateverMenu);
@@ -89,16 +95,31 @@ MainWindow::MainWindow(QWidget *parent) :
     });
     m_listRowMenu->addAction(openDir);
 
+
+
     show();
     m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), false, this);
 }
 
 MainWindow::~MainWindow(){
+    delete m_statusBarContent;
     delete m_progress;
     delete m_choose_key;
     delete m_filesEncrypt;
     delete m_settings;
     delete ui;
+}
+
+void MainWindow::updateStatusBar(){
+    if(m_filesEncrypt == nullptr){
+        m_statusBarContent->setText("Key not loaded");
+    }else if(!m_filesEncrypt->isFileKeyLoaded()){
+        m_statusBarContent->setText("Brute aes key loaded");
+    }else if(m_filesEncrypt->isAesDecrypted()){
+        m_statusBarContent->setText("Key loaded, ready to use");
+    }else{
+        m_statusBarContent->setText("Key loaded but encrypted");
+    }
 }
 
 void MainWindow::openSelectedRowInDir(){
@@ -248,6 +269,10 @@ void MainWindow::closeSettings(){
 }
 
 void MainWindow::keySelected(){
+    updateStatusBar();
+    if(m_filesEncrypt == nullptr) return;
+    connect(m_filesEncrypt, SIGNAL(keyDecrypted()), this, SLOT(updateStatusBar()));
+    connect(m_filesEncrypt, SIGNAL(keyEncrypted()), this, SLOT(updateStatusBar()));
     delete m_progress;
     m_progress = new Progress(&m_filesEncrypt, this);
     m_progress->setFixedSize(m_progress->size());
