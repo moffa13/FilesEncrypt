@@ -37,13 +37,13 @@ QVariant FilesListModel::headerData(int section, Qt::Orientation orientation, in
         if(orientation == Qt::Horizontal){
             switch(section){
                 case 0:
-                    return QString{"Type"};
+                    return tr("Type");
                 case 1:
-                    return QString{"Taille"};
+                    return tr("Taille");
                 case 2:
-                    return QString{"Encrypté"};
+                    return tr("Encrypté");
                 case 3:
-                    return QString{"Nom"};
+                    return tr("Nom");
             }
         }
     }

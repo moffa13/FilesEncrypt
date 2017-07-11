@@ -78,10 +78,10 @@ void Progress::setFileMax(quint32 n){
 
 void Progress::renderLabels(){
     if(QDateTime::currentMSecsSinceEpoch() > m_last_update + TIME_REFRESH_MS){ // Update every TIME_REFRESH_MS
-        ui->file_out_of->setText("Fichier : " + QString::number(m_current_file) + "/" + QString::number(m_files_max) + " (" + utilities::speed_to_human(m_done) + " / " +  utilities::speed_to_human(m_max) + ")");
-        ui->threads_n->setText("Threads : " + QString::number((*m_f)->getPendingCrypt()));
-        ui->speed->setText("Vitesse : " + utilities::speed_to_human(get_speed()) + "/s");
-        ui->timePassed->setText("Temps écoulé : " + utilities::ms_to_time(m_timer.elapsed()));
+        ui->file_out_of->setText(tr("Fichier : ") + QString::number(m_current_file) + "/" + QString::number(m_files_max) + " (" + utilities::speed_to_human(m_done) + " / " +  utilities::speed_to_human(m_max) + ")");
+        ui->threads_n->setText(tr("Threads : ") + QString::number((*m_f)->getPendingCrypt()));
+        ui->speed->setText(tr("Vitesse : ") + utilities::speed_to_human(get_speed()) + "/s");
+        ui->timePassed->setText(tr("Temps écoulé : ") + utilities::ms_to_time(m_timer.elapsed()));
         setFixedSize(sizeHint());
         m_last_update = QDateTime::currentMSecsSinceEpoch();
     }
@@ -121,7 +121,7 @@ void Progress::on_cancel_button_clicked()
 
 void Progress::reject(){
     if(m_done < m_max){
-        auto resp = QMessageBox::warning(this, "Arrêt", "Etes-vous sur de vouloir arrêter l'action en cours ?", QMessageBox::Yes | QMessageBox::No);
+        auto resp = QMessageBox::warning(this, tr("Arrêt"), tr("Etes-vous sur de vouloir arrêter l'action en cours ?"), QMessageBox::Yes | QMessageBox::No);
         if(resp == QMessageBox::Yes){
             Crypt::abort();
             QDialog::reject();
@@ -135,7 +135,7 @@ void Progress::on_pause_button_clicked()
     Crypt::setPaused(Crypt::isPaused() ^ 1);
     if(Crypt::isPaused()){
         m_timer.pause();
-        ui->pause_button->setText("Resume");
+        ui->pause_button->setText(tr("Continuer"));
     }else{
         m_timer.start();
         ui->pause_button->setText("Pause");

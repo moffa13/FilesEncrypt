@@ -6,6 +6,8 @@
 #include "tests/TestVersion.h"
 #include "Version.h"
 #include <QMessageBox>
+#include <QLibraryInfo>
+#include <QTranslator>
 #include <Logger.h>
 
 int main(int argc, char *argv[])
@@ -36,6 +38,14 @@ int main(int argc, char *argv[])
 #ifndef UNIT_TEST
     QApplication a{argc, argv};
 
+    QTranslator translator;
+    translator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+    QTranslator translator2;
+    translator2.load(QLocale::system().name(), ":/lang");
+
+    qApp->installTranslator(&translator);
+    qApp->installTranslator(&translator2);
+
     a.setApplicationName("FilesEncrypt");
     a.setApplicationVersion(APP_VERSION);
     a.setOrganizationName("FilesEncrypt");
@@ -49,7 +59,7 @@ int main(int argc, char *argv[])
     if(argc > 1 && strcmp(argv[1], "update_done") == 0){
         // Delete old
         QFile::remove(qApp->applicationFilePath() + ".old");
-        QMessageBox::information(&w, "Mise à jour", "La mise à jour a correctement été installée.", QMessageBox::Ok);
+        QMessageBox::information(&w, MainWindow::tr("Mise à jour"), MainWindow::tr("La mise à jour a correctement été installée."), QMessageBox::Ok);
     }
 
     return a.exec();

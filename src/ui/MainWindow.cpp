@@ -77,15 +77,15 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->show();
 
     m_addWhateverMenu = new QMenu(this);
-    QAction* dir = new QAction("Importer des dossiers", m_addWhateverMenu);
-    QAction* file = new QAction("Importer des fichiers", m_addWhateverMenu);
+    QAction* dir = new QAction(tr("Importer des dossiers"), m_addWhateverMenu);
+    QAction* file = new QAction(tr("Importer des fichiers"), m_addWhateverMenu);
     connect(dir, SIGNAL(triggered(bool)), this, SLOT(select_dir()));
     connect(file, SIGNAL(triggered(bool)), this, SLOT(select_file()));
     m_addWhateverMenu->addAction(dir);
     m_addWhateverMenu->addAction(file);
 
     m_listRowMenu = new QMenu(this);
-    QAction* openDir = new QAction("Ouvrir le dossier", m_listRowMenu);
+    QAction* openDir = new QAction(tr("Ouvrir le dossier"), m_listRowMenu);
     connect(openDir, SIGNAL(triggered(bool)), this, SLOT(openSelectedRowInDir()));
     ui->filesList->setContextMenuPolicy(Qt::CustomContextMenu);
     //ui->tableWidget->acceptDrops();
@@ -112,13 +112,13 @@ MainWindow::~MainWindow(){
 
 void MainWindow::updateStatusBar(){
     if(m_filesEncrypt == nullptr){
-        m_statusBarContent->setText("Key not loaded");
+        m_statusBarContent->setText(tr("Clé non chargée"));
     }else if(!m_filesEncrypt->isFileKeyLoaded()){
-        m_statusBarContent->setText("Brute aes key loaded");
+        m_statusBarContent->setText(tr("Clé aes brute chargée"));
     }else if(m_filesEncrypt->isAesDecrypted()){
-        m_statusBarContent->setText("Key loaded, ready to use");
+        m_statusBarContent->setText(tr("Clé chargée, prêt"));
     }else{
-        m_statusBarContent->setText("Key loaded but encrypted");
+        m_statusBarContent->setText(tr("Clé chargée mais encryptée"));
     }
 }
 
@@ -251,7 +251,7 @@ void MainWindow::displayKey(bool forceAsk){
 
     QMessageBox keyBox{this};
     keyBox.setDefaultButton(QMessageBox::Ok);
-    keyBox.setText("Votre clé est " + key);
+    keyBox.setText(tr("Votre clé est ") + key);
     keyBox.setWindowTitle("Your key");
     keyBox.setStyleSheet("*{ messagebox-text-interaction-flags: 5 }");
     keyBox.exec();
@@ -382,10 +382,10 @@ void MainWindow::encryptFinished(CryptInfos &item) const{
 
 
     if(crypted == length){
-        item.stateStr = "Oui";
+        item.stateStr = tr("Oui");
         *item.state = ENCRYPT;
     }else if(uncrypted == length){
-        item.stateStr = "Non";
+        item.stateStr = tr("Non");
         *item.state = DECRYPT;
     }else{
         item.stateStr = "-";
@@ -399,7 +399,7 @@ QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
     f.open(QFile::ReadOnly);
     auto res = FilesEncrypt::guessEncrypted(f);
     if(res.state == EncryptDecrypt::ENCRYPT){
-        Logging::Logger::debug("File " + fInfo.absoluteFilePath() + " is encrypted");
+        Logging::Logger::debug(tr("Le fichier %1 est encrypté").arg(fInfo.absoluteFilePath()));
     }
     return QPAIR_CRYPT_DEF{file, res};
 }
@@ -493,7 +493,7 @@ void MainWindow::addWhateverToList(QString const& item){
             QFuture<FilesAndSize> future{QtConcurrent::run(FilesEncrypt::getFilesFromDirRecursive, QDir{item})};
             watcherRecursiveFilesDiscover->setFuture(future);
 
-            infos.type = "Dossier";
+            infos.type = tr("Dossier");
             infos.state = new EncryptDecrypt(NOT_FINISHED);
 
         }else{
@@ -511,7 +511,7 @@ void MainWindow::addWhateverToList(QString const& item){
             encryptFinished(infos);
 
             // Show the type
-            infos.type = "Fichier";
+            infos.type = tr("Fichier");
             infos.size = utilities::speed_to_human(info.size());
         }
 
@@ -530,7 +530,7 @@ void MainWindow::select_file()
 {
     QStringList list = QFileDialog::getOpenFileNames(
         this,
-        "Sélectionner des fichiers",
+        tr("Sélectionner des fichiers"),
         get_base_dir()
     );
 
@@ -544,7 +544,7 @@ void MainWindow::select_dir()
 {
     QString name = QFileDialog::getExistingDirectory(
         this,
-        "Sélectionner des dossiers",
+        tr("Sélectionner des dossiers"),
         get_base_dir()
     );
 
@@ -630,8 +630,8 @@ void MainWindow::action(EncryptDecrypt action){
         if(problemWrite){
             QMessageBox::warning(
                 this,
-                "Write protection",
-                "Some files are write protected (perhaps privileges too low), they won't be encrypted/decrypted"
+                tr("Write protection"),
+                tr("Some files are write protected (perhaps privileges too low), they won't be encrypted/decrypted")
             );
         }
     }
@@ -650,7 +650,7 @@ void MainWindow::action(EncryptDecrypt action){
 
             if(*item.state != action){ // Check again and avoid to do any action if it's not needed
 
-                item.stateStr = "En cours...";
+                item.stateStr = tr("En cours...");
 
                 QFutureWatcher<void>* watcher = new QFutureWatcher<void>;
 

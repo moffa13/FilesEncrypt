@@ -2,6 +2,9 @@ QT += core gui widgets concurrent network xml
 
 CONFIG += c++11
 
+RESOURCES = FilesEncrypt.qrc
+TRANSLATIONS = filesencrypt_en.ts
+
 VERSION = 0.2.2
 DEFINES += APP_VERSION_COMMA=0,2,2
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"

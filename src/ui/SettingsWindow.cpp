@@ -12,8 +12,8 @@ bool SettingsWindow::defaultValuesInit = false;
 void SettingsWindow::init(){
     if(!defaultValuesInit){
         defaultValuesInit = true;
-        checkNames.insert("encrypt_filenames", QPair<QString, QVariant>{"Crypter les noms de fichiers", true});
-        checkNames.insert("check_beta", QPair<QString, QVariant>{"Autoriser les mises à jour beta (risqué)", false});
+        checkNames.insert("encrypt_filenames", QPair<QString, QVariant>{tr("Crypter les noms de fichiers"), true});
+        checkNames.insert("check_beta", QPair<QString, QVariant>{tr("Autoriser les mises à jour beta (risqué)"), false});
     }
 }
 
@@ -25,7 +25,7 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->verticalLayout->setAlignment(Qt::AlignTop);
 
-    setWindowTitle("Paramètres");
+    setWindowTitle(tr("Paramètres"));
 
     init();
 

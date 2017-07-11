@@ -7,6 +7,9 @@
 
 class FilesListModel : public QAbstractTableModel
 {
+
+    Q_OBJECT
+
     public:
         FilesListModel();
         int rowCount(const QModelIndex &parent = QModelIndex{}) const;

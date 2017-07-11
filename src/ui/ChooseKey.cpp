@@ -71,7 +71,7 @@ void ChooseKey::saveAESToFile(){
     QFile f(filename);
     int rep;
     if(f.exists()){
-        rep = QMessageBox::warning(this, "Existe dejà", "Un fichier existe déjà, voulez-vous écraser ?", QMessageBox::Yes | QMessageBox::No);
+        rep = QMessageBox::warning(this, tr("Existe dejà"), tr("Un fichier existe déjà, voulez-vous écraser ?"), QMessageBox::Yes | QMessageBox::No);
     }
     if(rep == QMessageBox::No){
         return;
@@ -94,7 +94,7 @@ void ChooseKey::on_newKey_clicked(){
     QFile f(ui->key->text());
     int rep;
     if(f.exists()){
-        rep = QMessageBox::warning(this, "Existe dejà", "Un fichier existe déjà, voulez-vous écraser ?", QMessageBox::Yes | QMessageBox::No);
+        rep = QMessageBox::warning(this, tr("Existe dejà"), tr("Un fichier existe déjà, voulez-vous écraser ?"), QMessageBox::Yes | QMessageBox::No);
     }
     if(rep == QMessageBox::No){
         return;
@@ -116,7 +116,7 @@ void ChooseKey::on_choose_clicked(){
 
     QFile f(ui->key->text());
     if(!f.exists()){
-        QMessageBox::warning(this, "Introuvable", "La clé est introuvable", QMessageBox::Ok);
+        QMessageBox::warning(this, tr("Introuvable"), tr("La clé est introuvable"), QMessageBox::Ok);
     }else{
         bool ok;
 req:
@@ -136,9 +136,9 @@ QString ChooseKey::askPassword(bool newKey, bool* okCond, QWidget* parent){
     QString password;
     do{
         if(newKey){
-            password = QInputDialog::getText(parent, "Mot de passe", "Entrez un mot de passe pour sécuriser la clé", QLineEdit::Password, "", okCond);
+            password = QInputDialog::getText(parent, tr("Mot de passe"), tr("Entrez un mot de passe pour sécuriser la clé"), QLineEdit::Password, "", okCond);
         }else{
-            password = QInputDialog::getText(parent, "Mot de passe", "Entrez le mot de passe de la clé", QLineEdit::Password, "", okCond);
+            password = QInputDialog::getText(parent, tr("Mot de passe"), tr("Entrez le mot de passe de la clé"), QLineEdit::Password, "", okCond);
         }
 
     }while(*okCond && password.isEmpty());
@@ -149,9 +149,9 @@ QString ChooseKey::askPassword(bool newKey, bool* okCond, QWidget* parent){
 QString ChooseKey::showInputKeyDialog(){
     auto filename = QFileDialog::getSaveFileName(
         this,
-        "Emplacement de la clé",
+        tr("Emplacement de la clé"),
         QStandardPaths::writableLocation(QStandardPaths::DesktopLocation),
-        "All files (*)",
+        tr("Tous les fichiers (*)"),
         NULL,
         QFileDialog::DontConfirmOverwrite
     );
@@ -171,7 +171,7 @@ void ChooseKey::on_pushButton_clicked(){
     QString key;
 
     do{
-        key = QInputDialog::getText(nullptr, "Clé", "Entrez une clé AES-256 en hexadécimal (32 bytes, 64 caractères)", QLineEdit::Normal,
+        key = QInputDialog::getText(nullptr, tr("Clé"), tr("Entrez une clé AES-256 en hexadécimal (32 bytes, 64 caractères)"), QLineEdit::Normal,
                                     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
                                     &okCond);
 
