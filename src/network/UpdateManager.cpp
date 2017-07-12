@@ -18,8 +18,8 @@ void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnN
     if(updInfos.newUpdate){
         auto response = QMessageBox::information(
             parent,
-            QObject::tr("Mise à jour"),
-            QObject::tr(qPrintable(QString{"Une mise à jour est disponible (v"} + updInfos.version.getVersionStr().c_str() + "), voulez-vous l'installer ?")),
+            tr("Mise à jour"),
+            tr("Une mise à jour est disponible (v %1), voulez-vous l'installer ?").arg(updInfos.version.getVersionStr().c_str()),
             QMessageBox::Yes | QMessageBox::No
         );
 
@@ -29,8 +29,8 @@ void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnN
     }else if (!updInfos.newUpdate && warnNoUpdate) {
         QMessageBox::information(
             parent,
-            QObject::tr("Mise à jour"),
-            QObject::tr(qPrintable(QString{"Vous possédez déjà la dernière mise à jour."})),
+            tr("Mise à jour"),
+            tr("Vous possédez déjà la dernière mise à jour."),
             QMessageBox::Ok
         );
     }
@@ -117,7 +117,7 @@ void UpdateManager::update(Version const& v, QWidget* parent){
 #elif defined(Q_OS_LINUX)
     downloader = new Downloader{_downloadUrl.toString() + v.getVersionStr().c_str() + "/" + qApp->applicationName() + "-linux-" + arch_folder + ".AppImage"};
 #else
-    QMessageBox::critical(parent, "Update error", "Update is not supported yet on this system", QMessageBox::Ok);
+    QMessageBox::critical(parent, tr("Erreur de mise à jour"), tr("Les mises à jour ne sont pas encore possibles sur ce système"), QMessageBox::Ok);
     return;
 #endif
 
@@ -125,7 +125,12 @@ void UpdateManager::update(Version const& v, QWidget* parent){
         QFile::rename(qApp->applicationFilePath(), qApp->applicationFilePath() + ".old");
         QFile f{qApp->applicationFilePath()};
         if(!f.open(QFile::ReadWrite)){
-            QMessageBox::critical(parent, "Download error", "We were unable to install the new update. Could not write new file", QMessageBox::Ok);
+            QMessageBox::critical(
+                parent,
+                tr("Erreur de télechargement"),
+                tr("Nous n'avons pas pu installer la mise à jour. Impossible d'écrire dans le fichier"),
+                QMessageBox::Ok
+            );
         }
         f.write(res);
         f.setPermissions(f.permissions() | QFile::ExeOwner | QFile::ExeUser | QFile::ExeGroup | QFile::ExeOther);
@@ -140,7 +145,12 @@ void UpdateManager::update(Version const& v, QWidget* parent){
     });
 
     connect(downloader, &Downloader::error, [downloader, parent](){
-         QMessageBox::critical(parent, "Download error", "We were unable to download the update, please try again later.", QMessageBox::Ok);
+         QMessageBox::critical(
+             parent,
+             tr("Erreur de télechargement"),
+             tr("Nous n'avons pas pu installer la mise à jour. Veuillez réessayer plus tard"),
+             QMessageBox::Ok
+         );
          downloader->deleteLater();
     });
     downloader->download();

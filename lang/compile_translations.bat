@@ -1,2 +1,4 @@
+move *.ts ..\src
 lrelease ../src/FilesEncrypt.pro
-move ../src/*.qm ../resources/lang
+move ..\src\*.ts .
+move ..\src\*.qm ..\resources\lang

@@ -73,8 +73,9 @@
     </message>
     <message>
         <location filename="ui/ChooseKey.cpp" line="154"/>
-        <source>All files (*)</source>
-        <translation></translation>
+        <source>Tous les fichiers (*)</source>
+        <oldsource>All files (*)</oldsource>
+        <translation>All files (*)</translation>
     </message>
     <message>
         <location filename="ui/ChooseKey.cpp" line="174"/>
@@ -174,12 +175,12 @@
         <translation>New key</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="52"/>
+        <location filename="main.cpp" line="62"/>
         <source>Mise à jour</source>
         <translation>Update</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="52"/>
+        <location filename="main.cpp" line="62"/>
         <source>La mise à jour a correctement été installée.</source>
         <translation>The update has successfully been installed.</translation>
     </message>
@@ -215,8 +216,8 @@
     </message>
     <message>
         <location filename="ui/MainWindow.cpp" line="121"/>
-        <source>Key loaded but encrypted</source>
-        <translation></translation>
+        <source>Clé chargée mais encryptée</source>
+        <translation>Key loaded but encrypted</translation>
     </message>
     <message>
         <location filename="ui/MainWindow.cpp" line="254"/>
@@ -235,8 +236,9 @@
     </message>
     <message>
         <location filename="ui/MainWindow.cpp" line="402"/>
-        <source>File %1 is encrypted</source>
-        <translation></translation>
+        <source>Le fichier %1 est encrypté</source>
+        <oldsource>File %1 is encrypted</oldsource>
+        <translation>The file %1 is encrypted</translation>
     </message>
     <message>
         <location filename="ui/MainWindow.cpp" line="496"/>
@@ -345,10 +347,8 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="network/UpdateManager.cpp" line="21"/>
-        <location filename="network/UpdateManager.cpp" line="32"/>
         <source>Mise à jour</source>
-        <translation>Update</translation>
+        <translation type="vanished">Update</translation>
     </message>
 </context>
 <context>
@@ -372,6 +372,51 @@
         <location filename="ui/SettingsWindow.cpp" line="28"/>
         <source>Paramètres</source>
         <translation>Settings</translation>
+    </message>
+</context>
+<context>
+    <name>UpdateManager</name>
+    <message>
+        <location filename="network/UpdateManager.cpp" line="21"/>
+        <location filename="network/UpdateManager.cpp" line="32"/>
+        <source>Mise à jour</source>
+        <translation>Update</translation>
+    </message>
+    <message>
+        <location filename="network/UpdateManager.cpp" line="22"/>
+        <source>Une mise à jour est disponible (v %1), voulez-vous l&apos;installer ?</source>
+        <translation>A new update is available (v %1), do you want to install it now ?</translation>
+    </message>
+    <message>
+        <location filename="network/UpdateManager.cpp" line="33"/>
+        <source>Vous possédez déjà la dernière mise à jour.</source>
+        <translation>Software is up to date.</translation>
+    </message>
+    <message>
+        <location filename="network/UpdateManager.cpp" line="120"/>
+        <source>Erreur de mise à jour</source>
+        <translation>Update error</translation>
+    </message>
+    <message>
+        <location filename="network/UpdateManager.cpp" line="120"/>
+        <source>Les mises à jour ne sont pas encore possibles sur ce système</source>
+        <translation>Updates are not currently available on this system</translation>
+    </message>
+    <message>
+        <location filename="network/UpdateManager.cpp" line="130"/>
+        <location filename="network/UpdateManager.cpp" line="150"/>
+        <source>Erreur de télechargement</source>
+        <translation>Download error</translation>
+    </message>
+    <message>
+        <location filename="network/UpdateManager.cpp" line="131"/>
+        <source>Nous n&apos;avons pas pu installer la mise à jour. Impossible d&apos;écrire dans le fichier</source>
+        <translation>We were unable to install the new update. Could not write to file</translation>
+    </message>
+    <message>
+        <location filename="network/UpdateManager.cpp" line="151"/>
+        <source>Nous n&apos;avons pas pu installer la mise à jour. Veuillez réessayer plus tard</source>
+        <translation>We were unable to install the new update. Please try again later</translation>
     </message>
 </context>
 </TS>
