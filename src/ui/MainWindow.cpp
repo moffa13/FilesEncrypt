@@ -70,9 +70,12 @@ MainWindow::MainWindow(QWidget *parent) :
         m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), true, this);
     });
 
-    m_statusBarContent = new QLabel{};
-    m_statusBarContent->setAlignment(Qt::AlignLeft);
-    statusBar()->addPermanentWidget(m_statusBarContent, 1);
+    m_statusBarLabel = new QLabel{statusBar()};
+    m_statusBarLabel->setStyleSheet("*{"
+                                    "margin-left: 15px;"
+                                    "}");
+    m_statusBarLabel->setAlignment(Qt::AlignLeft);
+    statusBar()->addPermanentWidget(m_statusBarLabel, 1);
     updateStatusBar();
     statusBar()->show();
 
@@ -102,7 +105,6 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow(){
-    delete m_statusBarContent;
     delete m_progress;
     delete m_choose_key;
     delete m_filesEncrypt;
@@ -112,13 +114,13 @@ MainWindow::~MainWindow(){
 
 void MainWindow::updateStatusBar(){
     if(m_filesEncrypt == nullptr){
-        m_statusBarContent->setText(tr("Clé non chargée"));
+        m_statusBarLabel->setText(tr("Clé non chargée"));
     }else if(!m_filesEncrypt->isFileKeyLoaded()){
-        m_statusBarContent->setText(tr("Clé aes brute chargée"));
+        m_statusBarLabel->setText(tr("Clé aes brute chargée"));
     }else if(m_filesEncrypt->isAesDecrypted()){
-        m_statusBarContent->setText(tr("Clé chargée, prêt"));
+        m_statusBarLabel->setText(tr("Clé chargée, prêt"));
     }else{
-        m_statusBarContent->setText(tr("Clé chargée mais encryptée"));
+        m_statusBarLabel->setText(tr("Clé chargée mais encryptée"));
     }
 }
 

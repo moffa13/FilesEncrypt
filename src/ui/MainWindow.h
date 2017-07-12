@@ -7,6 +7,7 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QSettings>
+#include <QHBoxLayout>
 #include <QLabel>
 #include "Progress.h"
 #include "ChooseKey.h"
@@ -55,7 +56,7 @@ class MainWindow : public QMainWindow
         Progress* m_progress = NULL;
         ChooseKey* m_choose_key;
         UpdateManager m_update;
-        QLabel *m_statusBarContent;
+        QLabel *m_statusBarLabel;
         SettingsWindow* m_settings_window;
         FilesEncrypt* m_filesEncrypt = NULL;
         QFuture<void> m_future_guessEncrypted;
