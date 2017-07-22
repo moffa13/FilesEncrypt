@@ -28,7 +28,7 @@ or
 Depending if you are on Windows or Linux.
 
 
-###Donations
+##Donations
 
 Even a little contribution is well appreciated :)
 
