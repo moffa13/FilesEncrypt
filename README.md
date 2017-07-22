@@ -28,5 +28,10 @@ or
 Depending if you are on Windows or Linux.
 
 
+###Donations
+
+Even a little contribution is well appreciated :)
+
 You can donate bitcoins at this address : 14BEtVLBzxJB9i9TzdNyNHM3zsK1v38TRe
-Even a little contribution is well appreciated.
+
+Or you can send with paypal at moffajeremy@outlook.com
