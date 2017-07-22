@@ -26,3 +26,7 @@ or
 	make
 
 Depending if you are on Windows or Linux.
+
+
+You can donate bitcoins at this address : 14BEtVLBzxJB9i9TzdNyNHM3zsK1v38TRe
+Even a little contribution is well appreciated.
