@@ -32,6 +32,6 @@ Depending if you are on Windows or Linux.
 
 Even a little contribution is well appreciated :)
 
-You can donate bitcoins at this address : 14BEtVLBzxJB9i9TzdNyNHM3zsK1v38TRe
+You can donate bitcoins at this address : 1LAB8UjmNBLB75pFhFxL6JTPo3vFWSoCG2
 
 Or you can send with paypal at moffajeremy@outlook.com
