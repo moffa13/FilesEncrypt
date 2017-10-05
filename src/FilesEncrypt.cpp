@@ -409,9 +409,6 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
         }
     }
 
-    removePendingCrypt();
-    emit file_done();
-
     result.success = !Crypt::isAborted();
 
     if(result.success){
@@ -427,6 +424,9 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
     }else{
         result.state = fileState.state;
     }
+
+    removePendingCrypt();
+    emit file_done();
 end:
     return result;
 }

@@ -17,8 +17,8 @@
 #include <iostream>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
-#define UPDATE_FETCH_URL "http://www.filesencrypt.com/update/current.xml"
-#define UPDATE_DOWNLOAD_URL "http://www.filesencrypt.com/update/"
+#define UPDATE_FETCH_URL "https://www.filesencrypt.com/update/current.xml"
+#define UPDATE_DOWNLOAD_URL "https://www.filesencrypt.com/update/"
 
 QMutex MainWindow::s_encryptMutex;
 unsigned MainWindow::s_current_guess_encrypted_watchers = 0;

@@ -44,13 +44,6 @@ void Progress::progressed(qint32 progress){
         percent = (double)1000 / ratio;
     }
     ui->progress->setValue(percent);
-
-    if(m_done >= m_max){
-        QTimer::singleShot(200, [this](){
-                close();
-                reset();
-        });
-    }
     renderLabels();
 }
 
@@ -68,6 +61,12 @@ void Progress::addFile(){
     QMutexLocker locker{&s_mutex};
     ++m_current_file;
     renderLabels();
+    if(m_done >= m_max && FilesEncrypt::getPendingCrypt() == 0){
+        QTimer::singleShot(200, [this](){
+            close();
+            reset();
+        });
+    }
 }
 
 void Progress::setFileMax(quint32 n){
