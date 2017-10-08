@@ -19,7 +19,7 @@ void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnN
         auto response = QMessageBox::information(
             parent,
             tr("Mise à jour"),
-            tr("Une mise à jour est disponible (v %1), voulez-vous l'installer ?").arg(updInfos.version.getVersionStr().c_str()),
+            tr("Une mise à jour est disponible (v%1), voulez-vous l'installer ?").arg(updInfos.version.getVersionStr().c_str()),
             QMessageBox::Yes | QMessageBox::No
         );
 
@@ -30,7 +30,7 @@ void UpdateManager::showUpdateDialogIfUpdateAvailable(bool checkBeta, bool warnN
         QMessageBox::information(
             parent,
             tr("Mise à jour"),
-            tr("Vous possédez déjà la dernière mise à jour."),
+            tr("Vous possédez déjà la dernière mise à jour (v%1)").arg(updInfos.version.getVersionStr().c_str()),
             QMessageBox::Ok
         );
     }
@@ -75,6 +75,8 @@ update_t UpdateManager::updateAvailable(bool checkBeta) const{
         }else if(!checkBeta && current_version < stable){
             upd.newUpdate = true;
             upd.version = stable;
+        }else{
+            upd.version = current_version;
         }
 
         loop.quit();

@@ -29,7 +29,7 @@ private slots:
     void on_select_clicked();
     void on_pushButton_clicked();
 
-    private:
+private:
     Ui::ChooseKey *ui;
     FilesEncrypt** m_filesEncrypt;
     bool m_done = false;

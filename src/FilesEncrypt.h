@@ -34,6 +34,7 @@ public:
     const unsigned char* getAES() const;
     void setAES(const char* aes);
     void unsetAES();
+    static bool isValidKey(QFile &f);
     static const char compare[];
     static const size_t COMPARE_SIZE;
     static const size_t VERSION_LENGTH; // V00000;

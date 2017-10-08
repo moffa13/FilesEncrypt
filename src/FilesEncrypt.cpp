@@ -69,6 +69,13 @@ void FilesEncrypt::init(){
     });
 }
 
+
+bool FilesEncrypt::isValidKey(QFile &f){
+    if(QString::fromLocal8Bit(f.read(37)) == "-----BEGIN ENCRYPTED PRIVATE KEY-----")
+        return true;
+    return false;
+}
+
 FilesEncrypt::~FilesEncrypt(){
     m_deleteAESTimer.stop();
     free(m_aes_crypted);

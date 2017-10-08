@@ -167,6 +167,7 @@ bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool fo
         bool passOk{false};
         while(!passOk){
             bool ok;
+            activateWindow();
             QString const pass{ChooseKey::askPassword(false, &ok, this)};
             if(!ok) return false;
             m_filesEncrypt->requestAesDecrypt(pass.toStdString(), &passOk);
@@ -312,13 +313,28 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event){
  */
 void MainWindow::dropEvent(QDropEvent *event){
     event->accept();
+
     if(event->mimeData()->hasUrls()){
         auto urls = event->mimeData()->urls();
+
         for(QUrl const& url : urls){
+
             QString urlStr{url.path()};
 #ifdef Q_OS_WIN
             urlStr = urlStr.remove(0, 1);
 #endif
+
+            if(urls.length() == 1){ // If there is only one single file, it might be the key
+                QFile f{urlStr};
+                // File can be opened & this is actually a key & we may remove the key
+                if(f.open(QFile::ReadOnly) && FilesEncrypt::isValidKey(f) && deleteKey()){
+                    m_filesEncrypt = new FilesEncrypt{urlStr.toStdString()};
+                    beSureKeyIsSelectedAndValid([](){}, true);
+                    keySelected();
+                    return;
+                }
+            }
+
             addWhateverToList(urlStr);
         }
     }
@@ -745,11 +761,16 @@ void MainWindow::on_remove_clicked(){
     }
 }
 
-void MainWindow::on_action_newKey_triggered(){
-    if(FilesEncrypt::getPendingCrypt() > 0) return;
+bool MainWindow::deleteKey(){
+    if(FilesEncrypt::getPendingCrypt() > 0) return false;
     delete m_filesEncrypt;
     m_filesEncrypt = nullptr;
-    beSureKeyIsSelectedAndValid([](){}, false);
+    return true;
+}
+
+void MainWindow::on_action_newKey_triggered(){
+    if(deleteKey())
+        beSureKeyIsSelectedAndValid([](){}, false);
 }
 
 void MainWindow::on_action_saveKey_triggered(){

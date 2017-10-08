@@ -82,6 +82,7 @@ class MainWindow : public QMainWindow
         void openInNautilus(const QString& pathIn);
         bool beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey = false);
         void updateAvailableButtons();
+        bool deleteKey();
     public Q_SLOTS:
         void updateStatusBar();
     protected:
