@@ -44,7 +44,6 @@ SOURCES += main.cpp \
     Logger.cpp \
     ui/FilesListModel.cpp \
     SecureMemBlock.cpp \
-    tests/TestSecureMemBlock.cpp
 
 HEADERS += \
     Crypt.h \
@@ -61,8 +60,7 @@ HEADERS += \
     Version.h \
     defines.h \
     ui/FilesListModel.h \
-    SecureMemBlock.h \
-    tests/TestSecureMemBlock.h
+    SecureMemBlock.h
 
 win32{
     QMAKE_CXXFLAGS += -MD
@@ -88,7 +86,7 @@ unix{
     INCLUDEPATH += "$$PWD/../include/linux/"
     DEPENDPATH += "$$PWD/../include/linux/"
     INCLUDEPATH += "$$PWD/../include/"
-    LIBS += -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs
+    LIBS += -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs -lgcrypt
 }
 
 FORMS += \
@@ -101,8 +99,10 @@ CONFIG(debug, debug|release) {
     QT += testlib
     SOURCES += tests/TestCrypt.cpp \
 	tests/TestFilesEncrypt.cpp \
-	tests/TestVersion.cpp
+        tests/TestVersion.cpp \
+        tests/TestSecureMemBlock.cpp
     HEADERS += tests/TestCrypt.h \
 	tests/TestFilesEncrypt.h \
-	tests/TestVersion.h
+        tests/TestVersion.h \
+        tests/TestSecureMemBlock.h
 }

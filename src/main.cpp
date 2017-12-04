@@ -20,10 +20,10 @@ int main(int argc, char *argv[])
 #ifdef QT_DEBUG
 	Logging::Logger::setLogLevel(Logging::DEBUG);
 	int result;
-	result = TestCrypt::runTests();
+    result = TestSecureMemBlock::runTests();
+    result |= TestCrypt::runTests();
 	result |= TestFilesEncrypt::runTests();
 	result |= TestVersion::runTests();
-	result |= TestSecureMemBlock::runTests();
 	if(result != 0){
 		Logging::Logger::error("Unit test has failed. Please fix errors");
 		return result;

@@ -101,7 +101,10 @@ void TestFilesEncrypt::shouldReadFromFile(){
 	bool ok = false;
 	QVERIFY(f.requestAesDecrypt("12345", &ok));
 	QVERIFY(ok);
-	QVERIFY(memcmp(f.getAES().getData(), "12345678901234561234567890123456", 32) == 0);
+
+    auto fa = f.getAES();
+    auto data = fa.getData();
+    QVERIFY(memcmp(data, "12345678901234561234567890123456", 32) == 0);
 
 	QFile::remove("Test.key.unit");
 }

@@ -19,21 +19,31 @@ void TestSecureMemBlock::cleanup()
 {}
 
 void TestSecureMemBlock::shouldWork(){
-	SecureMemBlock block(reinterpret_cast<const unsigned char*>("Hello"), 5, false);
-	unsigned char encrypted[16];
-	memcpy(&encrypted, block.getDataNoAction(), 16);
+    SecureMemBlock block(reinterpret_cast<const unsigned char*>("12345678901234561234567890123456"), 32, false);
 
 #ifdef Q_OS_WIN
-	// Fails on linux because it still doesnt support it
-	QVERIFY(memcmp(block.getDataNoAction(), "Hello", 5) != 0);
+    unsigned char encrypted[32];
+    memcpy(&encrypted, block.getDataNoAction(), 32);
+#else
+    unsigned char encrypted[48];
+    memcpy(&encrypted, block.getDataNoAction(), 48);
 #endif
-	QVERIFY(memcmp(block.getData(), "Hello", 5) == 0);
+
+    QVERIFY(memcmp(block.getDataNoAction(), "12345678901234561234567890123456", 32) != 0);
+
+    qDebug() << block.getData();
+    QVERIFY(memcmp(block.getData(), "12345678901234561234567890123456", 32) == 0);
 	block.secure();
+    QVERIFY(memcmp(block.getData(), "12345678901234561234567890123456", 32) == 0);
+    block.secure();
+
+    QVERIFY(memcmp(block.getDataNoAction(), "12345678901234561234567890123456", 32) != 0);
+
 #ifdef Q_OS_WIN
-	// Fails on linux because it still doesnt support it
-	QVERIFY(memcmp(block.getDataNoAction(), "Hello", 5) != 0);
+QVERIFY(memcmp(block.getDataNoAction(), &encrypted, 32) == 0);
+#else
+QVERIFY(memcmp(block.getDataNoAction(), &encrypted, 48) == 0);
 #endif
-	QVERIFY(memcmp(block.getDataNoAction(), &encrypted, 16) == 0);
 
 #ifdef Q_OS_WIN
 	unsigned char a[16] = {0x48, 0x65, 0x6C, 0x6C, 0x6F};

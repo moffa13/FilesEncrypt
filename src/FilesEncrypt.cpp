@@ -57,7 +57,7 @@ FilesEncrypt::FilesEncrypt(const char* aes){
  */
 void FilesEncrypt::init(){
 	m_aes_crypted = reinterpret_cast<unsigned char*>(malloc(512));
-	m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(32));
+    m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(48)); // CryptProtectMemory need multiple of 16 so it is 32 & aes needs 48 so it's 48
 
 	m_deleteAESTimer.setSingleShot(true);
 	connect(&m_deleteAESTimer, &QTimer::timeout, [this](){
@@ -102,9 +102,12 @@ unsigned FilesEncrypt::getPendingCrypt(){
 
 void FilesEncrypt::setAES(const char* aes){
 	m_aes_decrypted_set = true;
-	memcpy(m_aes_decrypted, aes, 32);
 #ifdef Q_OS_WIN
+    memcpy(m_aes_decrypted, aes, 32);
 	CryptProtectMemory(m_aes_decrypted, 32, CRYPTPROTECTMEMORY_SAME_PROCESS);
+#else
+    SecureMemBlock block{reinterpret_cast<const unsigned char*>(aes), 32, false};
+    memcpy(m_aes_decrypted, block.getDataNoAction(), block.getLen());
 #endif
 }
 
@@ -122,7 +125,7 @@ void FilesEncrypt::unsetAES(){
 }
 
 SecureMemBlock FilesEncrypt::getAES() const{
-	return SecureMemBlock{m_aes_decrypted, 32, true};
+    return SecureMemBlock{m_aes_decrypted, 48, true};
 }
 
 /**

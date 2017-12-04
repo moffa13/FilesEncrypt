@@ -34,8 +34,8 @@ class Crypt : public QObject
 		static void setPaused(bool value);
 		static bool isAborted();
 		static void setAborted(bool value);
-		int aes_decrypt(const unsigned char *encrypted, unsigned encrypted_size, unsigned char *uncrypted, const unsigned char* key, unsigned char* iv);
-		void aes_crypt(const unsigned char *uncrypted, unsigned uncrypted_size, unsigned char *encrypted, const unsigned char* key, unsigned char* iv);
+        int aes_decrypt(const unsigned char *encrypted, unsigned encrypted_size, unsigned char *uncrypted, const unsigned char* key, unsigned char* iv, bool threaded_mode = true);
+        void aes_crypt(const unsigned char *uncrypted, unsigned uncrypted_size, unsigned char *encrypted, const unsigned char* key, unsigned char* iv, bool threaded_mode = true);
 		int aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
 		void aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
 		std::string m_key;

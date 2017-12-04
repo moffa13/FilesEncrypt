@@ -43,7 +43,7 @@ Crypt::~Crypt(){}
 EVP_PKEY* Crypt::genRSA(int keyLength){
 	Logging::Logger::debug("Generating RSA keypair");
 	//Private key container
-	EVP_PKEY* prvKey = EVP_PKEY_new();
+    EVP_PKEY* prvKey = EVP_PKEY_new();
 	// RSA
 
 #ifdef QT_DEBUG
@@ -228,7 +228,8 @@ void Crypt::aes_crypt(
 		unsigned uncrypted_size,
 		unsigned char* encrypted,
 		const unsigned char* key,
-		unsigned char* iv
+        unsigned char* iv,
+        bool threaded_mode
 ){
 
 	EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
@@ -254,11 +255,13 @@ void Crypt::aes_crypt(
 		++pass;
 		readPass += read;
 		if(pass >= 2048){
-			if(isAborted()) return;
-			while(isPaused()){
-				if(isAborted()) return;
-				QThread::msleep(100);
-			}
+            if(threaded_mode){
+                if(isAborted()) return;
+                while(isPaused()){
+                    if(isAborted()) return;
+                    QThread::msleep(100);
+                }
+            }
 			emit aes_encrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
@@ -327,7 +330,6 @@ int Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, un
 	EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 	EVP_DecryptInit(ctx, EVP_aes_256_cbc(), key, iv);
 
-
 	qint64 read{0};
 	int lastLength{0};
 	unsigned pass{0};
@@ -342,11 +344,11 @@ int Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, un
 		++pass;
 		readPass += read;
 		if(pass >= 2048){
-			if(isAborted()) return -1;
-			while(isPaused()){
-				if(isAborted()) return -1;
-				QThread::msleep(100);
-			}
+            if(isAborted()) return -1;
+            while(isPaused()){
+                if(isAborted()) return -1;
+                QThread::msleep(100);
+            }
 			emit aes_decrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
@@ -378,7 +380,8 @@ int Crypt::aes_decrypt(
 		unsigned encrypted_size,
 		unsigned char* uncrypted,
 		const unsigned char* key,
-		unsigned char* iv
+        unsigned char* iv,
+        bool threaded_mode
 ){
 	EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 	EVP_DecryptInit(ctx, EVP_aes_256_cbc(), key, iv);
@@ -403,11 +406,13 @@ int Crypt::aes_decrypt(
 		++pass;
 		readPass += read;
 		if(pass >= 2048){
-			if(isAborted()) return -1;
-			while(isPaused()){
-				if(isAborted()) return -1;
-				QThread::msleep(100);
-			}
+            if(threaded_mode){
+                if(isAborted()) return -1;
+                while(isPaused()){
+                    if(isAborted()) return -1;
+                    QThread::msleep(100);
+                }
+            }
 			emit aes_decrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
