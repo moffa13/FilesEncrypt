@@ -2,6 +2,8 @@
 #define SECUREMEMBLOCK_H
 
 #include <cstddef>
+#include <cstdint>
+#include <cstring>
 
 class SecureMemBlock
 {
