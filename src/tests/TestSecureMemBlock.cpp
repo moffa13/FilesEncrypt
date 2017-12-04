@@ -1,6 +1,9 @@
 #include "TestSecureMemBlock.h"
 #include "SecureMemBlock.h"
+#ifdef Q_OS_WIN
 #include <Windows.h>
+#endif
+
 
 int TestSecureMemBlock::runTests(){
 	TestSecureMemBlock *test = new TestSecureMemBlock;
