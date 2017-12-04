@@ -1,5 +1,4 @@
 #include "SecureMemBlock.h"
-#include <memory>
 #include <QtGlobal>
 #ifdef Q_OS_WIN
 #include <Windows.h>
@@ -26,7 +25,11 @@ SecureMemBlock::SecureMemBlock(const unsigned char *data, size_t len, bool encry
 }
 
 SecureMemBlock::~SecureMemBlock(){
+#ifdef Q_OS_WIN
 	SecureZeroMemory(_enc_data, getMultipleSize(_len, CRYPTPROTECTMEMORY_BLOCK_SIZE));
+#else
+	memset(_enc_data, 0, _len);
+#endif
 	free(_enc_data);
 }
 

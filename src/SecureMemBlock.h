@@ -1,6 +1,8 @@
 #ifndef SECUREMEMBLOCK_H
 #define SECUREMEMBLOCK_H
 
+#include <cstddef>
+
 class SecureMemBlock
 {
 	public:
