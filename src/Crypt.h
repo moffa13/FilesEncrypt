@@ -47,7 +47,8 @@ class Crypt : public QObject
 		static RSA* getRSAFromEVP_PKEY(EVP_PKEY* pKey);
 		static void init();
 		static QByteArray userCrypt(const char *aes);
-private:
+		static QByteArray userDecrypt(const char *crypted_aes, size_t size);
+	private:
 		static bool paused;
 		static bool aborted;
 		static QMutex s_mutex;

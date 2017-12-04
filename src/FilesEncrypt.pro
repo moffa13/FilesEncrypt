@@ -42,7 +42,8 @@ SOURCES += main.cpp \
     AccurateTimer.cpp \
     Version.cpp \
     Logger.cpp \
-    ui/FilesListModel.cpp
+    ui/FilesListModel.cpp \
+    SecureMemBlock.cpp
 
 HEADERS += \
     Crypt.h \
@@ -58,7 +59,8 @@ HEADERS += \
     AccurateTimer.h \
     Version.h \
     defines.h \
-    ui/FilesListModel.h
+    ui/FilesListModel.h \
+    SecureMemBlock.h
 
 win32{
     QMAKE_CXXFLAGS += -MD

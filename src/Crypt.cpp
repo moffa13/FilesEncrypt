@@ -464,9 +464,25 @@ QByteArray Crypt::userCrypt(const char* aes){
 	aes_blob.pbData = (BYTE*)aes;
 	auto res = CryptProtectData(&aes_blob, NULL, NULL, NULL, NULL, 0, &aes_crypted);
 	if(res){
+		return QByteArray{reinterpret_cast<const char*>(aes_crypted.pbData), static_cast<int>(aes_crypted.cbData)};
+	}else{
+		throw std::runtime_error((QString{"Error user-decrypting the key "} +  QString::number(GetLastError())).toStdString().c_str());
+	}
+#endif
+throw std::runtime_error("Not working under non-win OS");
+}
+
+QByteArray Crypt::userDecrypt(const char* crypted_aes, size_t size){
+#ifdef Q_OS_WIN
+	DATA_BLOB aes_blob;
+	DATA_BLOB aes_crypted;
+	aes_crypted.cbData = size;
+	aes_crypted.pbData = (BYTE*)crypted_aes;
+	auto res = CryptUnprotectData(&aes_crypted, NULL, NULL, NULL, NULL, 0, &aes_blob);
+	if(res){
 		return QByteArray{reinterpret_cast<const char*>(aes_blob.pbData), static_cast<int>(aes_blob.cbData)};
 	}else{
-		throw std::runtime_error("Error user-encrypting the key");
+		throw std::runtime_error((QString{"Error user-decrypting the key "} + QString::number(GetLastError())).toStdString().c_str());
 	}
 #endif
 throw std::runtime_error("Not working under non-win OS");

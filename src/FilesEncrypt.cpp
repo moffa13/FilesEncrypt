@@ -18,6 +18,9 @@
 #include "ui/SettingsWindow.h"
 #include <QApplication>
 #include <QStack>
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#endif
 
 #define TIME_MIN_REMOVE_AES 3
 #define CURRENT_VERSION 2
@@ -98,9 +101,11 @@ unsigned FilesEncrypt::getPendingCrypt(){
 }
 
 void FilesEncrypt::setAES(const char* aes){
-	qDebug() << Crypt::userCrypt(aes);
 	m_aes_decrypted_set = true;
 	memcpy(m_aes_decrypted, aes, 32);
+#ifdef Q_OS_WIN
+	CryptProtectMemory(m_aes_decrypted, 32, CRYPTPROTECTMEMORY_SAME_PROCESS);
+#endif
 }
 
 /**
@@ -109,11 +114,15 @@ void FilesEncrypt::setAES(const char* aes){
  */
 void FilesEncrypt::unsetAES(){
 	m_aes_decrypted_set = false;
+#ifdef Q_OS_WIN
+	SecureZeroMemory(m_aes_decrypted, 32);
+#else
 	memset(m_aes_decrypted, 0, 32);
+#endif
 }
 
-const unsigned char* FilesEncrypt::getAES() const{
-	return m_aes_decrypted;
+SecureMemBlock FilesEncrypt::getAES() const{
+	return SecureMemBlock{m_aes_decrypted, 32, true};
 }
 
 /**
@@ -262,13 +271,15 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
 
 	if(!isAesDecrypted()){
 		private_key = Crypt::getRSAFromEVP_PKEY(container); // Save the private key
+		unsigned char aes_decrypted[32] = {0};
 		if(Crypt::decrypt(
 			private_key,
 			m_aes_crypted,
 			m_aes_crypted_length,
-			m_aes_decrypted
+			aes_decrypted
 		) != -1 ){
 			success = true;
+			setAES(reinterpret_cast<const char*>(aes_decrypted));
 			emit keyDecrypted();
 			Logging::Logger::debug("AES successfully decrypted");
 			m_aes_decrypted_set = true;
@@ -371,7 +382,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 			}
 
 			encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length())));
-			crypt.aes_crypt(reinterpret_cast<const unsigned char*>(nameWithoutPath.toStdString().c_str()), nameWithoutPath.length(), encrypted_filename, m_aes_decrypted, iv);
+			crypt.aes_crypt(reinterpret_cast<const unsigned char*>(nameWithoutPath.toStdString().c_str()), nameWithoutPath.length(), encrypted_filename, getAES().getData(), iv);
 		}
 
 		// Add Header
@@ -389,7 +400,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 		result.size = futureSize;
 
 		// Crypt data
-		crypt.aes_crypt(file, &tmpFile, m_aes_decrypted, iv);
+		crypt.aes_crypt(file, &tmpFile, getAES().getData(), iv);
 
 		free(iv);
 		iv = nullptr;
@@ -398,7 +409,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 
 		// Gen IV
 		file->seek(fileState.offsetBeforeContent);
-		result.size = crypt.aes_decrypt(file, &tmpFile, m_aes_decrypted, const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(fileState.iv.constData())));
+		result.size = crypt.aes_decrypt(file, &tmpFile, getAES().getData(), const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(fileState.iv.constData())));
 
 		// If there is a new file name to apply
 		if(!Crypt::isAborted() && fileState.filenameChanged){
@@ -407,7 +418,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 						reinterpret_cast<const unsigned char*>(fileState.newFilename.constData()),
 						fileState.newFilename.size(),
 						reinterpret_cast<unsigned char*>(uncrypted_filename),
-						m_aes_decrypted,
+						getAES().getData(),
 						const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(fileState.iv.constData()))
 			);
 
