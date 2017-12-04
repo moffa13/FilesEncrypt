@@ -6,23 +6,26 @@
 #include <cstring>
 #include <openssl/evp.h>
 #include <QtGlobal>
+#ifndef Q_OS_WIN
+#include <QMap>
+#endif
 
 class SecureMemBlock
 {
 	public:
-        SecureMemBlock(const unsigned char* data, size_t len, bool encrypted = false);
+		SecureMemBlock(const unsigned char* data, size_t len, bool encrypted = false);
 		~SecureMemBlock();
 		void secure();
 		const unsigned char* getData();
-        const unsigned char* getDataNoAction() const;
-        inline size_t getLen() const {return _len;}
+		const unsigned char* getDataNoAction() const;
+		inline size_t getLen() const {return _len;}
 private:
 		unsigned char* _enc_data;
 #ifdef Q_OS_LINUX
-        static QByteArray getMD5(const unsigned char *p, size_t len);
-        static unsigned char* _aes;
-        static QMap<QByteArray, QByteArray> _ivs;
-        unsigned char* _iv;
+		static QByteArray getMD5(const unsigned char *p, size_t len);
+		static unsigned char* _aes;
+		static QMap<QByteArray, QByteArray> _ivs;
+		unsigned char* _iv;
 #endif
 		bool _encrypted;
 		size_t _len;
