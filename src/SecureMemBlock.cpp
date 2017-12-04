@@ -10,7 +10,7 @@ SecureMemBlock::SecureMemBlock(const unsigned char *data, size_t len, bool encry
 #ifdef Q_OS_WIN
 	const size_t alloc_size = getMultipleSize(_len, CRYPTPROTECTMEMORY_BLOCK_SIZE);
 #else
-	constexpr size_t alloc_size = len;
+	const size_t alloc_size = len;
 #endif
 
 	_enc_data = reinterpret_cast<unsigned char*>(malloc(alloc_size));
