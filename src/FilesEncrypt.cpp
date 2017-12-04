@@ -66,7 +66,7 @@ void FilesEncrypt::init(){
 			emit keyEncrypted();
 			Logging::Logger::debug("AES key deleted from ram");
 		}else{
-			Logging::Logger::warn("Impossible to remove the key, already crypting/decrypting" + QString::number(s_pendingCrypt) + " file(s)");
+			Logging::Logger::warn("Impossible to remove the key, already crypting/decrypting " + QString::number(s_pendingCrypt) + " file(s)");
 			startDeleteAesTimer();
 		}
 	});

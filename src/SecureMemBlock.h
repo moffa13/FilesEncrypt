@@ -12,6 +12,7 @@ class SecureMemBlock
 		~SecureMemBlock();
 		void secure();
 		const unsigned char* getData();
+		const unsigned char* getDataNoAction() const;
 	private:
 		unsigned char* _enc_data;
 		bool _encrypted;

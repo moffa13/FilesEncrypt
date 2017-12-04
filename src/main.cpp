@@ -4,6 +4,7 @@
 #include "tests/TestCrypt.h"
 #include "tests/TestFilesEncrypt.h"
 #include "tests/TestVersion.h"
+#include "tests/TestSecureMemBlock.h"
 #include "Version.h"
 #include <QMessageBox>
 #include <QLibraryInfo>
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
 	result = TestCrypt::runTests();
 	result |= TestFilesEncrypt::runTests();
 	result |= TestVersion::runTests();
+	result |= TestSecureMemBlock::runTests();
 	if(result != 0){
 		Logging::Logger::error("Unit test has failed. Please fix errors");
 		return result;

@@ -10,13 +10,9 @@ int TestFilesEncrypt::runTests(){
 	return res;
 }
 
-void TestFilesEncrypt::init(){
+void TestFilesEncrypt::init(){}
 
-}
-
-void TestFilesEncrypt::cleanup(){
-
-}
+void TestFilesEncrypt::cleanup(){}
 
 void TestFilesEncrypt::shouldRecognizeFileState(){
 

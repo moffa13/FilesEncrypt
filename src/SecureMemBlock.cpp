@@ -48,6 +48,10 @@ const unsigned char* SecureMemBlock::getData(){
 	return _enc_data;
 }
 
+const unsigned char *SecureMemBlock::getDataNoAction() const{
+	return _enc_data;
+}
+
 void SecureMemBlock::secure(){
 #ifdef Q_OS_WIN
 	CryptProtectMemory(_enc_data, getMultipleSize(_len, CRYPTPROTECTMEMORY_BLOCK_SIZE), CRYPTPROTECTMEMORY_SAME_PROCESS);

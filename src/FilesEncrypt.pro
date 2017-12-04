@@ -43,7 +43,8 @@ SOURCES += main.cpp \
     Version.cpp \
     Logger.cpp \
     ui/FilesListModel.cpp \
-    SecureMemBlock.cpp
+    SecureMemBlock.cpp \
+    tests/TestSecureMemBlock.cpp
 
 HEADERS += \
     Crypt.h \
@@ -60,7 +61,8 @@ HEADERS += \
     Version.h \
     defines.h \
     ui/FilesListModel.h \
-    SecureMemBlock.h
+    SecureMemBlock.h \
+    tests/TestSecureMemBlock.h
 
 win32{
     QMAKE_CXXFLAGS += -MD
