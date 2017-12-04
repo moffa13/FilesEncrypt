@@ -65,16 +65,17 @@ win32{
     QMAKE_CXXFLAGS_RELEASE = -O2
     INCLUDEPATH += "$$PWD/../include/windows/"
     DEPENDPATH += "$$PWD/../include/windows/"
+    LIBS += -lcrypt32
     !contains(QMAKE_TARGET.arch, x86_64) {
-        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86d
-        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86d
-        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86
-        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86
+	CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86d
+	CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86d
+	CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86
+	CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86
     } else {
-        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64d
-        CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64d
-        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64
-        CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64
+	CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64d
+	CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64d
+	CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64
+	CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64
     }
 }
 
@@ -95,9 +96,9 @@ FORMS += \
 CONFIG(debug, debug|release) {
     QT += testlib
     SOURCES += tests/TestCrypt.cpp \
-        tests/TestFilesEncrypt.cpp \
-        tests/TestVersion.cpp
+	tests/TestFilesEncrypt.cpp \
+	tests/TestVersion.cpp
     HEADERS += tests/TestCrypt.h \
-        tests/TestFilesEncrypt.h \
-        tests/TestVersion.h
+	tests/TestFilesEncrypt.h \
+	tests/TestVersion.h
 }
