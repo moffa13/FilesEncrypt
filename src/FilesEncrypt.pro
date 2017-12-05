@@ -45,7 +45,6 @@ SOURCES += main.cpp \
 	ui/FilesListModel.cpp \
 	SecureMemBlock.cpp \
 	ui/ContextualMenuToggler.cpp \
-	SessionKey.cpp
 
 HEADERS += \
 	Crypt.h \
@@ -64,7 +63,6 @@ HEADERS += \
 	ui/FilesListModel.h \
 	SecureMemBlock.h \
 	ui/ContextualMenuToggler.h \
-	SessionKey.h
 
 win32{
 	SOURCES += SessionKey.cpp
