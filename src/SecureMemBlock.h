@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <openssl/evp.h>
 #include <QtGlobal>
 #ifndef Q_OS_WIN
 #include <QMap>

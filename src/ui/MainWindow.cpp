@@ -97,10 +97,6 @@ MainWindow::MainWindow(QWidget *parent) :
 		m_listRowMenu->exec(QCursor::pos());
 	});
 	m_listRowMenu->addAction(openDir);
-
-
-
-	show();
 	m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), false, this);
 }
 
@@ -544,8 +540,7 @@ void MainWindow::addWhateverToList(QString const& item){
 	}
 }
 
-void MainWindow::select_file()
-{
+void MainWindow::select_file(){
 	QStringList list = QFileDialog::getOpenFileNames(
 		this,
 		tr("Sélectionner des fichiers"),
@@ -558,8 +553,7 @@ void MainWindow::select_file()
 	addWhateverToList(list);
 }
 
-void MainWindow::select_dir()
-{
+void MainWindow::select_dir(){
 	QString name = QFileDialog::getExistingDirectory(
 		this,
 		tr("Sélectionner des dossiers"),

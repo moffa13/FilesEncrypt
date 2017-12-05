@@ -1,15 +1,22 @@
 #include <QApplication>
 #include <QTextCodec>
 #include "ui/MainWindow.h"
-#include "tests/TestCrypt.h"
-#include "tests/TestFilesEncrypt.h"
-#include "tests/TestVersion.h"
-#include "tests/TestSecureMemBlock.h"
 #include "Version.h"
 #include <QMessageBox>
 #include <QLibraryInfo>
 #include <QTranslator>
 #include <Logger.h>
+
+#ifdef Q_OS_WIN
+#include "SessionKey.h"
+#endif
+
+#ifdef QT_DEBUG
+#include "tests/TestCrypt.h"
+#include "tests/TestFilesEncrypt.h"
+#include "tests/TestVersion.h"
+#include "tests/TestSecureMemBlock.h"
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -20,8 +27,8 @@ int main(int argc, char *argv[])
 #ifdef QT_DEBUG
 	Logging::Logger::setLogLevel(Logging::DEBUG);
 	int result;
-    result = TestSecureMemBlock::runTests();
-    result |= TestCrypt::runTests();
+	result = TestSecureMemBlock::runTests();
+	result |= TestCrypt::runTests();
 	result |= TestFilesEncrypt::runTests();
 	result |= TestVersion::runTests();
 	if(result != 0){
@@ -58,12 +65,35 @@ int main(int argc, char *argv[])
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 
 	MainWindow w;
+
+	EncryptDecrypt action = NOT_FINISHED;
+
 	if(argc > 1 && strcmp(argv[1], "update_done") == 0){
 		// Delete old
 		QFile::remove(qApp->applicationFilePath() + ".old");
 		QMessageBox::information(&w, MainWindow::tr("Mise à jour"), MainWindow::tr("La mise à jour a correctement été installée."), QMessageBox::Ok);
 	}
+#ifdef Q_OS_WIN
+	else if(argc > 1 && strcmp(argv[1], "encrypt") == 0){
+		action = ENCRYPT;
+	}else if(argc > 1 && strcmp(argv[1], "decrypt") == 0){
+		action = DECRYPT;
+	}
 
+	// Encryption from contextual menu needed
+	if(action != NOT_FINISHED){
+		SessionKey s{&w};
+		QEventLoop loop;
+		QObject::connect(&s, SIGNAL(finishedAction()), &loop, SLOT(quit()));
+		QObject::connect(&s, &SessionKey::keyReady, [&s, argv, action](){
+			s.action(argv[2],  action);
+		});
+		s.checkForSessionKey();
+		loop.exec();
+	}else{
+		w.show();
+	}
+#endif // Q_OS_WIN
 	return a.exec();
 #endif
 }
