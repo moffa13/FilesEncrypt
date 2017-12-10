@@ -84,12 +84,19 @@ int main(int argc, char *argv[])
 	if(action != NOT_FINISHED){
 		SessionKey s{&w};
 		QEventLoop loop;
-		QObject::connect(&s, SIGNAL(finishedAction()), &loop, SLOT(quit()));
+		QObject::connect(&s, &SessionKey::finishedAction, [&loop](){
+			loop.exit();
+		});
 		QObject::connect(&s, &SessionKey::keyReady, [&s, argv, action](){
 			s.action(argv[2],  action);
 		});
-		s.checkForSessionKey();
+		QTimer::singleShot(0, [&s](){ // To be sure loop is executing
+			s.checkForSessionKey();
+		});
 		loop.exec();
+		QTimer::singleShot(0, [](){ // Tell the main event loop to exit
+			qApp->exit();
+		});
 	}else{
 		w.show();
 	}

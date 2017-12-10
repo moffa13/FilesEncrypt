@@ -32,6 +32,8 @@ void ChooseKey::closeEvent(QCloseEvent *e){
 	QDialog::closeEvent(e);
 	if(m_done)
 		emit keyDone();
+	else
+		emit userExit();
 	e->accept();
 }
 

@@ -14,13 +14,13 @@ void ContextualMenuToggler::setCryptUncryptOptions(){
 	settings.beginGroup("FilesEncrypt_encrypt");
 	settings.setValue("Default", tr(qPrintable("Crypter avec " + QApplication::applicationName())));
 	settings.beginGroup("command");
-	settings.setValue("Default", QDir::toNativeSeparators(QApplication::applicationFilePath() + " encrypt %1"));
+	settings.setValue("Default", QDir::toNativeSeparators(QApplication::applicationFilePath() + " encrypt \"%1\""));
 	settings.endGroup();
 	settings.endGroup();
 	settings.beginGroup("FilesEncrypt_decrypt");
 	settings.setValue("Default", tr(qPrintable("Décrypter avec " + QApplication::applicationName())));
 	settings.beginGroup("command");
-	settings.setValue("Default", QDir::toNativeSeparators(QApplication::applicationFilePath() + " decrypt %1"));
+	settings.setValue("Default", QDir::toNativeSeparators(QApplication::applicationFilePath() + " decrypt \"%1\""));
 	settings.endGroup();
 	settings.endGroup();
 #endif;

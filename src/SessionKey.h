@@ -16,11 +16,12 @@ class SessionKey : public QObject
 		void action(const QStringList &items, EncryptDecrypt action);
 		void checkForSessionKey();
 	private:
-		QString _sessionKeyName;
+		const QString _sessionKeyName;
 		MainWindow* _mainWindow;
 		void encryptAndStoreSessionKey(const char *key);
 		SecureMemBlock *_secureAes;
 		QByteArray readSessionKey();
+		void emitIfNoMoreEncrypt();
 	Q_SIGNALS:
 		void finishedAction();
 		void keyReady();
