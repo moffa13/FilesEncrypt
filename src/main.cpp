@@ -100,6 +100,8 @@ int main(int argc, char *argv[])
 	}else{
 		w.show();
 	}
+#else
+	w.show();
 #endif // Q_OS_WIN
 	return a.exec();
 #endif
