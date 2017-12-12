@@ -96,6 +96,7 @@ MainWindow::MainWindow(QWidget *parent) :
 		Q_UNUSED(p);
 		m_listRowMenu->exec(QCursor::pos());
 	});
+
 	m_listRowMenu->addAction(openDir);
 
 	_sessionKey = new SessionKey{this};
@@ -629,7 +630,6 @@ void MainWindow::action(EncryptDecrypt action){
 			// If current state != from what you'd do
 
 			if(*state.state != action && f.isWritable()){
-				qDebug() << state.offsetBeforeContent;
 				if(action == EncryptDecrypt::ENCRYPT){
 					max += f.size();
 				}else{
@@ -718,6 +718,8 @@ void MainWindow::action(EncryptDecrypt action){
 							s_encryptMutex.unlock();
 						}
 					}
+
+					emit file_done();
 				};
 
 				QFuture<void> future = QtConcurrent::map(*l, func);

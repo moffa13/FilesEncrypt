@@ -31,7 +31,6 @@ void TestSecureMemBlock::shouldWork(){
 
 	QVERIFY(memcmp(block.getDataNoAction(), "12345678901234561234567890123456", 32) != 0);
 
-	qDebug() << block.getData();
 	QVERIFY(memcmp(block.getData(), "12345678901234561234567890123456", 32) == 0);
 	QVERIFY(memcmp(block.getDataNoAction(), "12345678901234561234567890123456", 32) == 0);
 	block.secure();

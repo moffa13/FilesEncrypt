@@ -35,7 +35,8 @@ class MainWindow : public QMainWindow
 	public:
 		explicit MainWindow(QWidget *parent = 0);
 		~MainWindow();
-
+	Q_SIGNALS:
+		void file_done();
 	private Q_SLOTS:
 		void select_dir();
 		void select_file();

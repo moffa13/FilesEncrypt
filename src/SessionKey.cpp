@@ -14,6 +14,7 @@ SessionKey::SessionKey(MainWindow* mainWindow, QString sessionKeyName) : _sessio
 
 /**
  * Encrypts/Decrypts the specified file using the _mainWindow and emits finishedAction when the file have been processed
+ * or if some error occured like trying to encrypt the session key, a protected file, ...
  * @brief SessionKey::action
  * @param item Concerned files
  * @param action
@@ -26,6 +27,7 @@ void SessionKey::action(QString const& item, EncryptDecrypt action){
 
 /**
  * Encrypts/Decrypts the specified files using the _mainWindow and emits finishedAction when all files have been processed
+ * or if some error occured like trying to encrypt the session key, a protected file, ...
  * @brief SessionKey::action
  * @param item Concerned files
  * @param action
@@ -66,6 +68,11 @@ QByteArray SessionKey::readSessionKey(){
 	return ret;
 }
 
+/**
+ * Emits finishedAction when there is no pending crypts in the program
+ * Otherwise, does nothing
+ * @brief SessionKey::emitIfNoMoreEncrypt
+ */
 void SessionKey::emitIfNoMoreEncrypt(){
 	if(FilesEncrypt::getPendingCrypt() == 0){
 		emit finishedAction();
@@ -73,6 +80,7 @@ void SessionKey::emitIfNoMoreEncrypt(){
 }
 
 /**
+ * Encrypts the raw aes key & stores it
  * @brief SessionKey::encryptAndStoreSessionKey
  * @param key Uncrypted 32 bytes aes key
  */
@@ -92,6 +100,12 @@ void SessionKey::encryptAndStoreSessionKey(const char* key){
 	sessionKeyFile.close();
 }
 
+/**
+ * Asks the user to select/create a key then creates the associated session key
+ * Emits keyReady when the mainWindow has a key loaded in it
+ * @brief SessionKey::checkForSessionKey
+ * @param warn Warn the user to tell him what's going on
+ */
 void SessionKey::checkForSessionKey(bool warn){
 	QFile sessionKey{QApplication::applicationDirPath() + "/" + _sessionKeyName};
 	bool keyReadyB = false; // Delay the emit a the end
@@ -111,7 +125,7 @@ void SessionKey::checkForSessionKey(bool warn){
 	}
 
 	if(_mainWindow->m_filesEncrypt){
-		QObject::connect(_mainWindow->m_filesEncrypt, &FilesEncrypt::file_done, [this](){
+		QObject::connect(_mainWindow, &MainWindow::file_done, [this](){
 			emitIfNoMoreEncrypt();
 		});
 	}
