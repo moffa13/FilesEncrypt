@@ -74,9 +74,9 @@ void ChooseKey::saveAESToFile(){
 	int rep;
 	if(f.exists()){
 		rep = QMessageBox::warning(this, tr("Existe dejà"), tr("Un fichier existe déjà, voulez-vous écraser ?"), QMessageBox::Yes | QMessageBox::No);
-	}
-	if(rep == QMessageBox::No){
-		return;
+		if(rep == QMessageBox::No){
+			return;
+		}
 	}
 	bool ok;
 	QString password(askPassword(true, &ok, this));

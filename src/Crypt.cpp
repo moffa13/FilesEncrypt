@@ -22,7 +22,7 @@
 #include <QtDebug>
 #include <QMutexLocker>
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
 #include <Windows.h>
 #include "openssl/applink.c"
 #endif
@@ -36,14 +36,10 @@ bool Crypt::aborted = false;
 
 QMutex Crypt::s_mutex;
 
-Crypt::Crypt(){}
-
-Crypt::~Crypt(){}
-
 EVP_PKEY* Crypt::genRSA(int keyLength){
 	Logging::Logger::debug("Generating RSA keypair");
 	//Private key container
-    EVP_PKEY* prvKey = EVP_PKEY_new();
+	EVP_PKEY* prvKey = EVP_PKEY_new();
 	// RSA
 
 #ifdef QT_DEBUG
@@ -63,138 +59,15 @@ EVP_PKEY* Crypt::genRSA(int keyLength){
 	return prvKey;
 }
 
-void Crypt::writePrivateKey(EVP_PKEY* x, char* password) const{
-	FILE* keyFile = fopen(m_key.c_str(), "wb");
-	if(password == nullptr){
-		PEM_write_PrivateKey(
-		   keyFile,
-		   x,
-		   NULL,
-		   NULL,
-		   0,
-		   NULL,
-		   NULL
-		);
-	}else{
-		PEM_write_PrivateKey(
-			keyFile,
-			x,
-			EVP_des_ede3_cbc(),
-			reinterpret_cast<unsigned char *>(password),
-			strlen(password),
-			NULL,
-			NULL
-		);
-	}
-
-	fclose(keyFile);
-}
-
-void Crypt::writePublicKey(EVP_PKEY* x) const{
-	FILE* keyFile = fopen(m_pbc_key.c_str(), "wb");
-	PEM_write_PUBKEY(
-	   keyFile,
-	   x
-	);
-	fclose(keyFile);
-}
-
-
-
-//void Crypt::genCert(CertInfos const &infos, int keyLength) const{
-
-//	if(keyLength < MINIMUM_KEY_LENGTH){
-//		Logging::Logger::warn("The key length is to small (", QString::number(keyLength), "). Must be at least ", QString::number(MINIMUM_KEY_LENGTH), " bits");
-//	}
-
-//	Logging::Logger::debug("Generating Cert file...");
-
-//	//Private key container
-//	EVP_PKEY* prvKey = genRSA(keyLength);
-
-//	// Create cert
-//	X509* x509 = X509_new();
-//	// Cert serial n°
-//	ASN1_INTEGER_set(X509_get_serialNumber(x509), 1);
-//	// Cert exp date
-//	X509_gmtime_adj(X509_get_notBefore(x509), 0);
-//	X509_gmtime_adj(X509_get_notAfter(x509), 1576800000);
-//	// Assign prvKey with cert
-//	X509_set_pubkey(x509, prvKey);
-//	// Cert infos
-//	X509_NAME* certInfos = X509_get_subject_name(x509);
-//	X509_NAME_add_entry_by_txt(certInfos, "C",  MBSTRING_ASC,
-//							   reinterpret_cast<const unsigned char *>(infos.country_code.c_str()), -1, -1, 0);
-//	X509_NAME_add_entry_by_txt(certInfos, "O",  MBSTRING_ASC,
-//								reinterpret_cast<const unsigned char *>(infos.organisation_name.c_str()), -1, -1, 0);
-//	X509_NAME_add_entry_by_txt(certInfos, "CN", MBSTRING_ASC,
-//								reinterpret_cast<const unsigned char *>(infos.website_url.c_str()), -1, -1, 0);
-//	X509_set_issuer_name(x509, certInfos);
-//	// Cert sign
-//	X509_sign(x509, prvKey, EVP_sha256());
-
-//	// char* strcopy = reinterpret_cast<char*>(malloc(strlen(infos.password.c_str()) + 1));
-//	// strcpy(strcopy, infos.password.c_str());
-//	//    PEM_write_PrivateKey(
-//	//        m_keyFile,
-//	//        prvKey,
-//	//        EVP_des_ede3_cbc(),
-//	//         reinterpret_cast<unsigned char *>(strcopy),
-//	//        9,
-//	//        NULL,
-//	//        NULL
-//	//    );
-
-//	// Write prvKey
-//	writePrivateKey(prvKey);
-//	EVP_PKEY_free(prvKey);
-
-//	Logging::Logger::debug("Private key successfully written.");
-//	// Write cert
-//	FILE* certFile = fopen(m_cert.c_str(), "wb");
-//	PEM_write_X509(
-//		certFile,
-//		x509
-//	);
-//	fclose(certFile);
-//	X509_free(x509);
-
-//	Logging::Logger::debug("Certificate successfully written.");
-//}
-
-X509* Crypt::loadCert() const{
-	X509* cert;
-	BIO* bio;
-	bio = BIO_new(BIO_s_file());
-	BIO_read_filename(bio, m_cert.c_str());
-	cert = PEM_read_bio_X509_AUX(bio, NULL, NULL, NULL);
-	BIO_free(bio);
-	return cert;
-}
-
-EVP_PKEY* Crypt::getPublicKeyFromCertificate(X509* cert){
-	EVP_PKEY* pubKey = X509_get_pubkey(cert);
-	return pubKey;
-}
-
 RSA* Crypt::getRSAFromEVP_PKEY(EVP_PKEY* pKey){
 	return EVP_PKEY_get1_RSA(pKey);
 }
-
-RSA* Crypt::getPublicKeyFromFile() const{
-	return getPublicKeyFromFile(m_pbc_key);
-}
-
 
 RSA* Crypt::getPublicKeyFromFile(string const &filename){
 	FILE* keyFile = fopen(filename.c_str(), "rb");
 	RSA* pbcKey = PEM_read_RSA_PUBKEY(keyFile, NULL, NULL, NULL);
 	fclose(keyFile);
 	return pbcKey;
-}
-
-RSA* Crypt::getPrivateKeyFromFile() const{
-	return getPrivateKeyFromFile(m_key);
 }
 
 RSA* Crypt::getPrivateKeyFromFile(string const &filename){
@@ -228,8 +101,8 @@ void Crypt::aes_crypt(
 		unsigned uncrypted_size,
 		unsigned char* encrypted,
 		const unsigned char* key,
-        unsigned char* iv,
-        bool threaded_mode
+		unsigned char* iv,
+		bool threaded_mode
 ){
 
 	EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
@@ -255,13 +128,13 @@ void Crypt::aes_crypt(
 		++pass;
 		readPass += read;
 		if(pass >= 2048){
-            if(threaded_mode){
-                if(isAborted()) return;
-                while(isPaused()){
-                    if(isAborted()) return;
-                    QThread::msleep(100);
-                }
-            }
+			if(threaded_mode){
+				if(isAborted()) return;
+				while(isPaused()){
+					if(isAborted()) return;
+					QThread::msleep(100);
+				}
+			}
 			emit aes_encrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
@@ -344,11 +217,11 @@ int Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, un
 		++pass;
 		readPass += read;
 		if(pass >= 2048){
-            if(isAborted()) return -1;
-            while(isPaused()){
-                if(isAborted()) return -1;
-                QThread::msleep(100);
-            }
+			if(isAborted()) return -1;
+			while(isPaused()){
+				if(isAborted()) return -1;
+				QThread::msleep(100);
+			}
 			emit aes_decrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
@@ -380,8 +253,8 @@ int Crypt::aes_decrypt(
 		unsigned encrypted_size,
 		unsigned char* uncrypted,
 		const unsigned char* key,
-        unsigned char* iv,
-        bool threaded_mode
+		unsigned char* iv,
+		bool threaded_mode
 ){
 	EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 	EVP_DecryptInit(ctx, EVP_aes_256_cbc(), key, iv);
@@ -406,13 +279,13 @@ int Crypt::aes_decrypt(
 		++pass;
 		readPass += read;
 		if(pass >= 2048){
-            if(threaded_mode){
-                if(isAborted()) return -1;
-                while(isPaused()){
-                    if(isAborted()) return -1;
-                    QThread::msleep(100);
-                }
-            }
+			if(threaded_mode){
+				if(isAborted()) return -1;
+				while(isPaused()){
+					if(isAborted()) return -1;
+					QThread::msleep(100);
+				}
+			}
 			emit aes_decrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
@@ -491,61 +364,4 @@ QByteArray Crypt::userDecrypt(const char* crypted_aes, size_t size){
 	}
 #endif
 throw std::runtime_error("Not working under non-win OS");
-}
-
-bool Crypt::checkCert(){
-	bool integrityOk = false;
-	bool foundOnDisk = false;
-	EVP_PKEY* pubKey;
-	RSA* pubKeyRSA;
-	if(m_certsExists){
-		foundOnDisk = true;
-		Logging::Logger::debug("Key and cert found on disk, checking integrity...");
-
-		X509* certificate = loadCert();
-		if(certificate == NULL){
-			Logging::Logger::error("Certificate corrupted");
-			integrityOk = false;
-			goto end;
-		}
-
-		pubKey = getPublicKeyFromCertificate(certificate);
-		pubKeyRSA = getRSAFromEVP_PKEY(pubKey);
-
-		RSA* prvKey = getPrivateKeyFromFile();
-
-		Logging::Logger::debug("The RSA size is "+ QString::number( RSA_size(pubKeyRSA) * 8) + " bits length");
-		if(prvKey == NULL){
-			Logging::Logger::error("Private key corrupted");
-			integrityOk = false;
-			goto end;
-		}
-
-		if(!BN_cmp(pubKeyRSA->n, prvKey->n)){
-			Logging::Logger::debug("Keys pair modulus matches");
-			 integrityOk = true;
-		}else{
-			Logging::Logger::error("Keys pair modulus does not match");
-		}
-
-		RSA_free(prvKey);
-		X509_free(certificate);
-
-	}
-end:
-	if(!integrityOk && foundOnDisk){
-		Logging::Logger::error("... Integrity problem, needs to regenerate");
-		return false;
-	}else if(!integrityOk && !foundOnDisk){
-		Logging::Logger::debug("Certificate generating");
-		return false;
-	}else{
-		Logging::Logger::debug("... Integrity OK");
-		Logging::Logger::debug("Server public key is : ");
-		PEM_write_PUBKEY(stdout, pubKey);
-		pubKey = NULL;
-		RSA_free(pubKeyRSA);
-		return true;
-	}
-
 }

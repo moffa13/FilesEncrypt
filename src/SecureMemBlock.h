@@ -25,7 +25,7 @@ private:
 		unsigned char* _enc_data;
 #ifdef Q_OS_LINUX
 		static QByteArray getMD5(const unsigned char *p, size_t len);
-        static std::unique_ptr<unsigned char, std::function<void(unsigned char*)>> _aes;
+		static std::unique_ptr<unsigned char, std::function<void(unsigned char*)>> _aes;
 		static QMap<QByteArray, QByteArray> _ivs;
 		unsigned char* _iv;
 #endif

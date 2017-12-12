@@ -14,12 +14,6 @@ class Crypt : public QObject
 	Q_OBJECT
 
 	public:
-		Crypt();
-		~Crypt();
-		bool checkCert();
-		//void genCert(CertInfos const &infos, int keyLength = 2048) const;
-		RSA* getPublicKeyFromFile() const;
-		RSA* getPrivateKeyFromFile() const;
 		static RSA* getPrivateKeyFromFile(std::string const& filename);
 		static RSA* getPublicKeyFromFile(std::string const& filename);
 		static int encrypt(RSA* public_key, const unsigned char* message, int len, unsigned char* encrypted);
@@ -34,15 +28,10 @@ class Crypt : public QObject
 		static void setPaused(bool value);
 		static bool isAborted();
 		static void setAborted(bool value);
-        int aes_decrypt(const unsigned char *encrypted, unsigned encrypted_size, unsigned char *uncrypted, const unsigned char* key, unsigned char* iv, bool threaded_mode = true);
-        void aes_crypt(const unsigned char *uncrypted, unsigned uncrypted_size, unsigned char *encrypted, const unsigned char* key, unsigned char* iv, bool threaded_mode = true);
+		int aes_decrypt(const unsigned char *encrypted, unsigned encrypted_size, unsigned char *uncrypted, const unsigned char* key, unsigned char* iv, bool threaded_mode = true);
+		void aes_crypt(const unsigned char *uncrypted, unsigned uncrypted_size, unsigned char *encrypted, const unsigned char* key, unsigned char* iv, bool threaded_mode = true);
 		int aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
 		void aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
-		std::string m_key;
-		std::string m_cert;
-		std::string m_pbc_key;
-		bool m_certsExists;
-		X509* loadCert() const;
 		static EVP_PKEY* getPublicKeyFromCertificate(X509* cert);
 		static RSA* getRSAFromEVP_PKEY(EVP_PKEY* pKey);
 		static void init();

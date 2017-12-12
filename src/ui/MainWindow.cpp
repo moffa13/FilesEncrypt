@@ -599,10 +599,9 @@ void MainWindow::action(EncryptDecrypt action){
 	qint64 items_number{0};
 	qint64 item_does_not_need_action{0};
 
-	bool passOk{false};
-
 	// Ask password to decrypt aes if aes has been deleted
 	if(!m_filesEncrypt->isAesDecrypted()){
+		bool passOk{false};
 		while(!passOk){
 			bool ok;
 			QString const pass(ChooseKey::askPassword(false, &ok, this));

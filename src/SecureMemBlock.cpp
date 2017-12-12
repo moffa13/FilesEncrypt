@@ -25,10 +25,12 @@ QMap<QByteArray, QByteArray> SecureMemBlock::_ivs;
 SecureMemBlock::SecureMemBlock(const unsigned char *data, size_t len, bool encrypted) : _len(len), _encrypted(true){
 
 #ifdef Q_OS_LINUX
+	// Create an encryption key valid until the program's lifetime ends
 	if(_aes == nullptr){
         _aes.reset(reinterpret_cast<unsigned char*>(gcry_malloc_secure(32)));
         Crypt::genAES(AESSIZE::S256, _aes.get());
 	}
+	// Allocate an IV for each block
 	_iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
 #endif
 
@@ -44,8 +46,9 @@ SecureMemBlock::SecureMemBlock(const unsigned char *data, size_t len, bool encry
 
 	if(!encrypted){
 #ifdef Q_OS_WIN
-		CryptProtectMemory(_enc_data, getMultipleSize(_len, CRYPTPROTECTMEMORY_BLOCK_SIZE), CRYPTPROTECTMEMORY_SAME_PROCESS);
+		CryptProtectMemory(_enc_data, alloc_size, CRYPTPROTECTMEMORY_SAME_PROCESS);
 #else
+		// Create an IV for each block
 		Crypt::genRandomIV(_iv);
 		secure();
 		_ivs[getMD5(_enc_data, FilesEncrypt::getEncryptedSize(len))] = QByteArray{reinterpret_cast<char*>(_iv), AES_BLOCK_SIZE};
@@ -72,6 +75,7 @@ SecureMemBlock::~SecureMemBlock(){
 	SecureZeroMemory(_enc_data, getMultipleSize(_len, CRYPTPROTECTMEMORY_BLOCK_SIZE));
 #else
 	memset(_enc_data, 0, _len);
+	free(_iv);
 #endif
 
 	free(_enc_data);
