@@ -57,8 +57,10 @@ class MainWindow : public QMainWindow
 		void on_action_saveKey_triggered();
 		void on_action_saveSessionKey_triggered();
 	private:
+#ifdef Q_OS_WIN
+        SessionKey *_sessionKey;
+#endif
 		Ui::MainWindow *ui;
-		SessionKey *_sessionKey;
 		Progress* m_progress = NULL;
 		ChooseKey* m_choose_key;
 		UpdateManager m_update;
