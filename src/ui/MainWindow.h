@@ -16,13 +16,15 @@
 #include <functional>
 #include "FilesListModel.h"
 
+#ifdef Q_OS_WIN
+#include "SessionKey.h"
+#endif
+
 #define QPAIR_CRYPT_DEF QPair<QString, EncryptDecrypt_s>
 
 namespace Ui {
 class MainWindow;
 }
-
-class SessionKey;
 
 class MainWindow : public QMainWindow
 {
@@ -52,11 +54,11 @@ class MainWindow : public QMainWindow
 		void closeSettings();
 		void openSelectedRowInDir();
 		void on_action_newKey_triggered();
-
 		void on_action_saveKey_triggered();
-
+		void on_action_saveSessionKey_triggered();
 	private:
 		Ui::MainWindow *ui;
+		SessionKey *_sessionKey;
 		Progress* m_progress = NULL;
 		ChooseKey* m_choose_key;
 		UpdateManager m_update;

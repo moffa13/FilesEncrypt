@@ -1,9 +1,11 @@
 #ifndef SESSIONKEY_H
 #define SESSIONKEY_H
 
-#include "ui/MainWindow.h"
 #include "SecureMemBlock.h"
+#include "defines.h"
+#include <QObject>
 
+class MainWindow;
 
 class SessionKey : public QObject
 {
@@ -14,13 +16,13 @@ class SessionKey : public QObject
 		SessionKey(MainWindow* mainWindow, QString sessionKeyName = QString{".session.key.filesencrypt"});
 		void action(const QString &item, EncryptDecrypt action);
 		void action(const QStringList &items, EncryptDecrypt action);
-		void checkForSessionKey();
+		QByteArray readSessionKey();
+		void checkForSessionKey(bool warn = true);
 	private:
 		const QString _sessionKeyName;
 		MainWindow* _mainWindow;
 		void encryptAndStoreSessionKey(const char *key);
 		SecureMemBlock *_secureAes;
-		QByteArray readSessionKey();
 		void emitIfNoMoreEncrypt();
 	Q_SIGNALS:
 		void finishedAction();

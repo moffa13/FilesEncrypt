@@ -97,10 +97,17 @@ MainWindow::MainWindow(QWidget *parent) :
 		m_listRowMenu->exec(QCursor::pos());
 	});
 	m_listRowMenu->addAction(openDir);
+
+	_sessionKey = new SessionKey{this};
+	if(!_sessionKey->readSessionKey().isEmpty()){
+		ui->action_saveSessionKey->setEnabled(false);
+	}
+
 	m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), false, this);
 }
 
 MainWindow::~MainWindow(){
+	delete _sessionKey;
 	delete m_progress;
 	delete m_choose_key;
 	delete m_filesEncrypt;
@@ -770,4 +777,15 @@ void MainWindow::on_action_saveKey_triggered(){
 	if(beSureKeyIsSelectedAndValid([](){}, true)){
 		m_choose_key->saveAESToFile();
 	}
+}
+
+void MainWindow::on_action_saveSessionKey_triggered(){
+#ifndef Q_OS_WIN
+	QMessageBox::information(this, tr("Non disponible"), tr("Cette fonction n'est uniquement disponible que pour les systemes Windows"), QMessageBox::Ok);
+#else
+	connect(_sessionKey, &SessionKey::keyReady, [this](){
+		ui->action_saveSessionKey->setEnabled(false);
+	});
+	_sessionKey->checkForSessionKey(false);
+#endif
 }

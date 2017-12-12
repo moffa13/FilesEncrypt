@@ -2,6 +2,7 @@
 #include <QApplication>
 #include "FilesEncrypt.h"
 #include <QMessageBox>
+#include "ui/MainWindow.h"
 
 #ifdef Q_OS_WIN
 #include <Windows.h>
@@ -47,7 +48,7 @@ void SessionKey::action(QStringList const& items, EncryptDecrypt action){
  */
 QByteArray SessionKey::readSessionKey(){
 	QFile sessionKeyFile{QApplication::applicationDirPath() + "/" + _sessionKeyName};
-	if(!sessionKeyFile.open(QFile::ReadWrite)){
+	if(!sessionKeyFile.exists() || !sessionKeyFile.open(QFile::ReadWrite)){
 		return QByteArray{};
 	}
 	QByteArray content = sessionKeyFile.readAll();
@@ -91,12 +92,13 @@ void SessionKey::encryptAndStoreSessionKey(const char* key){
 	sessionKeyFile.close();
 }
 
-void SessionKey::checkForSessionKey(){
+void SessionKey::checkForSessionKey(bool warn){
 	QFile sessionKey{QApplication::applicationDirPath() + "/" + _sessionKeyName};
 	bool keyReadyB = false; // Delay the emit a the end
 	if(!sessionKey.exists()){
-		QMessageBox::information(nullptr, tr("Créer une clé de session"), tr("Vous ne disposez pas encore de clé de session, merci de sélectionner une clé ou d'en créer une"), QMessageBox::Ok);
-		if(_mainWindow->beSureKeyIsSelectedAndValid([this](){checkForSessionKey();}, false)){ // Asks user to select/create aes
+		if(warn)
+			QMessageBox::information(nullptr, tr("Créer une clé de session"), tr("Vous ne disposez pas encore de clé de session, merci de sélectionner une clé ou d'en créer une"), QMessageBox::Ok);
+		if(_mainWindow->beSureKeyIsSelectedAndValid([this, warn](){checkForSessionKey(warn);}, false)){ // Asks user to select/create aes
 			SecureMemBlock aes = _mainWindow->m_filesEncrypt->getAES();
 			encryptAndStoreSessionKey(reinterpret_cast<const char*>(aes.getData()));
 			keyReadyB = true;

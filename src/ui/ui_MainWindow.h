@@ -35,6 +35,7 @@ public:
     QAction *action_checkForUpdates;
     QAction *action_saveKey;
     QAction *action_newKey;
+    QAction *action_saveSessionKey;
     QWidget *centralwidget;
     QVBoxLayout *verticalLayout_4;
     QTableView *filesList;
@@ -66,6 +67,8 @@ public:
         action_saveKey->setObjectName(QStringLiteral("action_saveKey"));
         action_newKey = new QAction(MainWindow);
         action_newKey->setObjectName(QStringLiteral("action_newKey"));
+        action_saveSessionKey = new QAction(MainWindow);
+        action_saveSessionKey->setObjectName(QStringLiteral("action_saveSessionKey"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         verticalLayout_4 = new QVBoxLayout(centralwidget);
@@ -112,7 +115,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 734, 25));
+        menubar->setGeometry(QRect(0, 0, 734, 20));
         menuOptions = new QMenu(menubar);
         menuOptions->setObjectName(QStringLiteral("menuOptions"));
         menuFichier = new QMenu(menubar);
@@ -129,6 +132,7 @@ public:
         menuOptions->addAction(action_openSettings);
         menuFichier->addAction(action_newKey);
         menuFichier->addAction(action_saveKey);
+        menuFichier->addAction(action_saveSessionKey);
 
         retranslateUi(MainWindow);
 
@@ -143,6 +147,7 @@ public:
         action_checkForUpdates->setText(QApplication::translate("MainWindow", "V\303\251rifier les mises \303\240 jour", Q_NULLPTR));
         action_saveKey->setText(QApplication::translate("MainWindow", "Sauvegarder la cl\303\251", Q_NULLPTR));
         action_newKey->setText(QApplication::translate("MainWindow", "Nouvelle cl\303\251", Q_NULLPTR));
+        action_saveSessionKey->setText(QApplication::translate("MainWindow", "Cr\303\251er la cl\303\251 de session", Q_NULLPTR));
         cryptAll->setText(QApplication::translate("MainWindow", "Crypter", Q_NULLPTR));
         decryptAll->setText(QApplication::translate("MainWindow", "D\303\251crypter", Q_NULLPTR));
         remove->setText(QApplication::translate("MainWindow", "Supprimer", Q_NULLPTR));

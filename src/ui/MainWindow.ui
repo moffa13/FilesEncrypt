@@ -80,7 +80,7 @@
      <x>0</x>
      <y>0</y>
      <width>734</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -97,6 +97,7 @@
     </property>
     <addaction name="action_newKey"/>
     <addaction name="action_saveKey"/>
+    <addaction name="action_saveSessionKey"/>
    </widget>
    <addaction name="menuFichier"/>
    <addaction name="menuOptions"/>
@@ -125,6 +126,11 @@
   <action name="action_newKey">
    <property name="text">
     <string>Nouvelle clé</string>
+   </property>
+  </action>
+  <action name="action_saveSessionKey">
+   <property name="text">
+    <string>Créer la clé de session</string>
    </property>
   </action>
  </widget>
