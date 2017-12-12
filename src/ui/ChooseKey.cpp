@@ -71,9 +71,8 @@ void ChooseKey::saveAESToFile(){
 	if(filename.isEmpty()) return;
 
 	QFile f(filename);
-	int rep;
 	if(f.exists()){
-		rep = QMessageBox::warning(this, tr("Existe dejà"), tr("Un fichier existe déjà, voulez-vous écraser ?"), QMessageBox::Yes | QMessageBox::No);
+		int rep = QMessageBox::warning(this, tr("Existe dejà"), tr("Un fichier existe déjà, voulez-vous écraser ?"), QMessageBox::Yes | QMessageBox::No);
 		if(rep == QMessageBox::No){
 			return;
 		}
