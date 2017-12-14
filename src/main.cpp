@@ -87,8 +87,16 @@ int main(int argc, char *argv[])
 		QObject::connect(&s, &SessionKey::finishedAction, [&loop](){
 			loop.exit();
 		});
-		QObject::connect(&s, &SessionKey::keyReady, [&s, argv, action](){
-			s.action(argv[2],  action);
+		QObject::connect(&s, &SessionKey::keyReady, [&s, argc, argv, action](){
+			if(argc > 3){
+				QStringList files;
+				for(int i = 2; i < argc; ++i){
+					files << QString{argv[i]};
+				}
+				s.action(files, action);
+			}else{
+				s.action(argv[2],  action);
+			}
 		});
 		QTimer::singleShot(0, [&s](){ // To be sure loop is executing
 			s.checkForSessionKey();
