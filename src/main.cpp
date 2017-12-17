@@ -51,6 +51,32 @@ int main(int argc, char *argv[])
 
 #ifndef UNIT_TEST
 
+	if(argc > 2 && strcmp(argv[1], "getState") == 0){ // This has to be fast for explorer
+		unsigned uncrypted = 0;
+		unsigned crypted = 0;
+		for(int i = 2; i < argc; ++i){
+			QFile f{argv[i]};
+			if(!f.exists()) continue;
+			if(!f.open(QFile::ReadWrite)) continue;
+			EncryptDecrypt_s infos = FilesEncrypt::guessEncrypted(f);
+			f.close();
+			if(infos.state == ENCRYPT){
+				crypted++;
+			}else{
+				uncrypted++;
+			}
+		}
+
+		Init::deInit();
+
+		if(crypted == 0){
+			return 1;
+		}else if(uncrypted == 0){
+			return 2;
+		}else{
+			return 3;
+		}
+	}
 
 	QTranslator translator;
 	translator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
@@ -80,9 +106,9 @@ int main(int argc, char *argv[])
 		QMessageBox::information(&w, MainWindow::tr("Mise à jour"), MainWindow::tr("La mise à jour a correctement été installée."), QMessageBox::Ok);
 	}
 #ifdef Q_OS_WIN
-	else if(argc > 1 && strcmp(argv[1], "encrypt") == 0){
+	else if(argc > 2 && strcmp(argv[1], "encrypt") == 0){
 		action = ENCRYPT;
-	}else if(argc > 1 && strcmp(argv[1], "decrypt") == 0){
+	}else if(argc > 2 && strcmp(argv[1], "decrypt") == 0){
 		action = DECRYPT;
 	}
 
