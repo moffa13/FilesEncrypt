@@ -36,8 +36,10 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
 	for(QMap<QString, QPair<QString, QVariant>>::iterator it{checkNames.begin()}; it != checkNames.end(); ++it){
 		QCheckBox *box = new QCheckBox{it.value().first, this};
 		const QString key{it.key()};
-		connect(box, &QCheckBox::toggled, [this, key](bool checked){
-			action(key, checked);
+		connect(box, &QCheckBox::toggled, [this, key, box](bool checked){
+			if(!action(key, checked)){
+				box->setEnabled(false);
+			}
 			m_settings->setValue(key, checked);
 		});
 		box->setChecked(m_settings->value(it.key(), getDefaultSetting(it.key())).toBool());
@@ -47,10 +49,11 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
 	setFixedSize(sizeHint());
 }
 
-void SettingsWindow::action(QString const& param, bool value){
+bool SettingsWindow::action(QString const& param, bool value){
 	if(param == "contextual_menu_options"){
-		ContextualMenuToggler::toggleCryptUncryptOptions(value);
+		return ContextualMenuToggler::toggleCryptUncryptOptions(value);
 	}
+	return true;
 }
 
 QVariant SettingsWindow::getDefaultSetting(QString const& name){

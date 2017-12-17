@@ -12,6 +12,14 @@
 #include <functional>
 #endif
 
+/**
+ * Allocates a safe memory block to store sensitive data
+ * On Windows, it secures memory using CryptProtectMemory/CryptUnProtectMemory
+ * With linux, it creates one single aes key for all the program's lifetime
+ * which is allocated using gcry_malloc_secure and encrypts the data with this key
+ * using a random iv stored in a static List until the program exits
+ * @brief The SecureMemBlock class
+ */
 class SecureMemBlock
 {
 	public:
@@ -28,10 +36,12 @@ private:
 		static std::unique_ptr<unsigned char, std::function<void(unsigned char*)>> _aes;
 		static QMap<QByteArray, QByteArray> _ivs;
 		unsigned char* _iv;
+#else
+		static size_t getMultipleSize(size_t len, size_t multiple);
 #endif
 		bool _encrypted;
 		size_t _len;
-		static size_t getMultipleSize(size_t len, size_t multiple);
+
 };
 
 #endif // SECUREMEMBLOCK_H

@@ -37,11 +37,12 @@ class MainWindow : public QMainWindow
 		~MainWindow();
 	Q_SIGNALS:
 		void file_done();
+		void finishedDiscover() const;
 	private Q_SLOTS:
 		void select_dir();
 		void select_file();
 		void addWhateverToList(QStringList const& items);
-		void addWhateverToList(QString const& item);
+		void addWhateverToList(QString const& item, bool fromMany = false);
 		void resizeEvent(QResizeEvent *event);
 		void showEvent(QShowEvent *event);
 		void correctResize();
@@ -59,7 +60,7 @@ class MainWindow : public QMainWindow
 		void on_action_saveSessionKey_triggered();
 	private:
 #ifdef Q_OS_WIN
-        SessionKey *_sessionKey;
+		SessionKey *_sessionKey;
 #endif
 		Ui::MainWindow *ui;
 		Progress* m_progress = NULL;
@@ -87,11 +88,13 @@ class MainWindow : public QMainWindow
 		static QMutex s_encryptMutex;
 		static QMutex ENCRYTPT_MUTEX2;
 		static unsigned s_current_guess_encrypted_watchers;
+		unsigned _current_adding_items = 0;
 		void openInExplorer(const QString& pathIn);
 		void openInNautilus(const QString& pathIn);
 		bool beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey = false);
 		void updateAvailableButtons();
 		bool deleteKey();
+		void checkNoFilesProcessingToList() const;
 	public Q_SLOTS:
 		void updateStatusBar();
 	protected:

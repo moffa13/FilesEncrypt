@@ -54,13 +54,13 @@ void TestFilesEncrypt::shouldEncrypt(){
 	bool encrypt_filename{true};
 
 n_test:
-	FilesEncrypt::genKey("key.test", "12345");
-	FilesEncrypt f{std::string{"key.test"}};
+	FilesEncrypt::genKey(QApplication::applicationDirPath() + "/key.test", "12345");
+	FilesEncrypt f{(QApplication::applicationDirPath() + "/key.test").toStdString()};
 	QVERIFY(f.requestAesDecrypt("12345"));
 	QVERIFY(f.isAesDecrypted());
 
 
-	QFile file{"test.file"};
+	QFile file{QApplication::applicationDirPath() + "/test.file"};
 	file.open(QFile::ReadWrite);
 	file.write("Hello", 5);
 
@@ -94,17 +94,17 @@ n_test:
 }
 
 void TestFilesEncrypt::shouldReadFromFile(){
-	QVERIFY(FilesEncrypt::genKey("Test.key.unit", "12345", (const unsigned char*)"12345678901234561234567890123456"));
-	FilesEncrypt f{std::string{"Test.key.unit"}};
+	QVERIFY(FilesEncrypt::genKey(QApplication::applicationDirPath() + "/Test.key.unit", "12345", (const unsigned char*)"12345678901234561234567890123456"));
+	FilesEncrypt f{(QApplication::applicationDirPath() + "/Test.key.unit").toStdString()};
 	QVERIFY(f.isFileKeyLoaded());
 
 	bool ok = false;
 	QVERIFY(f.requestAesDecrypt("12345", &ok));
 	QVERIFY(ok);
 
-    auto fa = f.getAES();
-    auto data = fa.getData();
-    QVERIFY(memcmp(data, "12345678901234561234567890123456", 32) == 0);
+	auto fa = f.getAES();
+	auto data = fa.getData();
+	QVERIFY(memcmp(data, "12345678901234561234567890123456", 32) == 0);
 
 	QFile::remove("Test.key.unit");
 }

@@ -91,7 +91,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	QAction* openDir = new QAction(tr("Ouvrir le dossier"), m_listRowMenu);
 	connect(openDir, SIGNAL(triggered(bool)), this, SLOT(openSelectedRowInDir()));
 	ui->filesList->setContextMenuPolicy(Qt::CustomContextMenu);
-	//ui->tableWidget->acceptDrops();
 	connect(ui->filesList, &QTableView::customContextMenuRequested, [this](const QPoint &p){
 		Q_UNUSED(p);
 		m_listRowMenu->exec(QCursor::pos());
@@ -100,10 +99,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_listRowMenu->addAction(openDir);
 
 #ifdef Q_OS_WIN
-    _sessionKey = new SessionKey{this};
-    if(!_sessionKey->readSessionKey().isEmpty()){
-        ui->action_saveSessionKey->setEnabled(false);
-    }
+	_sessionKey = new SessionKey{this};
+	if(!_sessionKey->readSessionKey().isEmpty()){
+		ui->action_saveSessionKey->setEnabled(false);
+	}
 #endif
 
 	m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), false, this);
@@ -362,12 +361,6 @@ void MainWindow::showEvent(QShowEvent *event){
 	correctResize();
 }
 
-void MainWindow::addWhateverToList(QStringList const& items){
-	foreach(const auto& item, items){
-		addWhateverToList(item);
-	}
-}
-
 void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item) const{
 	// Retrieve results
 	QList<QPAIR_CRYPT_DEF> res{watcher->future().results()};
@@ -443,7 +436,26 @@ finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action) const{
 	return res;
 }
 
-void MainWindow::addWhateverToList(QString const& item){
+/**
+ * Emits finishedDiscover when all the files added with addWhateverToList have been processed
+ * @brief MainWindow::checkNoFilesProcessingToList
+ */
+void MainWindow::checkNoFilesProcessingToList() const{
+	if(_current_adding_items == 0){
+		emit finishedDiscover();
+	}
+}
+
+void MainWindow::addWhateverToList(QStringList const& items){
+	_current_adding_items += items.length();
+	foreach(const auto& item, items){
+		addWhateverToList(item, true);
+	}
+}
+
+void MainWindow::addWhateverToList(QString const& item, bool fromMany){
+
+	if(!fromMany) _current_adding_items++;
 
 	if(!item.isEmpty() && !m_filesListModel.getDirs().contains(item)){ // Pre-conditions
 
@@ -476,6 +488,7 @@ void MainWindow::addWhateverToList(QString const& item){
 			connect(watcher, &QFutureWatcher<QPAIR_CRYPT_DEF>::finished, [this, watcher, item](){
 
 				s_current_guess_encrypted_watchers--;
+				_current_adding_items--;
 
 				if(!watcher->isCanceled()){
 					auto &infos{m_filesListModel.getDir(item)};
@@ -489,6 +502,8 @@ void MainWindow::addWhateverToList(QString const& item){
 				}else{
 					Logging::Logger::debug("Encrypted guess watcher canceled");
 				}
+
+				checkNoFilesProcessingToList();
 
 				watcher->deleteLater();
 			});
@@ -548,6 +563,8 @@ void MainWindow::addWhateverToList(QString const& item){
 
 		if(infos.isFile){
 			updateAvailableButtons();
+			_current_adding_items--;
+			checkNoFilesProcessingToList();
 		}
 	}
 }
@@ -599,7 +616,7 @@ void MainWindow::on_cryptAll_clicked(){
 
 void MainWindow::action(EncryptDecrypt action){
 
-	if(m_encrypting || m_filesListModel.rowCount() == 0) return;
+	if(m_encrypting || m_filesListModel.rowCount() == 0 || _current_adding_items > 0) return;
 
 	if(!beSureKeyIsSelectedAndValid([this, action]{
 		this->action(action);

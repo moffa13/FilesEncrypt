@@ -6,6 +6,7 @@
 #include <QLibraryInfo>
 #include <QTranslator>
 #include <Logger.h>
+#include "Init.h"
 
 #ifdef Q_OS_WIN
 #include "SessionKey.h"
@@ -21,9 +22,12 @@
 int main(int argc, char *argv[])
 {
 
-	OpenSSL_add_all_algorithms();
-	ERR_load_BIO_strings();
+	// Init openssl & libgcrypt
+	Init::init();
 
+	QApplication a{argc, argv};
+
+// If in debug mode, run unit tests before starting program
 #ifdef QT_DEBUG
 	Logging::Logger::setLogLevel(Logging::DEBUG);
 	int result;
@@ -32,11 +36,12 @@ int main(int argc, char *argv[])
 	result |= TestFilesEncrypt::runTests();
 	result |= TestVersion::runTests();
 	if(result != 0){
+		Init::deInit();
 		Logging::Logger::error("Unit test has failed. Please fix errors");
 		return result;
 	}
 #ifdef UNIT_TEST
-	EVP_cleanup();
+	Init::deInit();
 	return 0;
 #endif
 
@@ -45,7 +50,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifndef UNIT_TEST
-	QApplication a{argc, argv};
+
 
 	QTranslator translator;
 	translator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
@@ -65,6 +70,7 @@ int main(int argc, char *argv[])
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 
 	MainWindow w;
+	w.show();
 
 	EncryptDecrypt action = NOT_FINISHED;
 
@@ -105,12 +111,10 @@ int main(int argc, char *argv[])
 		QTimer::singleShot(0, [](){ // Tell the main event loop to exit
 			qApp->exit();
 		});
-	}else{
-		w.show();
 	}
-#else
-	w.show();
 #endif // Q_OS_WIN
-	return a.exec();
-#endif
+	auto ret = a.exec();
+	Init::deInit();
+	return ret;
+#endif // UNIT_TEST
 }

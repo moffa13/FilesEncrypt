@@ -36,10 +36,12 @@ void SessionKey::action(QStringList const& items, EncryptDecrypt action){
 	if(items.contains(QDir::toNativeSeparators(QApplication::applicationDirPath() + "/" + _sessionKeyName))){
 		QMessageBox::critical(nullptr, tr("Clé de session"), tr("Vous ne pouvez pas modifier la clé de session"), QMessageBox::Ok);
 	}else{
+		connect(_mainWindow, &MainWindow::finishedDiscover, [this, action](){
+			_mainWindow->action(action);
+			emitIfNoMoreEncrypt();
+		});
 		_mainWindow->addWhateverToList(items);
-		_mainWindow->action(action);
 	}
-	emitIfNoMoreEncrypt();
 }
 
 /**

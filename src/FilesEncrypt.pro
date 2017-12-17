@@ -45,6 +45,7 @@ SOURCES += main.cpp \
 	ui/FilesListModel.cpp \
 	SecureMemBlock.cpp \
 	ui/ContextualMenuToggler.cpp \
+	Init.cpp
 
 HEADERS += \
 	Crypt.h \
@@ -63,6 +64,7 @@ HEADERS += \
 	ui/FilesListModel.h \
 	SecureMemBlock.h \
 	ui/ContextualMenuToggler.h \
+	Init.h
 
 win32{
 	SOURCES += SessionKey.cpp
@@ -73,7 +75,7 @@ win32{
 	QMAKE_CXXFLAGS_RELEASE = -O2
 	INCLUDEPATH += "$$PWD/../include/windows/"
 	DEPENDPATH += "$$PWD/../include/windows/"
-	LIBS += -lcrypt32
+	LIBS += -lcrypt32 -lshell32
 	!contains(QMAKE_TARGET.arch, x86_64) {
 		CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86d
 		CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86d

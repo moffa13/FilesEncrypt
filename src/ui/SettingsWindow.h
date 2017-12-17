@@ -28,7 +28,7 @@ private:
 	static bool defaultValuesInit;
 	bool m_refuseClose;
 	static void init();
-	void action(const QString &param, bool value);
+	bool action(const QString &param, bool value);
 	protected:
 	void closeEvent(QCloseEvent*);
 };

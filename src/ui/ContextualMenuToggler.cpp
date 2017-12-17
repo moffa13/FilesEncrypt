@@ -2,36 +2,29 @@
 #include <QSettings>
 #include <QApplication>
 #include <QDir>
+#include <QMessageBox>
 
-void ContextualMenuToggler::toggleCryptUncryptOptions(bool enable){
-	if(enable) setCryptUncryptOptions();
-	else unsetCryptUncryptOptions();
-}
-
-void ContextualMenuToggler::setCryptUncryptOptions(){
 #ifdef Q_OS_WIN
-	QSettings settings{"HKEY_CURRENT_USER\\Software\\Classes\\*\\shell", QSettings::NativeFormat};
-	settings.beginGroup("FilesEncrypt_encrypt");
-	settings.setValue("Default", tr(qPrintable("Crypter avec " + QApplication::applicationName())));
-	settings.beginGroup("command");
-	settings.setValue("Default", QDir::toNativeSeparators(QApplication::applicationFilePath() + " encrypt \"%1\""));
-	settings.endGroup();
-	settings.endGroup();
-	settings.beginGroup("FilesEncrypt_decrypt");
-	settings.setValue("Default", tr(qPrintable("Décrypter avec " + QApplication::applicationName())));
-	settings.beginGroup("command");
-	settings.setValue("Default", QDir::toNativeSeparators(QApplication::applicationFilePath() + " decrypt \"%1\""));
-	settings.endGroup();
-	settings.endGroup();
-#endif;
-}
+#include <Windows.h>
+#endif
 
-void ContextualMenuToggler::unsetCryptUncryptOptions(){
+bool ContextualMenuToggler::toggleCryptUncryptOptions(bool enable){
 #ifdef Q_OS_WIN
-	QSettings settings{"HKEY_CURRENT_USER\\Software\\Classes\\*\\shell", QSettings::NativeFormat};
-	settings.remove("FilesEncrypt_encrypt");
-	settings.remove("FilesEncrypt_decrypt");
-#endif;
+	return regsvr(!enable);
+#endif
+	return false;
 }
 
+#ifdef Q_OS_WIN
+bool ContextualMenuToggler::regsvr(bool unregister){
+	QFile f{QApplication::applicationDirPath() + "/FilesEncryptShellExtension.dll"};
+	if(f.exists()){
+		ShellExecute(NULL, L"Open", L"regsvr32.exe", (std::wstring(L"FilesEncryptShellExtension.dll /s") + (unregister ? L" /u" : L"")).c_str(), NULL, SW_HIDE);
+	}else{
+		QMessageBox::critical(nullptr, tr("Erreur"), "Impossible de trouver FilesEncryptShellExtension.dll");
+		return false;
+	}
+	return true;
+}
+#endif
 

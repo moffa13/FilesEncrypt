@@ -6,17 +6,17 @@
 
 #ifdef Q_OS_LINUX
 #include <gcrypt.h>
-#include <openssl/md5.h>
+#include <openssl/sha.h>
 #include "Crypt.h"
 #include "FilesEncrypt.h"
 #endif
 
 #ifdef Q_OS_LINUX
 std::unique_ptr<unsigned char, std::function<void(unsigned char*)>> SecureMemBlock::_aes{
-    nullptr,
-    [](unsigned char* ptr){
-        gcry_free(ptr);
-    }
+	nullptr,
+	[](unsigned char* ptr){
+		gcry_free(ptr);
+	}
 };
 QMap<QByteArray, QByteArray> SecureMemBlock::_ivs;
 #endif
@@ -27,8 +27,8 @@ SecureMemBlock::SecureMemBlock(const unsigned char *data, size_t len, bool encry
 #ifdef Q_OS_LINUX
 	// Create an encryption key valid until the program's lifetime ends
 	if(_aes == nullptr){
-        _aes.reset(reinterpret_cast<unsigned char*>(gcry_malloc_secure(32)));
-        Crypt::genAES(AESSIZE::S256, _aes.get());
+		_aes.reset(reinterpret_cast<unsigned char*>(gcry_malloc_secure(32)));
+		Crypt::genAES(AESSIZE::S256, _aes.get());
 	}
 	// Allocate an IV for each block
 	_iv = reinterpret_cast<unsigned char*>(malloc(AES_BLOCK_SIZE));
@@ -62,10 +62,10 @@ SecureMemBlock::SecureMemBlock(const unsigned char *data, size_t len, bool encry
 
 #ifndef Q_OS_WIN
 QByteArray SecureMemBlock::getMD5(const unsigned char* p, size_t len){
-	unsigned char* md5 = reinterpret_cast<unsigned char*>(malloc(MD5_DIGEST_LENGTH));
-	MD5(p, len, md5);
-	QByteArray res{reinterpret_cast<const char*>(p), MD5_DIGEST_LENGTH};
-	free(md5);
+	unsigned char* sha1 = reinterpret_cast<unsigned char*>(malloc(SHA_DIGEST_LENGTH));
+	SHA1(p, len, sha1);
+	QByteArray res{reinterpret_cast<const char*>(p), SHA_DIGEST_LENGTH};
+	free(sha1);
 	return res;
 }
 #endif
@@ -81,10 +81,12 @@ SecureMemBlock::~SecureMemBlock(){
 	free(_enc_data);
 }
 
+#ifdef Q_OS_WIN
 size_t SecureMemBlock::getMultipleSize(size_t len, size_t multiple){
 	const uint8_t mod = len % multiple;
 	return mod ? len + multiple - mod : len;
 }
+#endif
 
 const unsigned char* SecureMemBlock::getData(){
 	if(_encrypted){
@@ -93,7 +95,7 @@ const unsigned char* SecureMemBlock::getData(){
 #else
 		Crypt c;
 		unsigned char* uncrypted = reinterpret_cast<unsigned char*>(gcry_malloc_secure(_len));
-        _len = c.aes_decrypt(_enc_data, _len, uncrypted, _aes.get(), _iv, false);
+		_len = c.aes_decrypt(_enc_data, _len, uncrypted, _aes.get(), _iv, false);
 		memcpy(_enc_data, uncrypted, _len);
 		memset(uncrypted, 0, _len);
 		gcry_free(uncrypted);
@@ -114,7 +116,7 @@ void SecureMemBlock::secure(){
 	Crypt c;
 	size_t futureSize = FilesEncrypt::getEncryptedSize(_len);
 	unsigned char* encrypted = reinterpret_cast<unsigned char*>(gcry_malloc_secure(futureSize));
-    c.aes_crypt(_enc_data, _len, encrypted, _aes.get(), _iv, false);
+	c.aes_crypt(_enc_data, _len, encrypted, _aes.get(), _iv, false);
 	_len = futureSize;
 	memcpy(_enc_data, encrypted, _len);
 	memset(encrypted, 0, _len);

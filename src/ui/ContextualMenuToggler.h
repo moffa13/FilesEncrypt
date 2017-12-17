@@ -8,10 +8,10 @@ class ContextualMenuToggler : public QObject
 		Q_OBJECT
 
 	public:
-		static void toggleCryptUncryptOptions(bool enable);
-	private:
-		static void setCryptUncryptOptions();
-		static void unsetCryptUncryptOptions();
+		static bool toggleCryptUncryptOptions(bool enable);
+#ifdef Q_OS_WIN
+		static bool regsvr(bool unregister = false);
+#endif
 };
 
 #endif // CONTEXTUALMENUTOGGLER_H
