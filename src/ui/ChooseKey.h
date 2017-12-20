@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QDialog>
 #include <QCloseEvent>
-#include "FilesEncrypt.h"
+#include "crypto/FilesEncrypt.h"
 
 namespace Ui {
 class ChooseKey;

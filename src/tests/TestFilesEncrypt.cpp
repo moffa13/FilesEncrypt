@@ -1,5 +1,5 @@
 #include "TestFilesEncrypt.h"
-#include "FilesEncrypt.h"
+#include "crypto/FilesEncrypt.h"
 #include <QTemporaryFile>
 #include <iostream>
 

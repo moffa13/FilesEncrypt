@@ -7,7 +7,7 @@
 #include <QMessageBox>
 #include <QAction>
 #include "Logger.h"
-#include "FilesEncrypt.h"
+#include "crypto/FilesEncrypt.h"
 #include "MainWindow.h"
 #include "ui/ui_MainWindow.h"
 #include "utilities.h"

@@ -1,5 +1,5 @@
 #include "TestSecureMemBlock.h"
-#include "SecureMemBlock.h"
+#include "crypto/SecureMemBlock.h"
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #endif

@@ -2,7 +2,7 @@
 #define TESTSECUREMEMBLOCK_H
 
 #include <QtTest/QTest>
-#include "Crypt.h"
+#include "crypto/Crypt.h"
 
 class TestSecureMemBlock : public QObject
 {

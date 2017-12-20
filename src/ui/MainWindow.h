@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <FilesEncrypt.h>
+#include <crypto/FilesEncrypt.h>
 #include <QTableWidgetItem>
 #include <QFuture>
 #include <QFutureWatcher>
