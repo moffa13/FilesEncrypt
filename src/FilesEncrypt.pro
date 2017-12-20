@@ -2,7 +2,7 @@ QT += core gui widgets concurrent network xml
 
 CONFIG += c++11
 
-RESOURCES = FilesEncrypt.qrc
+RESOURCES = resources/FilesEncrypt.qrc
 TRANSLATIONS = filesencrypt_en.ts
 
 VERSION = 0.3.0
@@ -13,7 +13,7 @@ TARGET = FilesEncrypt
 CONFIG -= app_bundle
 CONFIG -= console
 
-RC_FILE = FilesEncrypt.rc
+RC_FILE = resources/FilesEncrypt.rc
 
 Release:DESTDIR = $$PWD/../bin/release
 Release:OBJECTS_DIR = $$PWD/../build/release/.obj
@@ -30,46 +30,46 @@ Debug:UI_DIR = $$PWD/../build/debug/.ui
 TEMPLATE = app
 
 SOURCES += main.cpp \
-	Crypt.cpp \
-	utilities.cpp \
-	ui/ChooseKey.cpp \
-	ui/Progress.cpp \
-	ui/MainWindow.cpp \
-	FilesEncrypt.cpp \
-	ui/SettingsWindow.cpp \
-	network/UpdateManager.cpp \
+	crypto/Crypt.cpp \
+	crypto/FilesEncrypt.cpp \
+	crypto/SecureMemBlock.cpp \
 	network/Downloader.cpp \
-	AccurateTimer.cpp \
-	Version.cpp \
-	Logger.cpp \
-	ui/FilesListModel.cpp \
-	SecureMemBlock.cpp \
+	network/UpdateManager.cpp \
+	ui/ChooseKey.cpp \
 	ui/ContextualMenuToggler.cpp \
+	ui/FilesListModel.cpp \
+	ui/MainWindow.cpp \
+	ui/Progress.cpp \
+	ui/SettingsWindow.cpp \
+	AccurateTimer.cpp \
 	Init.cpp
+	Logger.cpp \
+	utilities.cpp \
+	Version.cpp \
 
 HEADERS += \
-	Crypt.h \
+	crypto/Crypt.h \
+	crypto/FilesEncrypt.h \
+	crypto/SecureMemBlock.h \
+	network/Downloader.h \
+	network/UpdateManager.h \
+	ui/ChooseKey.h \
+	ui/ContextualMenuToggler.h \
+	ui/FilesListModel.h \
+	ui/MainWindow.h \
+	ui/Progress.h \
+	ui/SettingsWindow.h \
+	AccurateTimer.h \
+	defines.h \
+	Init.h
 	Logger.h \
 	utilities.h \
-	ui/ChooseKey.h \
-	ui/Progress.h \
-	FilesEncrypt.h \
-	ui/MainWindow.h \
-	ui/SettingsWindow.h \
-	network/UpdateManager.h \
-	network/Downloader.h \
-	AccurateTimer.h \
 	Version.h \
-	defines.h \
-	ui/FilesListModel.h \
-	SecureMemBlock.h \
-	ui/ContextualMenuToggler.h \
-	Init.h
 
 win32{
-	SOURCES += SessionKey.cpp
+	SOURCES += crypto/SessionKey.cpp
 
-	HEADERS += SessionKey.h
+	HEADERS += crypto/SessionKey.h
 
 	QMAKE_CXXFLAGS += -MD
 	QMAKE_CXXFLAGS_RELEASE = -O2
