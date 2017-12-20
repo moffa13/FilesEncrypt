@@ -2,7 +2,7 @@
 #define TESTCRYPT_H
 
 #include <QtTest/QTest>
-#include "Crypt.h"
+#include "crypto/Crypt.h"
 
 class TestCrypt : public QObject
 {

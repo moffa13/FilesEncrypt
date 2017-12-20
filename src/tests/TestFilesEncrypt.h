@@ -2,7 +2,7 @@
 #define TESTFILESENCRYPT_H
 
 #include <QtTest/QTest>
-#include "Crypt.h"
+#include "crypto/Crypt.h"
 
 class TestFilesEncrypt : public QObject
 {

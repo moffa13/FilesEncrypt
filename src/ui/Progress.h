@@ -4,7 +4,7 @@
 #include <AccurateTimer.h>
 
 #include <QDialog>
-#include "FilesEncrypt.h"
+#include "crypto/FilesEncrypt.h"
 #include <QMutex>
 
 namespace Ui {

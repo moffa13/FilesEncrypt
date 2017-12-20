@@ -1,5 +1,5 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file alias="lang/en.qm">../resources/lang/filesencrypt_en.qm</file>
+    <file alias="lang/en.qm">../../resources/lang/filesencrypt_en.qm</file>
 </qresource>
 </RCC>

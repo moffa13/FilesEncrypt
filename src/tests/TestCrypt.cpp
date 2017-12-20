@@ -1,7 +1,7 @@
 #include "TestCrypt.h"
-#include "Crypt.h"
+#include "crypto/Crypt.h"
 #include "openssl/aes.h"
-#include "FilesEncrypt.h"
+#include "crypto/FilesEncrypt.h"
 
 int TestCrypt::runTests(){
 	TestCrypt *test = new TestCrypt;
