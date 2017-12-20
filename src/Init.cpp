@@ -1,9 +1,13 @@
 #include "Init.h"
 #include "openssl/evp.h"
 
+bool Init::_init = false;
+
 void Init::init() {
+	if(_init) return;
 	initOpenSSL();
 	initGcrypt();
+	_init = true;
 }
 
 void Init::initOpenSSL(){
@@ -12,7 +16,9 @@ void Init::initOpenSSL(){
 }
 
 void Init::deInitOpenSSL() {
+	if(!_init) return;
 	EVP_cleanup();
+	_init = false;
 }
 
 void Init::initGcrypt() {
