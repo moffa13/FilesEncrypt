@@ -42,10 +42,10 @@ SOURCES += main.cpp \
 	ui/Progress.cpp \
 	ui/SettingsWindow.cpp \
 	AccurateTimer.cpp \
-	Init.cpp
+	Init.cpp \
 	Logger.cpp \
 	utilities.cpp \
-	Version.cpp \
+	Version.cpp
 
 HEADERS += \
 	crypto/Crypt.h \
@@ -61,10 +61,10 @@ HEADERS += \
 	ui/SettingsWindow.h \
 	AccurateTimer.h \
 	defines.h \
-	Init.h
+	Init.h \
 	Logger.h \
 	utilities.h \
-	Version.h \
+	Version.h
 
 win32{
 	SOURCES += crypto/SessionKey.cpp
