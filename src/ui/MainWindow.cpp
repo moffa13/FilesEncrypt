@@ -667,7 +667,7 @@ void MainWindow::action(EncryptDecrypt action){
 				}
 			}else{
 				if(!f.isWritable()){
-					qDebug() << "!!!"  << it.key();
+					qDebug() << "!!!" << it.key();
 					problemWrite = true;
 				}
 				++item_does_not_need_action;

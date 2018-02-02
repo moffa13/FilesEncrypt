@@ -10,6 +10,7 @@
 
 #ifdef Q_OS_WIN
 #include "crypto/SessionKey.h"
+#include <Windows.h>
 #endif
 
 #ifdef QT_DEBUG
@@ -19,8 +20,7 @@
 #include "tests/TestSecureMemBlock.h"
 #endif
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
 
 	// Init openssl & libgcrypt
 	Init::init();
@@ -45,11 +45,21 @@ int main(int argc, char *argv[])
 	return 0;
 #endif
 
-#else // QT_DEBUG
-	Logging::Logger::setLogLevel(Logging::ERROR);
-#endif
+#else // !QT_DEBUG
+	Logging::Logger::setLogLevel(ERROR);
+#endif // QT_DEBUG
 
 #ifndef UNIT_TEST
+
+	ushort** argvw = nullptr;
+	int argcw;
+
+#ifdef Q_OS_WIN
+	argvw = (ushort**)CommandLineToArgvW(GetCommandLineW(), &argcw);
+#else
+	argvw = argv;
+	argcw = argc;
+#endif
 
 	if(argc > 2 && strcmp(argv[1], "getState") == 0){ // This has to be fast for explorer
 
@@ -58,13 +68,15 @@ int main(int argc, char *argv[])
 		unsigned uncrypted = 0;
 		unsigned crypted = 0;
 
-		for(int i = 2; i < argc; ++i){
+		for(int i = 2; i < argcw; ++i){
 
-			QFileInfo fInfo{argv[i]};
+			QString fileStr = QString::fromUtf16(argvw[i]);
+
+			QFileInfo fInfo{fileStr};
 			if(!fInfo.exists()) continue;
 
 			if(fInfo.isDir()){
-				EncryptDecrypt infos = FilesEncrypt::guessEncrypted(QDir{argv[i]});
+				EncryptDecrypt infos = FilesEncrypt::guessEncrypted(QDir{fileStr});
 				if(infos == PARTIAL){ // If one dir is partially encrypted, return PARTIAL
 					return 3;
 				}else if(infos == ENCRYPT){
@@ -73,7 +85,7 @@ int main(int argc, char *argv[])
 					uncrypted++;
 				}
 			}else{
-				QFile f{argv[i]};
+				QFile f{fileStr};
 				if(!f.open(QFile::ReadWrite)) continue;
 				EncryptDecrypt_s infos = FilesEncrypt::guessEncrypted(f);
 				f.close();
@@ -138,15 +150,15 @@ int main(int argc, char *argv[])
 		QObject::connect(&s, &SessionKey::finishedAction, [&loop](){
 			loop.exit();
 		});
-		QObject::connect(&s, &SessionKey::keyReady, [&s, argc, argv, action](){
-			if(argc > 3){
+		QObject::connect(&s, &SessionKey::keyReady, [&s, argcw, argvw, action](){
+			if(argcw > 3){
 				QStringList files;
-				for(int i = 2; i < argc; ++i){
-					files << QString{argv[i]};
+				for(int i = 2; i < argcw; ++i){
+					files << QString::fromUtf16(argvw[i]);
 				}
 				s.action(files, action);
 			}else{
-				s.action(argv[2],  action);
+				s.action(QString::fromUtf16(argvw[2]),  action);
 			}
 		});
 		QTimer::singleShot(0, [&s](){ // To be sure loop is executing
@@ -160,6 +172,7 @@ int main(int argc, char *argv[])
 #endif // Q_OS_WIN
 	auto ret = a.exec();
 	Init::deInit();
+	LocalFree(argvw);
 	return ret;
 #endif // UNIT_TEST
 }
