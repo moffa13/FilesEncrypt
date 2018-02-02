@@ -562,6 +562,7 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 			// Show the type
 			infos.type = tr("Fichier");
 			infos.size = utilities::speed_to_human(info.size());
+			infos.sizeBytes = info.size();
 		}
 
 		infos.files = filesAndState;

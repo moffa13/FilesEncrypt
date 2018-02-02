@@ -384,19 +384,18 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 				name = fileInfo.absolutePath() + newName + ".filesencrypt";
 			}
 
-			encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length())));
-			crypt.aes_crypt(reinterpret_cast<const unsigned char*>(nameWithoutPath.toStdString().c_str()), nameWithoutPath.length(), encrypted_filename, getAES().getData(), iv);
+			encrypted_filename = reinterpret_cast<unsigned char*>(malloc(getEncryptedSize(nameWithoutPath.length() * 2)));
+			crypt.aes_crypt(reinterpret_cast<const unsigned char*>(nameWithoutPath.toStdU16String().c_str()), nameWithoutPath.length() * 2, encrypted_filename, getAES().getData(), iv);
 		}
 
 		// Add Header
-		auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, filenameNeedsEncryption, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(nameWithoutPath.length()));
+		auto blob = getEncryptBlob(reinterpret_cast<char*>(iv), CURRENT_VERSION, filenameNeedsEncryption, reinterpret_cast<const char*>(encrypted_filename), getEncryptedSize(nameWithoutPath.length() * 2));
 		result.offsetBeforeContent = blob.size();
 
 		QByteArray fileContentEncrypted{blob};
 		tmpFile.write(fileContentEncrypted);
 
 		free(encrypted_filename);
-
 
 		// Save final size
 		quint64 futureSize = getEncryptedSize(file->size()) + blob.size();
@@ -426,7 +425,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 			);
 
 			QByteArray str(uncrypted_filename, nameSize);
-			name = fileInfo.absolutePath() + "/" + QString::fromLocal8Bit(str);
+			name = fileInfo.absolutePath() + "/" + QString::fromUtf16(reinterpret_cast<const uint16_t*>(str.constData()), nameSize / 2);
 			free(uncrypted_filename);
 		}
 	}
