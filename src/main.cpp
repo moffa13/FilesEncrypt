@@ -9,7 +9,7 @@
 #include "Init.h"
 
 #ifdef Q_OS_WIN
-#include "SessionKey.h"
+#include "crypto/SessionKey.h"
 #endif
 
 #ifdef QT_DEBUG
@@ -52,29 +52,48 @@ int main(int argc, char *argv[])
 #ifndef UNIT_TEST
 
 	if(argc > 2 && strcmp(argv[1], "getState") == 0){ // This has to be fast for explorer
-		unsigned uncrypted = 0;
-		unsigned crypted = 0;
-		for(int i = 2; i < argc; ++i){
-			QFile f{argv[i]};
-			if(!f.exists()) continue;
-			if(!f.open(QFile::ReadWrite)) continue;
-			EncryptDecrypt_s infos = FilesEncrypt::guessEncrypted(f);
-			f.close();
-			if(infos.state == ENCRYPT){
-				crypted++;
-			}else{
-				uncrypted++;
-			}
-		}
 
 		Init::deInit();
 
+		unsigned uncrypted = 0;
+		unsigned crypted = 0;
+
+		for(int i = 2; i < argc; ++i){
+
+			QFileInfo fInfo{argv[i]};
+			if(!fInfo.exists()) continue;
+
+			if(fInfo.isDir()){
+				EncryptDecrypt infos = FilesEncrypt::guessEncrypted(QDir{argv[i]});
+				if(infos == PARTIAL){ // If one dir is partially encrypted, return PARTIAL
+					return 3;
+				}else if(infos == ENCRYPT){
+					crypted++;
+				}else{
+					uncrypted++;
+				}
+			}else{
+				QFile f{argv[i]};
+				if(!f.open(QFile::ReadWrite)) continue;
+				EncryptDecrypt_s infos = FilesEncrypt::guessEncrypted(f);
+				f.close();
+				if(infos.state == ENCRYPT){
+					crypted++;
+				}else{
+					uncrypted++;
+				}
+
+			}
+
+			if(crypted != 0 && uncrypted != 0){
+				return 3;
+			}
+		}
+
 		if(crypted == 0){
-			return 1;
+			return 1; // Decrypted
 		}else if(uncrypted == 0){
 			return 2;
-		}else{
-			return 3;
 		}
 	}
 

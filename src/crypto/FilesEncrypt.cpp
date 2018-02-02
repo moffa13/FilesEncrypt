@@ -57,7 +57,7 @@ FilesEncrypt::FilesEncrypt(const char* aes){
  */
 void FilesEncrypt::init(){
 	m_aes_crypted = reinterpret_cast<unsigned char*>(malloc(512));
-    m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(48)); // CryptProtectMemory need multiple of 16 so it is 32 & aes needs 48 so it's 48
+	m_aes_decrypted = reinterpret_cast<unsigned char*>(malloc(48)); // CryptProtectMemory need multiple of 16 so it is 32 & aes needs 48 so it's 48
 
 	m_deleteAESTimer.setSingleShot(true);
 	connect(&m_deleteAESTimer, &QTimer::timeout, [this](){
@@ -103,11 +103,11 @@ unsigned FilesEncrypt::getPendingCrypt(){
 void FilesEncrypt::setAES(const char* aes){
 	m_aes_decrypted_set = true;
 #ifdef Q_OS_WIN
-    memcpy(m_aes_decrypted, aes, 32);
+	memcpy(m_aes_decrypted, aes, 32);
 	CryptProtectMemory(m_aes_decrypted, 32, CRYPTPROTECTMEMORY_SAME_PROCESS);
 #else
-    SecureMemBlock block{reinterpret_cast<const unsigned char*>(aes), 32, false};
-    memcpy(m_aes_decrypted, block.getDataNoAction(), block.getLen());
+	SecureMemBlock block{reinterpret_cast<const unsigned char*>(aes), 32, false};
+	memcpy(m_aes_decrypted, block.getDataNoAction(), block.getLen());
 #endif
 }
 
@@ -125,7 +125,7 @@ void FilesEncrypt::unsetAES(){
 }
 
 SecureMemBlock FilesEncrypt::getAES() const{
-    return SecureMemBlock{m_aes_decrypted, 48, true};
+	return SecureMemBlock{m_aes_decrypted, 48, true};
 }
 
 /**
@@ -466,28 +466,31 @@ EncryptDecrypt FilesEncrypt::guessEncrypted(QDir const& dir){
 
 	unsigned crypted = 0;
 	unsigned uncrypted = 0;
-	unsigned total = 0;
-	foreach(QFileInfo const& f, dir.entryInfoList()){
-		if(f.isFile()){
-			total++;
-			QFile file(f.absoluteFilePath());
-			if(!file.open(QFile::ReadOnly)){
-				;; // TODO MOTHERFUCKER
-			}
+
+	FilesAndSize files = getFilesFromDirRecursive(dir);
+
+	if(files.files.length() == 0) return DECRYPT;
+
+	foreach(QString const& f, files.files){
+		QFile file(f);
+		if(!file.open(QFile::ReadOnly)){
+			;; // TODO
+		}
 		if(FilesEncrypt::guessEncrypted(file).state == EncryptDecrypt::ENCRYPT){
-				crypted++;
-			}else{
-				uncrypted++;
-			}
+			crypted++;
+		}else{
+			uncrypted++;
+		}
+
+		if(crypted != 0 && uncrypted != 0){
+			return PARTIAL;
 		}
 	}
 
-	if(crypted == total){
-		return EncryptDecrypt::ENCRYPT;
-	}else if(uncrypted == total){
+	if(crypted == 0){
 		return EncryptDecrypt::DECRYPT;
 	}else{
-		return EncryptDecrypt::PARTIAL;
+		return EncryptDecrypt::ENCRYPT;
 	}
 }
 

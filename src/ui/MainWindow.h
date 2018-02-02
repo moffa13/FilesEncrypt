@@ -17,7 +17,7 @@
 #include "FilesListModel.h"
 
 #ifdef Q_OS_WIN
-#include "SessionKey.h"
+#include "crypto/SessionKey.h"
 #endif
 
 #define QPAIR_CRYPT_DEF QPair<QString, EncryptDecrypt_s>

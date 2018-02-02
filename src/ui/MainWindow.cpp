@@ -218,8 +218,12 @@ void MainWindow::updateAvailableButtons(){
 	// if there are workers guessing the entries's state, some entries might have a NOT_FINISHED state so we can't change the buttons state
 	if(s_current_guess_encrypted_watchers > 0) return;
 
+	unsigned totalSize = 0;
+
 	for(auto const& dir : m_filesListModel.getDirs()){
 		// If at least one entry is partially encrypted, all the buttons have to be enabled so we can return after
+		totalSize += dir.sizeBytes;
+
 		if(*dir.state == PARTIAL){
 			ui->cryptAll->setEnabled(true);
 			ui->decryptAll->setEnabled(true);
@@ -234,7 +238,10 @@ void MainWindow::updateAvailableButtons(){
 	}
 
 	// All are encrypted
-	if(decrypted == 0){
+	if(totalSize == 0){
+		ui->cryptAll->setEnabled(false);
+		ui->decryptAll->setEnabled(false);
+	}else if(decrypted == 0){
 		ui->cryptAll->setEnabled(false);
 		ui->decryptAll->setEnabled(true);
 	}else if(encrypted == 0){
@@ -399,13 +406,12 @@ void MainWindow::encryptFinished(CryptInfos &item) const{
 		}
 	}
 
-
-	if(crypted == length){
-		item.stateStr = tr("Oui");
-		*item.state = ENCRYPT;
-	}else if(uncrypted == length){
+	if(length == 0 || uncrypted == length){
 		item.stateStr = tr("Non");
 		*item.state = DECRYPT;
+	}else if(crypted == length){
+		item.stateStr = tr("Oui");
+		*item.state = ENCRYPT;
 	}else{
 		item.stateStr = "-";
 		*item.state = PARTIAL;
@@ -470,6 +476,7 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 		infos.stateStr = "...";
 		infos.name  = item;
 		infos.size = "...";
+		infos.sizeBytes = 0;
 		infos.isFile = false;
 		infos.watcher = nullptr;
 		infos.recursiveWatcher = nullptr;
@@ -514,6 +521,7 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 					CryptInfos &infos{m_filesListModel.getDir(item)};
 					FilesAndSize res{watcherRecursiveFilesDiscover->result()};
 					infos.size = utilities::speed_to_human(res.size);
+					infos.sizeBytes = res.size;
 					QStringList &files = res.files;
 					foreach(auto const& file, files){
 						EncryptDecrypt_light state;
