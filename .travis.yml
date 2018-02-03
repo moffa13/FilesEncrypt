@@ -8,12 +8,14 @@ before_install:
 - sudo apt-get update -qq
 install:
 - sudo apt-get -y install qt55base
-group: deprecated-2017Q4
+- export DISPLAY=':99.0'
+- Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
     packages:
+    - xvfb
     - gcc-6
     - g++-6
 script:

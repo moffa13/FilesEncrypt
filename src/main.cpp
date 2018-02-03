@@ -29,9 +29,9 @@ static int argcw;
 
 QString getArgv(int i){
 #ifdef Q_OS_WIN
-    return QString::fromUtf16{argvw[i]};
+	return QString::fromUtf16(argvw[i]);
 #else
-    return QString{argvw[i]};
+	return QString(argvw[i]);
 #endif
 }
 
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]){
 
 		for(int i = 2; i < argcw; ++i){
 
-            QString fileStr = getArgv(i);
+			QString fileStr = getArgv(i);
 
 			QFileInfo fInfo{fileStr};
 			if(!fInfo.exists()) continue;
@@ -162,15 +162,15 @@ int main(int argc, char *argv[]){
 		QObject::connect(&s, &SessionKey::finishedAction, [&loop](){
 			loop.exit();
 		});
-		QObject::connect(&s, &SessionKey::keyReady, [&s, argcw, argvw, action](){
+		QObject::connect(&s, &SessionKey::keyReady, [&s, action](){
 			if(argcw > 3){
 				QStringList files;
 				for(int i = 2; i < argcw; ++i){
-                    files << getArgv(i);
+					files << getArgv(i);
 				}
 				s.action(files, action);
 			}else{
-                s.action(getArgv(2),  action);
+				s.action(getArgv(2),  action);
 			}
 		});
 		QTimer::singleShot(0, [&s](){ // To be sure loop is executing
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]){
 			qApp->exit();
 		});
 	}
-    LocalFree(argvw);
+	LocalFree(argvw);
 #endif // Q_OS_WIN
 	auto ret = a.exec();
 	Init::deInit();

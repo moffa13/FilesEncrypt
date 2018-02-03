@@ -49,6 +49,67 @@ void TestFilesEncrypt::shouldRecognizeFileState(){
 
 }
 
+void TestFilesEncrypt::shouldRecognizeDirState(){
+
+	QString testDirStr = QApplication::applicationDirPath() + "/test-dir";
+	QDir testDir(testDirStr);
+	testDir.removeRecursively();
+	testDir.mkdir(".");
+
+	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == DECRYPT); // Empty directory
+
+	QFile f(testDir.absoluteFilePath("file.test"));
+	QVERIFY(f.open(QFile::ReadWrite));
+	f.close();
+
+	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == DECRYPT); // Directory with empty file
+
+	QVERIFY(f.open(QFile::ReadWrite));
+	f.write(QByteArray("Hello"));
+	f.close();
+
+	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == DECRYPT); // Directory with uncrypted file
+
+
+	FilesEncrypt::genKey(QApplication::applicationDirPath() + "/key.test", "12345");
+	FilesEncrypt fi{(QApplication::applicationDirPath() + "/key.test").toStdString()};
+	fi.requestAesDecrypt("12345");
+
+	QVERIFY(f.open(QFile::ReadWrite));
+	finfo_s enc1 = fi.encryptFile(&f, ENCRYPT, true);
+	f.close();
+
+	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == ENCRYPT); // Directory with uncrypted file
+
+	QFile f2(testDir.absoluteFilePath("file2.test"));
+	QVERIFY(f2.open(QFile::ReadWrite));
+	f2.write(QByteArray("FilesEncrypt"));
+	f2.close();
+
+	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == PARTIAL); // Directory with uncrypted file
+
+
+	QVERIFY(f2.open(QFile::ReadWrite));
+	finfo_s enc2 = fi.encryptFile(&f2, ENCRYPT, true);
+	f2.close();
+
+	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == ENCRYPT); // Directory with uncrypted file
+
+	QFile enc1F(enc1.name);
+	QVERIFY(enc1F.open(QFile::ReadWrite));
+	fi.encryptFile(&enc1F, DECRYPT, true);
+	enc1F.close();
+
+	QFile enc2F(enc2.name);
+	QVERIFY(enc2F.open(QFile::ReadWrite));
+	fi.encryptFile(&enc2F, DECRYPT, true);
+	enc2F.close();
+
+	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == DECRYPT); // Directory with uncrypted file
+
+	testDir.removeRecursively();
+}
+
 void TestFilesEncrypt::shouldEncrypt(){
 
 	bool encrypt_filename{true};

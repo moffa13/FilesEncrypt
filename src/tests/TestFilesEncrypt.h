@@ -7,18 +7,19 @@
 class TestFilesEncrypt : public QObject
 {
 
-    Q_OBJECT
+	Q_OBJECT
 
-    public:
-        static int runTests();
-    private:
+	public:
+		static int runTests();
+	private:
 
-    private slots:
-        void init();
-        void cleanup();
-        void shouldRecognizeFileState();
-        void shouldEncrypt();
-        void shouldReadFromFile();
+	private slots:
+		void init();
+		void cleanup();
+		void shouldRecognizeFileState();
+		void shouldEncrypt();
+		void shouldReadFromFile();
+		void shouldRecognizeDirState();
 };
 
 #endif // TESTFILESENCRYPT_H
