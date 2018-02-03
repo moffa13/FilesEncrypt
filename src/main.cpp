@@ -20,6 +20,21 @@
 #include "tests/TestSecureMemBlock.h"
 #endif
 
+#ifdef Q_OS_WIN
+static ushort** argvw = nullptr;
+#else
+static char** argvw = nullptr;
+#endif
+static int argcw;
+
+QString getArgv(int i){
+#ifdef Q_OS_WIN
+    return QString::fromUtf16{argvw[i]};
+#else
+    return QString{argvw[i]};
+#endif
+}
+
 int main(int argc, char *argv[]){
 
 	// Init openssl & libgcrypt
@@ -51,9 +66,6 @@ int main(int argc, char *argv[]){
 
 #ifndef UNIT_TEST
 
-	ushort** argvw = nullptr;
-	int argcw;
-
 #ifdef Q_OS_WIN
 	argvw = (ushort**)CommandLineToArgvW(GetCommandLineW(), &argcw);
 #else
@@ -70,7 +82,7 @@ int main(int argc, char *argv[]){
 
 		for(int i = 2; i < argcw; ++i){
 
-			QString fileStr = QString::fromUtf16(argvw[i]);
+            QString fileStr = getArgv(i);
 
 			QFileInfo fInfo{fileStr};
 			if(!fInfo.exists()) continue;
@@ -154,11 +166,11 @@ int main(int argc, char *argv[]){
 			if(argcw > 3){
 				QStringList files;
 				for(int i = 2; i < argcw; ++i){
-					files << QString::fromUtf16(argvw[i]);
+                    files << getArgv(i);
 				}
 				s.action(files, action);
 			}else{
-				s.action(QString::fromUtf16(argvw[2]),  action);
+                s.action(getArgv(2),  action);
 			}
 		});
 		QTimer::singleShot(0, [&s](){ // To be sure loop is executing
@@ -169,10 +181,10 @@ int main(int argc, char *argv[]){
 			qApp->exit();
 		});
 	}
+    LocalFree(argvw);
 #endif // Q_OS_WIN
 	auto ret = a.exec();
 	Init::deInit();
-	LocalFree(argvw);
 	return ret;
 #endif // UNIT_TEST
 }
