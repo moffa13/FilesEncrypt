@@ -92,13 +92,19 @@ void SessionKey::emitIfNoMoreEncrypt(){
  * @param key Uncrypted 32 bytes aes key
  */
 void SessionKey::encryptAndStoreSessionKey(const char* key){
+
+	BYTE* aesCopy = reinterpret_cast<BYTE*>(malloc(32));
+	memcpy(aesCopy, key, 32);
+
 	DATA_BLOB aes;
 	aes.cbData = 32;
-	aes.pbData = (BYTE*)key;
+	aes.pbData = aesCopy;
 
 	DATA_BLOB sessionKey;
 
 	CryptProtectData(&aes, NULL, NULL, NULL, NULL, 0, &sessionKey);
+
+	free(aesCopy);
 
 	QFile sessionKeyFile{QApplication::applicationDirPath() + "/" + _sessionKeyName};
 	sessionKeyFile.open(QFile::ReadWrite);
