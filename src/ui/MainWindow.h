@@ -34,9 +34,12 @@ class MainWindow : public QMainWindow
 
 	public:
 		explicit MainWindow(QWidget *parent = 0);
-		~MainWindow();
+	~MainWindow();
+	bool allTasksDone(EncryptDecrypt action);
+	inline EncryptDecrypt getLastAction() const { return _lastAction; }
 	Q_SIGNALS:
-		void file_done();
+		void root_done() const;
+		void file_done() const;
 		void finishedDiscover() const;
 	private Q_SLOTS:
 		void select_dir();
@@ -76,10 +79,11 @@ class MainWindow : public QMainWindow
 		QMenu* m_listRowMenu;
 		bool m_encrypting = false;
 		FilesListModel m_filesListModel;
+		EncryptDecrypt _lastAction = PARTIAL;
 		static QPAIR_CRYPT_DEF guessEncrypted(QString const& file);
 		finfo_s encrypt(QString const &file, EncryptDecrypt action) const;
 		void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item) const;
-		void encryptFinished(CryptInfos &item) const;
+		void changeRootState(CryptInfos &item, bool emitRootChanged = false) const;
 		void action(EncryptDecrypt action);
 		QString get_base_dir() const;
 		void set_base_dir(QString const &dir);

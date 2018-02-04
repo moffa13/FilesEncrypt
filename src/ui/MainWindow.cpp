@@ -380,10 +380,10 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
 		*(fInfo.state) = i.second.state;
 	}
 
-	encryptFinished(item);
+	changeRootState(item);
 }
 
-void MainWindow::encryptFinished(CryptInfos &item) const{
+void MainWindow::changeRootState(CryptInfos &item, bool fileModified) const{
 
 	auto length = item.isFile ? 1 : item.files.size();
 
@@ -396,6 +396,11 @@ void MainWindow::encryptFinished(CryptInfos &item) const{
 				++crypted;
 			}else if(*(i.state) == EncryptDecrypt::DECRYPT){
 				++uncrypted;
+			}
+			if(crypted != 0 && uncrypted != 0){
+				crypted = 1;
+				uncrypted = 1;
+				break;
 			}
 		}
 	}else{
@@ -416,6 +421,9 @@ void MainWindow::encryptFinished(CryptInfos &item) const{
 		item.stateStr = "-";
 		*item.state = PARTIAL;
 	}
+
+	if(fileModified)
+		emit root_done();
 }
 
 QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
@@ -557,7 +565,7 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 
 			filesAndState[info.absoluteFilePath()] = state;
 			infos.state = new EncryptDecrypt{guess.second.state};
-			encryptFinished(infos);
+			changeRootState(infos);
 
 			// Show the type
 			infos.type = tr("Fichier");
@@ -623,9 +631,19 @@ void MainWindow::on_cryptAll_clicked(){
 	action(EncryptDecrypt::ENCRYPT);
 }
 
+bool MainWindow::allTasksDone(EncryptDecrypt action){
+	if(action == PARTIAL) throw std::runtime_error("Action can not be partial");
+	for(QMap<QString, CryptInfos>::const_iterator it = m_filesListModel.getDirs().constBegin(); it != m_filesListModel.getDirs().constEnd(); ++it){
+		if(*(it.value().state) != action) return false;
+	}
+	return true;
+}
+
 void MainWindow::action(EncryptDecrypt action){
 
 	if(m_encrypting || m_filesListModel.rowCount() == 0 || _current_adding_items > 0) return;
+
+	_lastAction = action;
 
 	if(!beSureKeyIsSelectedAndValid([this, action]{
 		this->action(action);
@@ -706,8 +724,9 @@ void MainWindow::action(EncryptDecrypt action){
 
 				connect(watcher, &QFutureWatcher<void>::finished, [this, watcher, &item, l, orig_name](){
 					delete l;
-					encryptFinished(item);
+					changeRootState(item, true);
 					m_encrypting = false;
+					emit file_done();
 					if(FilesEncrypt::getPendingCrypt() == 0){
 						Crypt::setAborted(false);
 						Crypt::setPaused(false);
@@ -715,7 +734,6 @@ void MainWindow::action(EncryptDecrypt action){
 					}
 
 					m_filesListModel.update(orig_name);
-
 					watcher->deleteLater();
 				});
 
@@ -748,8 +766,6 @@ void MainWindow::action(EncryptDecrypt action){
 							s_encryptMutex.unlock();
 						}
 					}
-
-					emit file_done();
 				};
 
 				QFuture<void> future = QtConcurrent::map(*l, func);

@@ -10,6 +10,11 @@
 
 SessionKey::SessionKey(MainWindow* mainWindow, QString sessionKeyName) : _sessionKeyName(std::move(sessionKeyName)), _mainWindow(mainWindow){
 	QObject::connect(_mainWindow->m_choose_key, SIGNAL(userExit()), this, SIGNAL(finishedAction()));
+	QObject::connect(_mainWindow, &MainWindow::file_done, [this](){
+		if(FilesEncrypt::getPendingCrypt() == 0 && Crypt::isAborted()){
+			emit finishedAction();
+		}
+	});
 }
 
 /**
@@ -76,7 +81,7 @@ QByteArray SessionKey::readSessionKey(){
  * @brief SessionKey::emitIfNoMoreEncrypt
  */
 void SessionKey::emitIfNoMoreEncrypt(){
-	if(FilesEncrypt::getPendingCrypt() == 0){
+	if(_mainWindow->allTasksDone(_mainWindow->getLastAction())){
 		emit finishedAction();
 	}
 }
@@ -127,7 +132,7 @@ void SessionKey::checkForSessionKey(bool warn){
 	}
 
 	if(_mainWindow->m_filesEncrypt){
-		QObject::connect(_mainWindow, &MainWindow::file_done, [this](){
+		QObject::connect(_mainWindow, &MainWindow::root_done, [this](){
 			emitIfNoMoreEncrypt();
 		});
 	}
