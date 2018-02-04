@@ -51,10 +51,10 @@ void TestFilesEncrypt::shouldRecognizeFileState(){
 
 void TestFilesEncrypt::shouldRecognizeDirState(){
 
-	QString testDirStr = QApplication::applicationDirPath() + "/test-dir";
-	QDir testDir(testDirStr);
-	testDir.removeRecursively();
-	testDir.mkdir(".");
+    QDir appDir(QApplication::applicationDirPath());
+    QDir testDir(appDir.absolutePath() + "/test-dir");
+    testDir.removeRecursively();
+    QVERIFY(appDir.mkdir("test-dir"));
 
 	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == DECRYPT); // Empty directory
 
@@ -107,7 +107,7 @@ void TestFilesEncrypt::shouldRecognizeDirState(){
 
 	QVERIFY(FilesEncrypt::guessEncrypted(testDir) == DECRYPT); // Directory with uncrypted file
 
-	testDir.removeRecursively();
+    testDir.removeRecursively();
 }
 
 void TestFilesEncrypt::shouldEncrypt(){
