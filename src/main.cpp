@@ -7,9 +7,9 @@
 #include <QTranslator>
 #include <Logger.h>
 #include "Init.h"
+#include "crypto/SessionKey.h"
 
 #ifdef Q_OS_WIN
-#include "crypto/SessionKey.h"
 #include <Windows.h>
 #endif
 
@@ -147,9 +147,7 @@ int main(int argc, char *argv[]){
 		// Delete old
 		QFile::remove(qApp->applicationFilePath() + ".old");
 		QMessageBox::information(&w, MainWindow::tr("Mise à jour"), MainWindow::tr("La mise à jour a correctement été installée."), QMessageBox::Ok);
-	}
-#ifdef Q_OS_WIN
-	else if(argc > 2 && strcmp(argv[1], "encrypt") == 0){
+	}else if(argc > 2 && strcmp(argv[1], "encrypt") == 0){
 		action = ENCRYPT;
 	}else if(argc > 2 && strcmp(argv[1], "decrypt") == 0){
 		action = DECRYPT;
@@ -181,6 +179,8 @@ int main(int argc, char *argv[]){
 			qApp->exit();
 		});
 	}
+
+#ifdef Q_OS_WIN
 	LocalFree(argvw);
 #endif // Q_OS_WIN
 	auto ret = a.exec();

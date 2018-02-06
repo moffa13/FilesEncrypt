@@ -45,7 +45,8 @@ SOURCES += main.cpp \
 	Init.cpp \
 	Logger.cpp \
 	utilities.cpp \
-	Version.cpp
+	Version.cpp \
+        crypto/SessionKeyBase.cpp
 
 HEADERS += \
 	crypto/Crypt.h \
@@ -64,12 +65,13 @@ HEADERS += \
 	Init.h \
 	Logger.h \
 	utilities.h \
-	Version.h
+	Version.h \
+        crypto/SessionKey.h \
+        crypto/SessionKeyBase.h
 
 win32{
-	SOURCES += crypto/SessionKey.cpp
-
-	HEADERS += crypto/SessionKey.h
+        SOURCES += crypto/SessionKey_win.cpp
+        HEADERS += crypto/SessionKey_win.h
 
 	QMAKE_CXXFLAGS += -MD
 	QMAKE_CXXFLAGS_RELEASE = -O2
@@ -90,11 +92,16 @@ win32{
 }
 
 unix{
+        SOURCES += crypto/SessionKey_linux.cpp
+        HEADERS += crypto/SessionKey_linux.h
+
 	QMAKE_CXXFLAGS += -Wno-reorder -g -fno-inline -std=c++11
 	INCLUDEPATH += "$$PWD/../include/linux/"
 	DEPENDPATH += "$$PWD/../include/linux/"
 	INCLUDEPATH += "$$PWD/../include/"
+        INCLUDEPATH += /usr/include/glib-2.0/
 	LIBS += -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs -lgcrypt
+        LIBS += -L/usr/lib -lgnome-keyring
 }
 
 FORMS += \

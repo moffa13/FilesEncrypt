@@ -10,7 +10,8 @@ Application for files/dir encrypting, RSA-4096 & AES-256 CBC
 
 If you are using linux system, you might have to install some extra libraries and write the following in a terminal.
 
-	sudo apt-get install openssl libssl-dev libgl1-mesa-dev libgcrypt-dev -y
+	sudo apt-get install openssl libssl-dev libgl1-mesa-dev libgcrypt-dev libglib2.0-dev libgnome-keyring-dev -y
+	sudo cp /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/glibconfig.h
 
 Then, simply run
 

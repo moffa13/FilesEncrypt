@@ -30,7 +30,8 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
-	friend class SessionKey;
+    friend class SessionKeyBase;
+    friend class SessionKey;
 
 	public:
 		explicit MainWindow(QWidget *parent = 0);

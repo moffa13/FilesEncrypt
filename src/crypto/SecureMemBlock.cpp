@@ -15,7 +15,7 @@
 std::unique_ptr<unsigned char, std::function<void(unsigned char*)>> SecureMemBlock::_aes{
 	nullptr,
 	[](unsigned char* ptr){
-		gcry_free(ptr);
+        gcry_free(ptr);
 	}
 };
 QMap<QByteArray, QByteArray> SecureMemBlock::_ivs;
@@ -27,7 +27,7 @@ SecureMemBlock::SecureMemBlock(const unsigned char *data, size_t len, bool encry
 #ifdef Q_OS_LINUX
 	// Create an encryption key valid until the program's lifetime ends
 	if(_aes == nullptr){
-		_aes.reset(reinterpret_cast<unsigned char*>(gcry_malloc_secure(32)));
+        _aes.reset(reinterpret_cast<unsigned char*>(gcry_malloc_secure(32)));
 		Crypt::genAES(AESSIZE::S256, _aes.get());
 	}
 	// Allocate an IV for each block
