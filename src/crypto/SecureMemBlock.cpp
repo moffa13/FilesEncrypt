@@ -5,7 +5,6 @@
 #endif
 
 #ifdef Q_OS_LINUX
-#include <gnome-keyring-1/gnome-keyring-memory.h>
 #include <openssl/sha.h>
 #include <gcr/gcr-base.h>
 #include "Crypt.h"
