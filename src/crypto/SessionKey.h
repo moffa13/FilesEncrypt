@@ -3,6 +3,8 @@
 
 #include <QtGlobal>
 
+class SessionKey;
+
 #ifdef Q_OS_WIN
 #include "SessionKey_win.h"
 #else
