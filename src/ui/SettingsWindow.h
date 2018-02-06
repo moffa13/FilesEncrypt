@@ -17,7 +17,7 @@ public:
 	explicit SettingsWindow(QWidget *parent = 0);
 	static QVariant getDefaultSetting(QString const& name);
 	~SettingsWindow();
-private slots:
+private Q_SLOTS:
 
 Q_SIGNALS:
 	void closed();

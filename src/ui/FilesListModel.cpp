@@ -51,7 +51,7 @@ QVariant FilesListModel::headerData(int section, Qt::Orientation orientation, in
 
 void FilesListModel::update(const QString &name){
 	auto row{getIndex(name)};
-	emit dataChanged(index(row, 0), index(row, 3));
+    Q_EMIT dataChanged(index(row, 0), index(row, 3));
 }
 
 void FilesListModel::insert(QString const& key, CryptInfos const& infos){

@@ -24,13 +24,13 @@ void Downloader::fileDownloadedSlot(QNetworkReply *reply){
     QUrl movedUrl = QUrl{reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl()};
 	int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if(responseCode != 200 && movedUrl.isEmpty()){
-		emit error();
+        Q_EMIT error();
         return;
 	}
 
     if(movedUrl.isEmpty()){
 		QByteArray res = reply->readAll();
-		emit downloaded(res);
+        Q_EMIT downloaded(res);
 		return;
 	}
 
@@ -42,6 +42,6 @@ void Downloader::fileDownloadedSlot(QNetworkReply *reply){
 void Downloader::downloadProgressSlot(qint64 read, qint64 total){
 	int r = rep->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 	if(r == 200)
-		emit downloadProgress(read, total);
+        Q_EMIT downloadProgress(read, total);
 }
 

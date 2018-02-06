@@ -19,10 +19,10 @@ class Downloader : public QNetworkAccessManager
 		QNetworkReply *rep = nullptr;
 	private:
 		QNetworkRequest m_request;
-	public slots:
+    public Q_SLOTS:
 		void fileDownloadedSlot(QNetworkReply*);
 		void downloadProgressSlot(qint64 read, qint64 total);
-	signals:
+    Q_SIGNALS:
 		void downloaded(QByteArray const& res);
 		void error();
 		void downloadProgress(qint64 read, qint64 total);

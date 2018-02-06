@@ -30,9 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_update{UPDATE_FETCH_URL, UPDATE_DOWNLOAD_URL}
 {
 	ui->setupUi(this);
-
 	setAcceptDrops(true);
-
 	setWindowTitle(qApp->applicationName() + " v" + Version{qApp->applicationVersion()}.getVersionStr().c_str());
 
 	m_settings = new QSettings;
@@ -100,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_listRowMenu->addAction(openDir);
 
 	_sessionKey = new SessionKey{this};
-	if(!_sessionKey->readSessionKey().isEmpty()){
+    if(_sessionKey->sessionKeyExists()){
 		ui->action_saveSessionKey->setEnabled(false);
 	}
 
@@ -369,7 +367,7 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
 	// Retrieve results
 	QList<QPAIR_CRYPT_DEF> res{watcher->future().results()};
 
-	foreach(auto const i, res){
+    Q_FOREACH(auto const i, res){
 
 		EncryptDecrypt_light& fInfo{item.files[i.first]};
 
@@ -420,7 +418,7 @@ void MainWindow::changeRootState(CryptInfos &item, bool fileModified) const{
 	}
 
 	if(fileModified)
-		emit root_done();
+        Q_EMIT root_done();
 }
 
 QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
@@ -453,13 +451,13 @@ finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action) const{
  */
 void MainWindow::checkNoFilesProcessingToList() const{
 	if(_current_adding_items == 0){
-		emit finishedDiscover();
+        Q_EMIT finishedDiscover();
 	}
 }
 
 void MainWindow::addWhateverToList(QStringList const& items){
 	_current_adding_items += items.length();
-	foreach(const auto& item, items){
+    Q_FOREACH(const auto& item, items){
 		addWhateverToList(item, true);
 	}
 }
@@ -468,7 +466,7 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 
 	if(!fromMany) _current_adding_items++;
 
-	if(!item.isEmpty() && !m_filesListModel.getDirs().contains(item)){ // Pre-conditions
+    if(!item.isEmpty() && !m_filesListModel.getDirs().contains(item)){ // Pre-conditions
 
 		CryptInfos infos; // All the informations about an entry (a complete recursive directory or a file)
 
@@ -528,7 +526,7 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 					infos.size = utilities::speed_to_human(res.size);
 					infos.sizeBytes = res.size;
 					QStringList &files = res.files;
-					foreach(auto const& file, files){
+                    Q_FOREACH(auto const& file, files){
 						EncryptDecrypt_light state;
 						state.offsetBeforeContent = 0; // Will be set in guessEncryptedFinished
 						state.state = new EncryptDecrypt{NOT_FINISHED};
@@ -580,7 +578,9 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 			_current_adding_items--;
 			checkNoFilesProcessingToList();
 		}
-	}
+    }else{
+        Q_EMIT finishedDiscover();
+    }
 }
 
 void MainWindow::select_file(){
@@ -723,7 +723,7 @@ void MainWindow::action(EncryptDecrypt action){
 					delete l;
 					changeRootState(item, true);
 					m_encrypting = false;
-					emit file_done();
+                    Q_EMIT file_done();
 					if(FilesEncrypt::getPendingCrypt() == 0){
 						Crypt::setAborted(false);
 						Crypt::setPaused(false);

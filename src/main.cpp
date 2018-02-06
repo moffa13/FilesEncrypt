@@ -18,6 +18,7 @@
 #include "tests/TestFilesEncrypt.h"
 #include "tests/TestVersion.h"
 #include "tests/TestSecureMemBlock.h"
+#include "tests/TestSessionKey.h"
 #endif
 
 #ifdef Q_OS_WIN
@@ -42,12 +43,22 @@ int main(int argc, char *argv[]){
 
 	QApplication a{argc, argv};
 
+    a.setApplicationName("FilesEncrypt");
+    a.setApplicationVersion(APP_VERSION);
+    a.setOrganizationName("FilesEncrypt");
+    a.setOrganizationDomain("filesencrypt.com");
+
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+
 // If in debug mode, run unit tests before starting program
 #ifdef QT_DEBUG
 	Logging::Logger::setLogLevel(Logging::DEBUG);
 	int result;
 	result = TestSecureMemBlock::runTests();
 	result |= TestCrypt::runTests();
+    result |= TestSessionKey::runTests();
 	result |= TestFilesEncrypt::runTests();
 	result |= TestVersion::runTests();
 	if(result != 0){
@@ -124,19 +135,10 @@ int main(int argc, char *argv[]){
 	QTranslator translator;
 	translator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
 	QTranslator translator2;
-	translator2.load(QLocale::system().name(), ":/lang");
+    translator2.load(QLocale::system().name(), ":/lang");
 
-	qApp->installTranslator(&translator);
-	qApp->installTranslator(&translator2);
-
-	a.setApplicationName("FilesEncrypt");
-	a.setApplicationVersion(APP_VERSION);
-	a.setOrganizationName("FilesEncrypt");
-	a.setOrganizationDomain("filesencrypt.com");
-
-	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-
-	QSettings::setDefaultFormat(QSettings::IniFormat);
+    qApp->installTranslator(&translator);
+    qApp->installTranslator(&translator2);
 
 	MainWindow w;
 	w.show();

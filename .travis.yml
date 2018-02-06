@@ -19,7 +19,8 @@ addons:
     - gcc-6
     - g++-6
     - libglib2.0-dev
-    - libgnome-keyring-dev
+    - libsecret-1-dev
+    - libgcr-3-dev
 script:
 - source /opt/qt55/bin/qt55-env.sh
 - sudo cp /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/glibconfig.h

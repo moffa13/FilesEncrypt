@@ -12,11 +12,11 @@ class TestVersion : public QObject
         static int runTests();
     private:
 
-    private slots:
-        void init();
-        void cleanup();
-        void shouldCompareCorrectly();
-        void shouldThrowError();
+private Q_SLOTS:
+    void init();
+    void cleanup();
+    void shouldCompareCorrectly();
+    void shouldThrowError();
 };
 
 #endif // TESTVERSION_H

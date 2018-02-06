@@ -24,7 +24,7 @@ public:
 	void keyDone();
 	void userExit(); // Called when user hit the red cross
 
-private slots:
+private Q_SLOTS:
 	void on_newKey_clicked();
 	void on_choose_clicked();
 	void on_select_clicked();

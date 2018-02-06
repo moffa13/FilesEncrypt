@@ -63,7 +63,7 @@ void FilesEncrypt::init(){
 	connect(&m_deleteAESTimer, &QTimer::timeout, [this](){
 		if(s_pendingCrypt == 0){
 			unsetAES();
-			emit keyEncrypted();
+            Q_EMIT keyEncrypted();
 			Logging::Logger::debug("AES key deleted from ram");
 		}else{
 			Logging::Logger::warn("Impossible to remove the key, already crypting/decrypting " + QString::number(s_pendingCrypt) + " file(s)");
@@ -283,7 +283,7 @@ bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
 		) != -1 ){
 			success = true;
 			setAES(reinterpret_cast<const char*>(aes_decrypted));
-			emit keyDecrypted();
+            Q_EMIT keyDecrypted();
 			Logging::Logger::debug("AES successfully decrypted");
 			m_aes_decrypted_set = true;
 			startDeleteAesTimer();
@@ -447,7 +447,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 	}
 
 	removePendingCrypt();
-	emit file_done();
+    Q_EMIT file_done();
 end:
 	return result;
 }
@@ -470,7 +470,7 @@ EncryptDecrypt FilesEncrypt::guessEncrypted(QDir const& dir){
 
 	if(files.files.length() == 0) return DECRYPT;
 
-	foreach(QString const& f, files.files){
+    Q_FOREACH(QString const& f, files.files){
 		QFile file(f);
 		if(!file.open(QFile::ReadOnly)){
 			;; // TODO

@@ -135,14 +135,14 @@ void Crypt::aes_crypt(
 					QThread::msleep(100);
 				}
 			}
-			emit aes_encrypt_updated(readPass);
+            Q_EMIT aes_encrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
 		}
 
 	}while(read == AES_BLOCK_SIZE);
 
-	emit aes_encrypt_updated(readPass);
+    Q_EMIT aes_encrypt_updated(readPass);
 
 	// Writes the padding
 	EVP_EncryptFinal(ctx, encrypted + current_crypted_position, &lastLength);
@@ -173,7 +173,7 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
 				if(isAborted()) return;
 				QThread::msleep(100);
 			}
-			emit aes_encrypt_updated(readPass);
+            Q_EMIT aes_encrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
 		}
@@ -182,7 +182,7 @@ void Crypt::aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, uns
 		memset(crypted, 0, 16);
 	}
 
-	emit aes_encrypt_updated(readPass);
+    Q_EMIT aes_encrypt_updated(readPass);
 
 	// Writes the padding
 	EVP_EncryptFinal(ctx, crypted, &lastLength);
@@ -222,7 +222,7 @@ int Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, un
 				if(isAborted()) return -1;
 				QThread::msleep(100);
 			}
-			emit aes_decrypt_updated(readPass);
+            Q_EMIT aes_decrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
 		}
@@ -231,7 +231,7 @@ int Crypt::aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, un
 		memset(uncrypted, 0, 16);
 	}
 
-	emit aes_decrypt_updated(readPass);
+    Q_EMIT aes_decrypt_updated(readPass);
 
 	// Writes the padding
 	EVP_DecryptFinal(ctx, uncrypted, &lastLength);
@@ -286,13 +286,13 @@ int Crypt::aes_decrypt(
 					QThread::msleep(100);
 				}
 			}
-			emit aes_decrypt_updated(readPass);
+            Q_EMIT aes_decrypt_updated(readPass);
 			pass = 0;
 			readPass = 0;
 		}
 	}while(read == AES_BLOCK_SIZE);
 
-	emit aes_decrypt_updated(readPass);
+    Q_EMIT aes_decrypt_updated(readPass);
 
 	// Writes the padding
 	EVP_DecryptFinal(ctx, uncrypted + current_uncrypted_position, &lastLength);

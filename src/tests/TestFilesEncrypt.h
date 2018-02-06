@@ -13,7 +13,7 @@ class TestFilesEncrypt : public QObject
 		static int runTests();
 	private:
 
-	private slots:
+    private Q_SLOTS:
 		void init();
 		void cleanup();
 		void shouldRecognizeFileState();

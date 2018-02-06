@@ -14,7 +14,7 @@ class TestCrypt : public QObject
     private:
         Crypt* m_crypt = nullptr;
 
-    private slots:
+    private Q_SLOTS:
         void init();
         void cleanup();
         void shouldDecryptAesFromFile();

@@ -70,6 +70,6 @@ SettingsWindow::~SettingsWindow(){
 void SettingsWindow::closeEvent(QCloseEvent *e){
 	Q_UNUSED(e);
 	if(!m_refuseClose){
-		emit closed();
+        Q_EMIT closed();
 	}
 }

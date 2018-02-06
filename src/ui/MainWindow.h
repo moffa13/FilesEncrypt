@@ -1,6 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#ifndef UNIT_FRIEND
+#define UNIT_FRIEND
+#endif
+
 #include <QMainWindow>
 #include "crypto/FilesEncrypt.h"
 #include <QTableWidgetItem>
@@ -30,11 +34,13 @@ class MainWindow : public QMainWindow
 	friend class SessionKeyBase;
 	friend class SessionKey;
 
+    UNIT_FRIEND
+
 	public:
 		explicit MainWindow(QWidget *parent = 0);
-	~MainWindow();
-	bool allTasksDone(EncryptDecrypt action);
-	inline EncryptDecrypt getLastAction() const { return _lastAction; }
+        ~MainWindow();
+        bool allTasksDone(EncryptDecrypt action);
+        inline EncryptDecrypt getLastAction() const { return _lastAction; }
 	Q_SIGNALS:
 		void root_done() const;
 		void file_done() const;

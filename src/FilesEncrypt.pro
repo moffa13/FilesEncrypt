@@ -5,9 +5,12 @@ CONFIG += c++11
 RESOURCES = resources/FilesEncrypt.qrc
 TRANSLATIONS = filesencrypt_en.ts
 
+
+DEFINES += QT_NO_KEYWORDS GCR_API_SUBJECT_TO_CHANGE
 VERSION = 0.3.0
 DEFINES += APP_VERSION_COMMA=0,3,0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
 
 TARGET = FilesEncrypt
 CONFIG -= app_bundle
@@ -87,7 +90,7 @@ win32{
 		CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64d
 		CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64d
 		CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64
-		CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64
+                CONFIG(release, debug|release): LIBS += -L$$PW/usr/lib/x86_64-linux-gnu/D/../lib/ -llibssl-x64
 	}
 }
 
@@ -95,13 +98,18 @@ unix{
         SOURCES += crypto/SessionKey_linux.cpp
         HEADERS += crypto/SessionKey_linux.h
 
-	QMAKE_CXXFLAGS += -Wno-reorder -g -fno-inline -std=c++11
+        QMAKE_CXXFLAGS += -Wno-reorder -g -fno-inline -std=c++11
 	INCLUDEPATH += "$$PWD/../include/linux/"
 	DEPENDPATH += "$$PWD/../include/linux/"
 	INCLUDEPATH += "$$PWD/../include/"
+        INCLUDEPATH += /usr/include/libsecret-1/
+        INCLUDEPATH += /usr/include/gcr-3/
         INCLUDEPATH += /usr/include/glib-2.0/
-	LIBS += -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs -lgcrypt
-        LIBS += -L/usr/lib -lgnome-keyring
+        INCLUDEPATH += /usr/include/cairo/
+        INCLUDEPATH += /usr/include/pango-1.0/
+        INCLUDEPATH += /usr/include/p11-kit-1/
+        INCLUDEPATH += /usr/include/gck-1/
+        LIBS += -L/usr/lib/x86_64-linux-gnu/ -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs -lgcrypt -lsecret-1 -lgcr-base-3
 }
 
 FORMS += \
@@ -115,9 +123,11 @@ CONFIG(debug, debug|release) {
 	SOURCES += tests/TestCrypt.cpp \
 		tests/TestFilesEncrypt.cpp \
 		tests/TestVersion.cpp \
-		tests/TestSecureMemBlock.cpp
+                tests/TestSecureMemBlock.cpp \
+                tests/TestSessionKey.cpp
 	HEADERS += tests/TestCrypt.h \
 		tests/TestFilesEncrypt.h \
 		tests/TestVersion.h \
-		tests/TestSecureMemBlock.h
+                tests/TestSecureMemBlock.h \
+                tests/TestSessionKey.h
 }

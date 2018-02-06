@@ -8,7 +8,7 @@ SessionKeyBase::SessionKeyBase(MainWindow* mainWindow, QString sessionKeyName) :
 	QObject::connect(_mainWindow->m_choose_key, SIGNAL(userExit()), this, SIGNAL(finishedAction()));
 	QObject::connect(_mainWindow, &MainWindow::file_done, [this](){
 		if(FilesEncrypt::getPendingCrypt() == 0 && Crypt::isAborted()){
-			emit finishedAction();
+            Q_EMIT finishedAction();
 		}
 	});
 }
@@ -37,7 +37,9 @@ void SessionKeyBase::action(QStringList const& items, EncryptDecrypt action){
 	if(items.contains(QDir::toNativeSeparators(QApplication::applicationDirPath() + "/" + _sessionKeyName))){
 		QMessageBox::critical(nullptr, tr("Clé de session"), tr("Vous ne pouvez pas modifier la clé de session"), QMessageBox::Ok);
 	}else{
-		connect(_mainWindow, &MainWindow::finishedDiscover, [this, action](){
+        static QMetaObject::Connection conn;
+        disconnect(conn);
+        conn = connect(_mainWindow, &MainWindow::finishedDiscover, [this, action](){
 			_mainWindow->action(action);
 			emitIfNoMoreEncrypt();
 		});
@@ -57,7 +59,7 @@ void SessionKeyBase::checkForSessionKey(bool warn){
 	if(!sessionKey.exists()){
 		if(warn)
 			QMessageBox::information(nullptr, tr("Créer une clé de session"), tr("Vous ne disposez pas encore de clé de session, merci de sélectionner une clé ou d'en créer une"), QMessageBox::Ok);
-		if(_mainWindow->beSureKeyIsSelectedAndValid([this, warn](){checkForSessionKey(warn);}, false)){ // Asks user to select/create aes
+        if(_mainWindow->beSureKeyIsSelectedAndValid([this, warn](){checkForSessionKey(false);}, false)){ // Asks user to select/create aes
 			SecureMemBlock aes = _mainWindow->m_filesEncrypt->getAES();
 			encryptAndStoreSessionKey(reinterpret_cast<const char*>(aes.getData()));
 			keyReadyB = true;
@@ -70,12 +72,18 @@ void SessionKeyBase::checkForSessionKey(bool warn){
 	}
 
 	if(_mainWindow->m_filesEncrypt){
-		QObject::connect(_mainWindow, &MainWindow::root_done, [this](){
+        static QMetaObject::Connection conn;
+        disconnect(conn);
+        conn = QObject::connect(_mainWindow, &MainWindow::root_done, [this](){
 			emitIfNoMoreEncrypt();
 		});
 	}
 
-	if(keyReadyB) emit keyReady();
+    if(keyReadyB) Q_EMIT keyReady();
+}
+
+bool SessionKeyBase::sessionKeyExists() const{
+    return QFileInfo(QApplication::applicationDirPath() + "/" + _sessionKeyName).exists();
 }
 
 /**
@@ -85,6 +93,6 @@ void SessionKeyBase::checkForSessionKey(bool warn){
  */
 void SessionKeyBase::emitIfNoMoreEncrypt(){
 	if(_mainWindow->allTasksDone(_mainWindow->getLastAction())){
-		emit finishedAction();
+        Q_EMIT finishedAction();
 	}
 }
