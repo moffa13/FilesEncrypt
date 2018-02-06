@@ -8,6 +8,7 @@
 #include <QAction>
 #include "Logger.h"
 #include "crypto/FilesEncrypt.h"
+#include "crypto/SessionKey.h"
 #include "MainWindow.h"
 #include "ui/ui_MainWindow.h"
 #include "utilities.h"
@@ -98,20 +99,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	m_listRowMenu->addAction(openDir);
 
-#ifdef Q_OS_WIN
 	_sessionKey = new SessionKey{this};
 	if(!_sessionKey->readSessionKey().isEmpty()){
 		ui->action_saveSessionKey->setEnabled(false);
 	}
-#endif
 
 	m_update.showUpdateDialogIfUpdateAvailable(m_settings->value("check_beta", SettingsWindow::getDefaultSetting("check_beta")).toBool(), false, this);
 }
 
 MainWindow::~MainWindow(){
-#ifdef Q_OS_WIN
-delete _sessionKey;
-#endif
+	delete _sessionKey;
 	delete m_progress;
 	delete m_choose_key;
 	delete m_filesEncrypt;

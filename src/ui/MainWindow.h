@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <crypto/FilesEncrypt.h>
+#include "crypto/FilesEncrypt.h"
 #include <QTableWidgetItem>
 #include <QFuture>
 #include <QFutureWatcher>
@@ -15,10 +15,7 @@
 #include "SettingsWindow.h"
 #include <functional>
 #include "FilesListModel.h"
-
-#ifdef Q_OS_WIN
 #include "crypto/SessionKey.h"
-#endif
 
 #define QPAIR_CRYPT_DEF QPair<QString, EncryptDecrypt_s>
 
@@ -30,8 +27,8 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 
-    friend class SessionKeyBase;
-    friend class SessionKey;
+	friend class SessionKeyBase;
+	friend class SessionKey;
 
 	public:
 		explicit MainWindow(QWidget *parent = 0);
@@ -63,9 +60,7 @@ class MainWindow : public QMainWindow
 		void on_action_saveKey_triggered();
 		void on_action_saveSessionKey_triggered();
 	private:
-#ifdef Q_OS_WIN
 		SessionKey *_sessionKey;
-#endif
 		Ui::MainWindow *ui;
 		Progress* m_progress = NULL;
 		ChooseKey* m_choose_key;

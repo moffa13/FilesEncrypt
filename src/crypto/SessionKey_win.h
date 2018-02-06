@@ -1,12 +1,9 @@
-#ifndef SESSIONKEY_H
-#define SESSIONKEY_H
+#ifndef SESSIONKEY_WIN_H
+#define SESSIONKEY_WIN_H
 
-#include "SecureMemBlock.h"
 #include "SessionKeyBase.h"
 #include "defines.h"
 #include <QObject>
-
-class MainWindow;
 
 class SessionKey : public SessionKeyBase
 {
@@ -15,12 +12,12 @@ class SessionKey : public SessionKeyBase
 
 	public:
 		SessionKey(MainWindow* mainWindow, QString sessionKeyName = QString{".session.key.filesencrypt"});
-        QByteArray readSessionKey() override;
+		QByteArray readSessionKey() override;
 	private:
-        void encryptAndStoreSessionKey(const char *key) override;
+		void encryptAndStoreSessionKey(const char *key) override;
 	Q_SIGNALS:
 		void finishedAction();
 		void keyReady();
 };
 
-#endif // SESSIONKEY_H
+#endif // SESSIONKEY_WIN_H

@@ -1,6 +1,10 @@
 #include "SessionKey_win.h"
 
 #include <Windows.h>
+#include <QApplication>
+#include <QFile>
+
+SessionKey::SessionKey(MainWindow *mainWindow, QString sessionKeyName) : SessionKeyBase(mainWindow, sessionKeyName) {}
 
 /**
  * Reads the user session encrypted file, decrypts it & return 32 bytes aes key
@@ -53,7 +57,4 @@ void SessionKey::encryptAndStoreSessionKey(const char* key){
 	sessionKeyFile.write(reinterpret_cast<const char*>(sessionKey.pbData), sessionKey.cbData);
 	LocalFree(sessionKey.pbData);
 	sessionKeyFile.close();
-}
-
-eyReadyB) emit keyReady();
 }
