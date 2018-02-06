@@ -22,6 +22,7 @@ addons:
     - libgnome-keyring-dev
 script:
 - source /opt/qt55/bin/qt55-env.sh
+- cp /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h /usr/include/glib-2.0/glibconfig.h
 - /opt/qt55/bin/qmake CONFIG+=debug DEFINES+=UNIT_TEST QMAKE_CC=gcc-6 QMAKE_CXX=g++-6 QMAKE_LINK=g++-6 src/FilesEncrypt.pro
 - make
 - ./FilesEncrypt
