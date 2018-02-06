@@ -18,6 +18,8 @@ addons:
     - xvfb
     - gcc-6
     - g++-6
+    - libglib2.0-dev
+    - libgnome-keyring-dev
 script:
 - source /opt/qt55/bin/qt55-env.sh
 - /opt/qt55/bin/qmake CONFIG+=debug DEFINES+=UNIT_TEST QMAKE_CC=gcc-6 QMAKE_CXX=g++-6 QMAKE_LINK=g++-6 src/FilesEncrypt.pro

@@ -5,7 +5,7 @@
 #endif
 
 #ifdef Q_OS_LINUX
-#include <gcrypt.h>
+#include <gnome-keyring-1/gnome-keyring-memory.h>
 #include <openssl/sha.h>
 #include "Crypt.h"
 #include "FilesEncrypt.h"
@@ -15,7 +15,7 @@
 std::unique_ptr<unsigned char, std::function<void(unsigned char*)>> SecureMemBlock::_aes{
 	nullptr,
 	[](unsigned char* ptr){
-        gcry_free(ptr);
+        gnome_keyring_memory_free(ptr);
 	}
 };
 QMap<QByteArray, QByteArray> SecureMemBlock::_ivs;
@@ -27,7 +27,7 @@ SecureMemBlock::SecureMemBlock(const unsigned char *data, size_t len, bool encry
 #ifdef Q_OS_LINUX
 	// Create an encryption key valid until the program's lifetime ends
 	if(_aes == nullptr){
-        _aes.reset(reinterpret_cast<unsigned char*>(gcry_malloc_secure(32)));
+        _aes.reset(reinterpret_cast<unsigned char*>(gnome_keyring_memory_alloc(32)));
 		Crypt::genAES(AESSIZE::S256, _aes.get());
 	}
 	// Allocate an IV for each block
@@ -94,11 +94,11 @@ const unsigned char* SecureMemBlock::getData(){
 		CryptUnprotectMemory(_enc_data, getMultipleSize(_len, CRYPTPROTECTMEMORY_BLOCK_SIZE), CRYPTPROTECTMEMORY_SAME_PROCESS);
 #else
 		Crypt c;
-		unsigned char* uncrypted = reinterpret_cast<unsigned char*>(gcry_malloc_secure(_len));
+        unsigned char* uncrypted = reinterpret_cast<unsigned char*>(gnome_keyring_memory_alloc(_len));
 		_len = c.aes_decrypt(_enc_data, _len, uncrypted, _aes.get(), _iv, false);
 		memcpy(_enc_data, uncrypted, _len);
 		memset(uncrypted, 0, _len);
-		gcry_free(uncrypted);
+        gnome_keyring_memory_free(uncrypted);
 #endif
 	}
 	_encrypted = false;
@@ -115,12 +115,12 @@ void SecureMemBlock::secure(){
 #else
 	Crypt c;
 	size_t futureSize = FilesEncrypt::getEncryptedSize(_len);
-	unsigned char* encrypted = reinterpret_cast<unsigned char*>(gcry_malloc_secure(futureSize));
+    unsigned char* encrypted = reinterpret_cast<unsigned char*>(gnome_keyring_memory_alloc(futureSize));
 	c.aes_crypt(_enc_data, _len, encrypted, _aes.get(), _iv, false);
 	_len = futureSize;
 	memcpy(_enc_data, encrypted, _len);
 	memset(encrypted, 0, _len);
-	gcry_free(encrypted);
+    gnome_keyring_memory_free(encrypted);
 #endif
 	_encrypted = true;
 }
