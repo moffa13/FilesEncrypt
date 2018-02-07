@@ -18,6 +18,7 @@ addons:
     - xvfb
     - gcc-6
     - g++-6
+    - gnome-keyring
     - libglib2.0-dev
     - libsecret-1-dev
     - libgcr-3-dev
