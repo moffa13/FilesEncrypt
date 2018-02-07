@@ -109,7 +109,7 @@ unix{
         INCLUDEPATH += /usr/include/pango-1.0/
         INCLUDEPATH += /usr/include/p11-kit-1/
         INCLUDEPATH += /usr/include/gck-1/
-        LIBS += -L/usr/lib/x86_64-linux-gnu/ -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs -lgcrypt -lsecret-1 -lgcr-base-3
+        LIBS += -L/usr/lib/x86_64-linux-gnu/ -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs -lsecret-1 -lgcr-base-3
 }
 
 FORMS += \

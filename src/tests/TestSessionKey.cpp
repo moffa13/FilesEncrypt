@@ -36,6 +36,7 @@ void TestSessionKey::shouldEncryptDecryptWithSessionKey(){
     w.show();
     w.m_filesEncrypt = new FilesEncrypt((QApplication::applicationDirPath() + "/test.key").toStdString());
     w.m_filesEncrypt->requestAesDecrypt("12345");
+    w.keySelected();
     w.beSureKeyIsSelectedAndValid([](){}, false);
 
     {
