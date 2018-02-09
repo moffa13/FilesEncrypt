@@ -6,16 +6,14 @@
 class TestSessionKey : public QObject
 {
 
-    Q_OBJECT
+	Q_OBJECT
 
-    public:
-        static int runTests();
-    private:
-
+public:
+	static int runTests();
 private Q_SLOTS:
-    void init();
-    void cleanup();
-    void shouldEncryptDecryptWithSessionKey();
+	void init();
+	void cleanup();
+	void shouldEncryptDecryptWithSessionKey();
 
 };
 

@@ -16,12 +16,12 @@ public:
 	SessionKeyBase(MainWindow* mainWindow, QString sessionKeyName = QString{".session.key.filesencrypt"});
 	void action(const QString &item, EncryptDecrypt action);
 	void action(const QStringList &items, EncryptDecrypt action);
-	void checkForSessionKey(bool warn = true);
-    bool sessionKeyExists() const;
+	bool checkForSessionKey(bool warn = true);
+	bool sessionKeyExists() const;
 private:
 	MainWindow* _mainWindow;
 	virtual void encryptAndStoreSessionKey(const char *key) = 0;
-    virtual QByteArray readSessionKey() = 0;
+	virtual QByteArray readSessionKey() = 0;
 	SecureMemBlock *_secureAes;
 	void emitIfNoMoreEncrypt();
 protected:
