@@ -524,20 +524,27 @@ FilesAndSize FilesEncrypt::getFilesFromDirRecursive(QDir const& dir){
 	return f;
 }
 
-QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version, bool filenameChanged, const char* newFilename, int newFilename_size){
-	if(!filenameChanged) newFilename_size = 0;
-	QByteArray content{};
-	content.append(compare);
-	content.append("V");
-	content.append(QString::number(version));
-	content.append(";");
-	content.append(iv, AES_BLOCK_SIZE);
-	content.append(QString::number(filenameChanged));
-	content.append(QString::number(newFilename_size));
-	content.append(";");
-	content.append(newFilename, newFilename_size);
-	return content;
+QByteArray FilesEncrypt::getEncryptBlob(const char* iv, quint32 version,
+                                        bool filenameChanged,
+                                        const char* newFilename,
+                                        int newFilename_size)
+{
+    if (!filenameChanged)
+        newFilename_size = 0;
+
+    QByteArray content;
+    content.append(compare);
+    content.append("V");
+    content.append(QString::number(version).toUtf8());
+    content.append(";");
+    content.append(iv, AES_BLOCK_SIZE);
+    content.append(QString::number(filenameChanged).toUtf8());
+    content.append(QString::number(newFilename_size).toUtf8());
+    content.append(";");
+    content.append(newFilename, newFilename_size);
+    return content;
 }
+
 
 EncryptDecrypt_s FilesEncrypt::guessEncrypted(QByteArray const& content){
 	QByteArray header = content.mid(0, SIZE_BEFORE_CONTENT); // Be sure we check the right size

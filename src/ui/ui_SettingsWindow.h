@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'SettingsWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.8.0
+** Created by: Qt User Interface Compiler version 6.9.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -10,11 +10,8 @@
 #define UI_SETTINGSWINDOW_H
 
 #include <QtCore/QVariant>
-#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QGridLayout>
-#include <QtWidgets/QHeaderView>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -29,12 +26,12 @@ public:
     void setupUi(QWidget *SettingsWindow)
     {
         if (SettingsWindow->objectName().isEmpty())
-            SettingsWindow->setObjectName(QStringLiteral("SettingsWindow"));
+            SettingsWindow->setObjectName("SettingsWindow");
         SettingsWindow->resize(550, 288);
         gridLayout = new QGridLayout(SettingsWindow);
-        gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        gridLayout->setObjectName("gridLayout");
         verticalLayout = new QVBoxLayout();
-        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        verticalLayout->setObjectName("verticalLayout");
 
         gridLayout->addLayout(verticalLayout, 0, 0, 1, 1);
 
@@ -46,7 +43,7 @@ public:
 
     void retranslateUi(QWidget *SettingsWindow)
     {
-        SettingsWindow->setWindowTitle(QApplication::translate("SettingsWindow", "Form", Q_NULLPTR));
+        SettingsWindow->setWindowTitle(QCoreApplication::translate("SettingsWindow", "Form", nullptr));
     } // retranslateUi
 
 };

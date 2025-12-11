@@ -13,9 +13,7 @@
 #include "ui/ui_MainWindow.h"
 #include "utilities.h"
 #include <QDesktopServices>
-#include <QDesktopWidget>
 #include <cassert>
-#include <iostream>
 
 #define BASE_DIR_PARAM_NAME "BASE_DIRECTORY"
 #define UPDATE_FETCH_URL "https://www.filesencrypt.com/update/current.xml"
@@ -53,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 			Qt::LeftToRight,
 			Qt::AlignCenter,
 			size(),
-			qApp->desktop()->availableGeometry()
+            QGuiApplication::primaryScreen()->availableGeometry()
 		)
 	);
 
@@ -178,7 +176,7 @@ bool MainWindow::beSureKeyIsSelectedAndValid(std::function<void()> func, bool fo
 	}else{ // There is no key
 		static QMetaObject::Connection oldConnection;
 		disconnect(oldConnection);
-		oldConnection = connect(m_choose_key, &ChooseKey::keyDone, [this, func]{
+        oldConnection = connect(m_choose_key, &ChooseKey::keyDone, [func]{
 			func();
 			disconnect(oldConnection);
 		});

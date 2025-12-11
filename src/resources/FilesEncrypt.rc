@@ -1,27 +1,31 @@
-IDI_ICON1               ICON    DISCARDABLE     "FilesEncrypt.ico"
+IDI_ICON1               ICON     "FilesEncrypt.ico"
 
 #include <windows.h>
+#include "../version_constants.h"
 
-VS_VERSION_INFO VERSIONINFO
-FILEVERSION     APP_VERSION_COMMA
-PRODUCTVERSION  APP_VERSION_COMMA
-BEGIN
-    BLOCK "StringFileInfo"
+    VS_VERSION_INFO VERSIONINFO
+    FILEVERSION     FILEVERSION_COMMAS
+    PRODUCTVERSION  FILEVERSION_COMMAS
     BEGIN
-        BLOCK "040904E4"
+        BLOCK "StringFileInfo"
         BEGIN
-            VALUE "CompanyName",        "FilesEncrypt"
-            VALUE "FileDescription",    "FilesEncrypt"
-            VALUE "FileVersion",        APP_VERSION
-            VALUE "InternalName",       "FilesEncrypt"
-            VALUE "OriginalFilename",   "FilesEncrypt.exe"
-            VALUE "ProductName",        "FilesEncrypt"
-            VALUE "ProductVersion",     APP_VERSION
+            BLOCK "040904E4"
+            BEGIN
+                VALUE "CompanyName",        COMPANYNAME
+                VALUE "FileDescription",    FILEDESCRIPTION
+                VALUE "FileVersion",        FILEVERSION_F
+                VALUE "InternalName",       INTERNALNAME
+                VALUE "LegalCopyright",     LEGALCOPYRIGHT
+                VALUE "LegalTrademarks1",   LEGALTRADEMARKS1
+                VALUE "LegalTrademarks2",   LEGALTRADEMARKS2
+                VALUE "OriginalFilename",   ORIGINALFILENAME
+                VALUE "ProductName",        PRODUCTNAME
+                VALUE "ProductVersion",     FILEVERSION_F
+            END
+        END
+
+        BLOCK "VarFileInfo"
+        BEGIN
+            VALUE "Translation", 0x040C, 1252
         END
     END
-
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x040C, 1252
-    END
-END

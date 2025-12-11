@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'MainWindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.8.0
+** Created by: Qt User Interface Compiler version 6.9.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -10,9 +10,8 @@
 #define UI_MAINWINDOW_H
 
 #include <QtCore/QVariant>
-#include <QtWidgets/QAction>
+#include <QtGui/QAction>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QMainWindow>
@@ -54,58 +53,58 @@ public:
     void setupUi(QMainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
-            MainWindow->setObjectName(QStringLiteral("MainWindow"));
+            MainWindow->setObjectName("MainWindow");
         MainWindow->resize(734, 300);
         MainWindow->setMinimumSize(QSize(500, 300));
         action_retrieveKey = new QAction(MainWindow);
-        action_retrieveKey->setObjectName(QStringLiteral("action_retrieveKey"));
+        action_retrieveKey->setObjectName("action_retrieveKey");
         action_openSettings = new QAction(MainWindow);
-        action_openSettings->setObjectName(QStringLiteral("action_openSettings"));
+        action_openSettings->setObjectName("action_openSettings");
         action_checkForUpdates = new QAction(MainWindow);
-        action_checkForUpdates->setObjectName(QStringLiteral("action_checkForUpdates"));
+        action_checkForUpdates->setObjectName("action_checkForUpdates");
         action_saveKey = new QAction(MainWindow);
-        action_saveKey->setObjectName(QStringLiteral("action_saveKey"));
+        action_saveKey->setObjectName("action_saveKey");
         action_newKey = new QAction(MainWindow);
-        action_newKey->setObjectName(QStringLiteral("action_newKey"));
+        action_newKey->setObjectName("action_newKey");
         action_saveSessionKey = new QAction(MainWindow);
-        action_saveSessionKey->setObjectName(QStringLiteral("action_saveSessionKey"));
+        action_saveSessionKey->setObjectName("action_saveSessionKey");
         centralwidget = new QWidget(MainWindow);
-        centralwidget->setObjectName(QStringLiteral("centralwidget"));
+        centralwidget->setObjectName("centralwidget");
         verticalLayout_4 = new QVBoxLayout(centralwidget);
-        verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
+        verticalLayout_4->setObjectName("verticalLayout_4");
         filesList = new QTableView(centralwidget);
-        filesList->setObjectName(QStringLiteral("filesList"));
+        filesList->setObjectName("filesList");
 
         verticalLayout_4->addWidget(filesList);
 
         gridLayout = new QGridLayout();
-        gridLayout->setObjectName(QStringLiteral("gridLayout"));
+        gridLayout->setObjectName("gridLayout");
         cryptAll = new QPushButton(centralwidget);
-        cryptAll->setObjectName(QStringLiteral("cryptAll"));
+        cryptAll->setObjectName("cryptAll");
 
         gridLayout->addWidget(cryptAll, 3, 1, 1, 1);
 
         decryptAll = new QPushButton(centralwidget);
-        decryptAll->setObjectName(QStringLiteral("decryptAll"));
+        decryptAll->setObjectName("decryptAll");
 
         gridLayout->addWidget(decryptAll, 3, 2, 1, 1);
 
         remove = new QPushButton(centralwidget);
-        remove->setObjectName(QStringLiteral("remove"));
+        remove->setObjectName("remove");
 
         gridLayout->addWidget(remove, 3, 3, 1, 1);
 
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         gridLayout->addItem(horizontalSpacer, 3, 0, 1, 1);
 
         importButton = new QPushButton(centralwidget);
-        importButton->setObjectName(QStringLiteral("importButton"));
+        importButton->setObjectName("importButton");
 
         gridLayout->addWidget(importButton, 3, 4, 1, 1);
 
         verticalLayout_3 = new QVBoxLayout();
-        verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        verticalLayout_3->setObjectName("verticalLayout_3");
 
         gridLayout->addLayout(verticalLayout_3, 0, 0, 1, 1);
 
@@ -114,15 +113,15 @@ public:
 
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
-        menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 734, 20));
+        menubar->setObjectName("menubar");
+        menubar->setGeometry(QRect(0, 0, 734, 21));
         menuOptions = new QMenu(menubar);
-        menuOptions->setObjectName(QStringLiteral("menuOptions"));
+        menuOptions->setObjectName("menuOptions");
         menuFichier = new QMenu(menubar);
-        menuFichier->setObjectName(QStringLiteral("menuFichier"));
+        menuFichier->setObjectName("menuFichier");
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
-        statusbar->setObjectName(QStringLiteral("statusbar"));
+        statusbar->setObjectName("statusbar");
         MainWindow->setStatusBar(statusbar);
 
         menubar->addAction(menuFichier->menuAction());
@@ -141,19 +140,19 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Encrypter", Q_NULLPTR));
-        action_retrieveKey->setText(QApplication::translate("MainWindow", "Obtenir la cl\303\251", Q_NULLPTR));
-        action_openSettings->setText(QApplication::translate("MainWindow", "Param\303\250tres", Q_NULLPTR));
-        action_checkForUpdates->setText(QApplication::translate("MainWindow", "V\303\251rifier les mises \303\240 jour", Q_NULLPTR));
-        action_saveKey->setText(QApplication::translate("MainWindow", "Sauvegarder la cl\303\251", Q_NULLPTR));
-        action_newKey->setText(QApplication::translate("MainWindow", "Nouvelle cl\303\251", Q_NULLPTR));
-        action_saveSessionKey->setText(QApplication::translate("MainWindow", "Cr\303\251er la cl\303\251 de session", Q_NULLPTR));
-        cryptAll->setText(QApplication::translate("MainWindow", "Crypter", Q_NULLPTR));
-        decryptAll->setText(QApplication::translate("MainWindow", "D\303\251crypter", Q_NULLPTR));
-        remove->setText(QApplication::translate("MainWindow", "Supprimer", Q_NULLPTR));
-        importButton->setText(QApplication::translate("MainWindow", "Ajouter", Q_NULLPTR));
-        menuOptions->setTitle(QApplication::translate("MainWindow", "Options", Q_NULLPTR));
-        menuFichier->setTitle(QApplication::translate("MainWindow", "Fichier", Q_NULLPTR));
+        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Encrypter", nullptr));
+        action_retrieveKey->setText(QCoreApplication::translate("MainWindow", "Obtenir la cl\303\251", nullptr));
+        action_openSettings->setText(QCoreApplication::translate("MainWindow", "Param\303\250tres", nullptr));
+        action_checkForUpdates->setText(QCoreApplication::translate("MainWindow", "V\303\251rifier les mises \303\240 jour", nullptr));
+        action_saveKey->setText(QCoreApplication::translate("MainWindow", "Sauvegarder la cl\303\251", nullptr));
+        action_newKey->setText(QCoreApplication::translate("MainWindow", "Nouvelle cl\303\251", nullptr));
+        action_saveSessionKey->setText(QCoreApplication::translate("MainWindow", "Cr\303\251er la cl\303\251 de session", nullptr));
+        cryptAll->setText(QCoreApplication::translate("MainWindow", "Crypter", nullptr));
+        decryptAll->setText(QCoreApplication::translate("MainWindow", "D\303\251crypter", nullptr));
+        remove->setText(QCoreApplication::translate("MainWindow", "Supprimer", nullptr));
+        importButton->setText(QCoreApplication::translate("MainWindow", "Ajouter", nullptr));
+        menuOptions->setTitle(QCoreApplication::translate("MainWindow", "Options", nullptr));
+        menuFichier->setTitle(QCoreApplication::translate("MainWindow", "Fichier", nullptr));
     } // retranslateUi
 
 };

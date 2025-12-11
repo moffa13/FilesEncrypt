@@ -1,15 +1,14 @@
 QT += core gui widgets concurrent network xml
 
-CONFIG += c++11
+CONFIG += c++17
 
 RESOURCES = resources/FilesEncrypt.qrc
 TRANSLATIONS = filesencrypt_en.ts
 
 
 DEFINES += QT_NO_KEYWORDS GCR_API_SUBJECT_TO_CHANGE
-VERSION = 0.3.0
-DEFINES += APP_VERSION_COMMA=0,3,0
-DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
+DEFINES += APP_VERSION=\\\"0.3.0\\\"
 
 
 TARGET = FilesEncrypt
@@ -33,7 +32,7 @@ Debug:UI_DIR = $$PWD/../build/debug/.ui
 TEMPLATE = app
 
 SOURCES += main.cpp \
-	crypto/Crypt.cpp \
+        crypto/Crypt.cpp \
 	crypto/FilesEncrypt.cpp \
 	crypto/SecureMemBlock.cpp \
 	network/Downloader.cpp \
@@ -49,10 +48,10 @@ SOURCES += main.cpp \
 	Logger.cpp \
 	utilities.cpp \
 	Version.cpp \
-        crypto/SessionKeyBase.cpp
+	crypto/SessionKeyBase.cpp
 
 HEADERS += \
-	crypto/Crypt.h \
+        crypto/Crypt.h \
 	crypto/FilesEncrypt.h \
 	crypto/SecureMemBlock.h \
 	network/Downloader.h \
@@ -69,65 +68,56 @@ HEADERS += \
 	Logger.h \
 	utilities.h \
 	Version.h \
-        crypto/SessionKey.h \
-        crypto/SessionKeyBase.h
+	crypto/SessionKey.h \
+	crypto/SessionKeyBase.h \
+	version_constants.h
 
 win32{
         SOURCES += crypto/SessionKey_win.cpp
-        HEADERS += crypto/SessionKey_win.h
+	HEADERS += crypto/SessionKey_win.h
 
-	QMAKE_CXXFLAGS += -MD
+        QMAKE_CXXFLAGS += -MD
 	QMAKE_CXXFLAGS_RELEASE = -O2
 	INCLUDEPATH += "$$PWD/../include/windows/"
 	DEPENDPATH += "$$PWD/../include/windows/"
-	LIBS += -lcrypt32 -lshell32
-	!contains(QMAKE_TARGET.arch, x86_64) {
-		CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86d
-		CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86d
-		CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x86
-		CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x86
-	} else {
-		CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64d
-		CONFIG(debug, debug|release): LIBS += -L$$PWD/../lib/ -llibssl-x64d
-		CONFIG(release, debug|release): LIBS += -L$$PWD/../lib/ -llibcrypto-x64
-                CONFIG(release, debug|release): LIBS += -L$$PW/usr/lib/x86_64-linux-gnu/D/../lib/ -llibssl-x64
-	}
+	LIBS += -lcrypt32 -lshell32 -lstdc++fs
+	LIBS += -L$$PWD/../lib/openssl -llibcrypto -llibssl
 }
 
 unix{
         SOURCES += crypto/SessionKey_linux.cpp
-        HEADERS += crypto/SessionKey_linux.h
+	HEADERS += crypto/SessionKey_linux.h
 
         QMAKE_CXXFLAGS += -Wno-reorder -g -fno-inline -std=c++11
 	INCLUDEPATH += "$$PWD/../include/linux/"
 	DEPENDPATH += "$$PWD/../include/linux/"
 	INCLUDEPATH += "$$PWD/../include/"
-        INCLUDEPATH += /usr/include/libsecret-1/
-        INCLUDEPATH += /usr/include/gcr-3/
-        INCLUDEPATH += /usr/include/glib-2.0/
-        INCLUDEPATH += /usr/include/cairo/
-        INCLUDEPATH += /usr/include/pango-1.0/
-        INCLUDEPATH += /usr/include/p11-kit-1/
-        INCLUDEPATH += /usr/include/gck-1/
-        LIBS += -L/usr/lib/x86_64-linux-gnu/ -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs -lsecret-1 -lgcr-base-3
+	INCLUDEPATH += /usr/include/libsecret-1/
+	INCLUDEPATH += /usr/include/gcr-3/
+	INCLUDEPATH += /usr/include/glib-2.0/
+	INCLUDEPATH += /usr/include/cairo/
+	INCLUDEPATH += /usr/include/pango-1.0/
+	INCLUDEPATH += /usr/include/p11-kit-1/
+	INCLUDEPATH += /usr/include/gck-1/
+	LIBS += -L/usr/lib/x86_64-linux-gnu/ -L/lib/x86_64-linux-gnu/ -lssl -lcrypto -lstdc++fs -lsecret-1 -lgcr-base-3
 }
 
 FORMS += \
-	ui/MainWindow.ui \
+        ui/MainWindow.ui \
 	ui/Progress.ui \
 	ui/ChooseKey.ui \
 	ui/SettingsWindow.ui
 
 CONFIG(debug, debug|release) {
-	QT += testlib
+        QT += testlib
 	SOURCES += tests/TestCrypt.cpp \
-		tests/TestFilesEncrypt.cpp \
+	        tests/TestFilesEncrypt.cpp \
 		tests/TestVersion.cpp \
-                tests/TestSecureMemBlock.cpp \
-                tests/TestSessionKey.cpp
+		tests/TestSecureMemBlock.cpp \
+		tests/TestSessionKey.cpp
 	HEADERS += tests/TestCrypt.h \
-		tests/TestFilesEncrypt.h \
+	        tests/TestFilesEncrypt.h \
 		tests/TestVersion.h \
-                tests/TestSecureMemBlock.h \
-                tests/TestSessionKey.h
+		tests/TestSecureMemBlock.h \
+		tests/TestSessionKey.h
 }

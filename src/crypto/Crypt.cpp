@@ -1,8 +1,6 @@
 #include "Crypt.h"
-#include "utilities.h"
 #include <cstdio>
 #include <string>
-#include "openssl/x509.h"
 #include "openssl/rsa.h"
 #include "openssl/pem.h"
 #include "openssl/evp.h"
@@ -12,10 +10,8 @@
 #include "Logger.h"
 #include <chrono>
 #include <ctime>
-#include <ratio>
 #include <QFile>
 #include <QFileInfo>
-#include <iostream>
 #include <QThread>
 #include <QCoreApplication>
 #include <cassert>
@@ -23,8 +19,8 @@
 #include <QMutexLocker>
 
 #ifdef Q_OS_WIN
-#include <Windows.h>
-#include "openssl/applink.c"
+#include <windows.h>
+#include <wincrypt.h>
 #endif
 
 #define MINIMUM_KEY_LENGTH 2048
@@ -36,28 +32,62 @@ bool Crypt::aborted = false;
 
 QMutex Crypt::s_mutex;
 
-EVP_PKEY* Crypt::genRSA(int keyLength){
-	Logging::Logger::debug("Generating RSA keypair");
-	//Private key container
-	EVP_PKEY* prvKey = EVP_PKEY_new();
-	// RSA
+EVP_PKEY* Crypt::genRSA(int keyLength)
+{
+    Logging::Logger::debug("Generating RSA keypair");
+
+    EVP_PKEY* pkey = EVP_PKEY_new();
+    if (!pkey) {
+        throw std::runtime_error("EVP_PKEY_new failed");
+    }
+
+    // Create RSA object
+    RSA* rsa = RSA_new();
+    if (!rsa) {
+        EVP_PKEY_free(pkey);
+        throw std::runtime_error("RSA_new failed");
+    }
+
+    // Create exponent object
+    BIGNUM* e = BN_new();
+    if (!e) {
+        RSA_free(rsa);
+        EVP_PKEY_free(pkey);
+        throw std::runtime_error("BN_new failed");
+    }
+
+    BN_set_word(e, RSA_F4); // 65537
 
 #ifdef QT_DEBUG
-	auto t1 = chrono::high_resolution_clock::now();
-#endif
-	RSA* rsa = RSA_generate_key(keyLength, RSA_F4, NULL, NULL);
-#ifdef QT_DEBUG
-	auto t2 = chrono::high_resolution_clock::now();
-	auto timeToGenRSAKeyPair = chrono::duration_cast<std::chrono::microseconds>(t2-t1);
-	Logging::Logger::debug("Took " + QString::number((double)(timeToGenRSAKeyPair.count() / double(1000000))) + "s");
+    auto t1 = std::chrono::high_resolution_clock::now();
 #endif
 
-	// Assign rsa to container
-	EVP_PKEY_assign_RSA(prvKey, rsa);
-	// Clean pointer
-	rsa = nullptr;
-	return prvKey;
+    // Modern RSA generation
+    if (RSA_generate_key_ex(rsa, keyLength, e, nullptr) != 1) {
+        BN_free(e);
+        RSA_free(rsa);
+        EVP_PKEY_free(pkey);
+        throw std::runtime_error("RSA_generate_key_ex failed");
+    }
+
+#ifdef QT_DEBUG
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto delta = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
+    Logging::Logger::debug("Took " + QString::number(delta.count() / 1'000'000.0) + "s");
+#endif
+
+    BN_free(e);
+
+    // Assign RSA to EVP container
+    if (EVP_PKEY_assign_RSA(pkey, rsa) != 1) {
+        RSA_free(rsa);
+        EVP_PKEY_free(pkey);
+        throw std::runtime_error("EVP_PKEY_assign_RSA failed");
+    }
+
+    return pkey;
 }
+
 
 RSA* Crypt::getRSAFromEVP_PKEY(EVP_PKEY* pKey){
 	return EVP_PKEY_get1_RSA(pKey);

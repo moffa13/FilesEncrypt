@@ -1,24 +1,30 @@
 #include "Version.h"
 
-#include <QRegExp>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QtDebug>
 
 Version::Version(unsigned major, unsigned minor, unsigned patch) : _major{major}, _minor{minor}, _patch{patch}{}
 
-Version::Version(QString const& version){
 
-	QRegExp version_regex{"^(([\\d]+)(?:\\.([\\d]+))?(?:\\.([\\d]+))?)$"};
-	version_regex.indexIn(version, 0);
 
-	if(version_regex.cap(0).isEmpty()){
-		throw std::runtime_error{"Unknown version format"};
-	}
+Version::Version(QString const& version)
+{
+    QRegularExpression versionRegex{
+        QStringLiteral("^(([\\d]+)(?:\\.([\\d]+))?(?:\\.([\\d]+))?)$")
+    };
 
-	_major = version_regex.cap(2).isEmpty() ? 0 : version_regex.cap(2).toUInt();
-	_minor = version_regex.cap(3).isEmpty() ? 0 : version_regex.cap(3).toUInt();
-	_patch = version_regex.cap(4).isEmpty() ? 0 : version_regex.cap(4).toUInt();
+    QRegularExpressionMatch match = versionRegex.match(version);
 
+    if (!match.hasMatch()) {
+        throw std::runtime_error{"Unknown version format"};
+    }
+
+    _major = match.captured(2).isEmpty() ? 0u : match.captured(2).toUInt();
+    _minor = match.captured(3).isEmpty() ? 0u : match.captured(3).toUInt();
+    _patch = match.captured(4).isEmpty() ? 0u : match.captured(4).toUInt();
 }
+
 
 unsigned Version::getMajor() const{
 	return _major;

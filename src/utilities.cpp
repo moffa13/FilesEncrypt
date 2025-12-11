@@ -65,10 +65,7 @@ namespace utilities{
             speed2 = speed / pow(1024, 4);
         }
 
-        QString res;
-        res = res.sprintf("%.3f", speed2);
-        res += " ";
-        res += letter;
+        QString res = QString("%1 %2").arg(QString::asprintf("%.3f", speed2), letter);
 
         return res;
     }

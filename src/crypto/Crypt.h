@@ -3,7 +3,7 @@
 
 #include <cstdio>
 #include <string>
-#include "openssl/x509.h"
+#include <openssl/x509.h>
 #include <QFile>
 #include <QMutex>
 #include "defines.h"
