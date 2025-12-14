@@ -25,7 +25,7 @@ void TestSessionKey::cleanup(){
 
 void TestSessionKey::shouldEncryptDecryptWithSessionKey(){
 
-	// File to crypt
+    // File to encrypt
 	QFile f(QApplication::applicationDirPath() + "/test.file");
 	f.open(QFile::ReadWrite);
 	f.write("Hello", 5);

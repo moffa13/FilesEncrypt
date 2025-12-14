@@ -2,13 +2,10 @@
 #include <cstdio>
 #include <string>
 #include "openssl/rsa.h"
-#include "openssl/pem.h"
 #include "openssl/evp.h"
 #include "openssl/aes.h"
 #include "openssl/rand.h"
-#include "openssl/err.h"
 #include "Logger.h"
-#include <chrono>
 #include <ctime>
 #include <QFile>
 #include <QFileInfo>
@@ -17,13 +14,12 @@
 #include <cassert>
 #include <QtDebug>
 #include <QMutexLocker>
+#include <utilities.h>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
 #include <wincrypt.h>
 #endif
-
-#define MINIMUM_KEY_LENGTH 2048
 
 using namespace std;
 
@@ -36,93 +32,75 @@ EVP_PKEY* Crypt::genRSA(int keyLength)
 {
     Logging::Logger::debug("Generating RSA keypair");
 
-    EVP_PKEY* pkey = EVP_PKEY_new();
-    if (!pkey) {
-        throw std::runtime_error("EVP_PKEY_new failed");
-    }
+    EVP_PKEY* pkey = nullptr;
+    EVP_PKEY_CTX *ctx = nullptr;
 
-    // Create RSA object
-    RSA* rsa = RSA_new();
-    if (!rsa) {
-        EVP_PKEY_free(pkey);
-        throw std::runtime_error("RSA_new failed");
-    }
+    ctx = EVP_PKEY_CTX_new_from_name(nullptr, "RSA", nullptr);
+    if (!ctx)
+        throw std::runtime_error("EVP_PKEY_CTX_new_from_name failed");
 
-    // Create exponent object
-    BIGNUM* e = BN_new();
-    if (!e) {
-        RSA_free(rsa);
-        EVP_PKEY_free(pkey);
-        throw std::runtime_error("BN_new failed");
-    }
+    if (EVP_PKEY_keygen_init(ctx) <= 0)
+        throw std::runtime_error("EVP_PKEY_keygen_init failed");
 
-    BN_set_word(e, RSA_F4); // 65537
+    if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, keyLength) <= 0)
+        throw std::runtime_error("EVP_PKEY_CTX_set_rsa_keygen_bits failed");
 
-#ifdef QT_DEBUG
-    auto t1 = std::chrono::high_resolution_clock::now();
-#endif
+    if (EVP_PKEY_keygen(ctx, &pkey) <= 0)
+        throw std::runtime_error("EVP_PKEY_keygen failed");
 
-    // Modern RSA generation
-    if (RSA_generate_key_ex(rsa, keyLength, e, nullptr) != 1) {
-        BN_free(e);
-        RSA_free(rsa);
-        EVP_PKEY_free(pkey);
-        throw std::runtime_error("RSA_generate_key_ex failed");
-    }
-
-#ifdef QT_DEBUG
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto delta = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-    Logging::Logger::debug("Took " + QString::number(delta.count() / 1'000'000.0) + "s");
-#endif
-
-    BN_free(e);
-
-    // Assign RSA to EVP container
-    if (EVP_PKEY_assign_RSA(pkey, rsa) != 1) {
-        RSA_free(rsa);
-        EVP_PKEY_free(pkey);
-        throw std::runtime_error("EVP_PKEY_assign_RSA failed");
-    }
-
+    EVP_PKEY_CTX_free(ctx);
     return pkey;
 }
 
+int Crypt::encrypt(EVP_PKEY* public_key, const unsigned char* message, int inlen, unsigned char* encrypted, size_t& outlen){
 
-RSA* Crypt::getRSAFromEVP_PKEY(EVP_PKEY* pKey){
-	return EVP_PKEY_get1_RSA(pKey);
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(public_key, nullptr);
+
+    if (EVP_PKEY_encrypt_init(ctx) <= 0) {
+        utilities::logOpenSSLErrors();
+        EVP_PKEY_CTX_free(ctx);
+        return -1;
+    }
+
+    if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_OAEP_PADDING) <= 0) {
+        utilities::logOpenSSLErrors();
+        EVP_PKEY_CTX_free(ctx);
+        return -1;
+    }
+
+    if (EVP_PKEY_encrypt(ctx, encrypted, &outlen, message, inlen) <= 0) {
+        utilities::logOpenSSLErrors();
+        EVP_PKEY_CTX_free(ctx);
+        return -1;
+    }
+
+    EVP_PKEY_CTX_free(ctx);
+    return 0;
 }
 
-RSA* Crypt::getPublicKeyFromFile(string const &filename){
-	FILE* keyFile = fopen(filename.c_str(), "rb");
-	RSA* pbcKey = PEM_read_RSA_PUBKEY(keyFile, NULL, NULL, NULL);
-	fclose(keyFile);
-	return pbcKey;
-}
+int Crypt::decrypt(EVP_PKEY* private_key, const unsigned char* encrypted, int inlen, unsigned char* message, size_t &outlen){
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(private_key, nullptr);
 
-RSA* Crypt::getPrivateKeyFromFile(string const &filename){
-	FILE* keyFile = fopen(filename.c_str(), "rb");
-	RSA* prvKey = PEM_read_RSAPrivateKey(keyFile, NULL, NULL, NULL);
-	fclose(keyFile);
-	return prvKey;
-}
+    if (EVP_PKEY_decrypt_init(ctx) <= 0) {
+        utilities::logOpenSSLErrors();
+        EVP_PKEY_CTX_free(ctx);
+        return -1;
+    }
 
-int Crypt::encrypt(RSA* public_key, const unsigned char* message, int len, unsigned char* encrypted){
-	int ret = RSA_public_encrypt(len, message, encrypted, public_key, RSA_PKCS1_OAEP_PADDING);
-	if(ret == -1){
-		ulong error = ERR_peek_last_error();
-		Logging::Logger::error("Error while crypting RSA : " + QString(ERR_error_string(error, NULL)));
-	}
-	return ret;
-}
+    if (EVP_PKEY_CTX_set_rsa_padding(ctx, RSA_PKCS1_OAEP_PADDING) <= 0) {
+        utilities::logOpenSSLErrors();
+        EVP_PKEY_CTX_free(ctx);
+        return -1;
+    }
 
-int Crypt::decrypt(RSA* private_key, const unsigned char* encrypted, int len, unsigned char* message){
-	int ret = RSA_private_decrypt(len, encrypted, message, private_key, RSA_PKCS1_OAEP_PADDING);
-	if(ret == -1){
-		ulong error = ERR_peek_last_error();
-		Logging::Logger::error("Error while decrypting RSA : " + QString(ERR_error_string(error, NULL)));
-	}
-	return ret;
+    if (EVP_PKEY_decrypt(ctx, message, &outlen, encrypted, inlen) <= 0) {
+        utilities::logOpenSSLErrors();
+        EVP_PKEY_CTX_free(ctx);
+        return -1;
+    }
+
+    EVP_PKEY_CTX_free(ctx);
+    return 0;
 }
 
 // Encrypt by buffer

@@ -1,6 +1,5 @@
 #include <QFile>
 #include <QFileInfo>
-#include <iostream>
 #include <QtDebug>
 #include <QTemporaryFile>
 #include <QThread>
@@ -8,16 +7,14 @@
 #include <QSettings>
 #include "FilesEncrypt.h"
 #include "utilities.h"
-#include "openssl/err.h"
-#include "openssl/rsa.h"
 #include "openssl/pem.h"
 #include "Logger.h"
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <cassert>
-#include "ui/SettingsWindow.h"
 #include <QApplication>
 #include <QStack>
+#include <openssl/rand.h>
 #ifdef Q_OS_WIN
 #include <Windows.h>
 #endif
@@ -33,6 +30,15 @@ const size_t FilesEncrypt::COMPARE_SIZE = sizeof(compare)/sizeof(*compare);
 const size_t FilesEncrypt::VERSION_LENGTH = 1 + 5 + 1; // V00000;
 const size_t FilesEncrypt::SIZE_BEFORE_CONTENT = COMPARE_SIZE + AES_BLOCK_SIZE + VERSION_LENGTH + 1 + 8 + 256;
 const char FilesEncrypt::PRIVATE_ENCRYPT_AES_SEPARATOR = 0x10;
+
+
+static const char PRIV_MAGIC[] = "FILESENCRYPT_KEY";
+static constexpr size_t PRIV_MAGIC_LEN = sizeof(PRIV_MAGIC) - 1;
+static constexpr uint8_t PRIV_VERSION = 1;
+static constexpr uint32_t PRIV_ITER = 200000; // à ajuster
+static constexpr uint8_t PRIV_SALT_LEN = 16;
+static constexpr uint8_t PRIV_IV_LEN   = 12;
+static constexpr uint8_t PRIV_TAG_LEN  = 16;
 
 /**
  * Constructs from a key path string
@@ -52,7 +58,7 @@ FilesEncrypt::FilesEncrypt(const char* aes){
 }
 
 /**
- * Allocates some vars and sets up the timer to delete the decrypted aes after TIME_MIN_REMOVE_AES. It DOES not start it
+ * Allocates some vars and sets up the timer to delete the decrypted aes after TIME_MIN_REMOVE_AES. It does NOT start it
  * @brief FilesEncrypt::init
  */
 void FilesEncrypt::init(){
@@ -128,6 +134,203 @@ SecureMemBlock FilesEncrypt::getAES() const{
 	return SecureMemBlock{m_aes_decrypted, 48, true};
 }
 
+EncryptedPrivateKeyBlob FilesEncrypt::encryptPrivateKeyWithPassword(
+    const QByteArray& privPem,
+    const QString& password)
+{
+    // 1) Générer salt + iv
+    QByteArray salt(PRIV_SALT_LEN, 0);
+    QByteArray iv(PRIV_IV_LEN, 0);
+    if (RAND_bytes(reinterpret_cast<unsigned char*>(salt.data()), salt.size()) != 1 ||
+        RAND_bytes(reinterpret_cast<unsigned char*>(iv.data()), iv.size()) != 1) {
+        throw std::runtime_error("RAND_bytes failed");
+    }
+
+    // 2) Dériver la clé avec PBKDF2-HMAC-SHA256
+    const int keyLen = 32; // AES-256
+    QByteArray key(keyLen, 0);
+    if (!PKCS5_PBKDF2_HMAC(
+            password.toUtf8().constData(),
+            password.toUtf8().size(),
+            reinterpret_cast<unsigned char*>(salt.data()),
+            salt.size(),
+            PRIV_ITER,
+            EVP_sha256(),
+            keyLen,
+            reinterpret_cast<unsigned char*>(key.data()))) {
+        throw std::runtime_error("PKCS5_PBKDF2_HMAC failed");
+    }
+
+    // 3) AES-256-GCM
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) throw std::runtime_error("EVP_CIPHER_CTX_new failed");
+
+    QByteArray ciphertext(privPem.size() + 16, 0); // marge
+    int outLen = 0, totalLen = 0;
+
+    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), nullptr, nullptr, nullptr) != 1 ||
+        EVP_EncryptInit_ex(ctx, nullptr, nullptr,
+                           reinterpret_cast<unsigned char*>(key.data()),
+                           reinterpret_cast<unsigned char*>(iv.data())) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw std::runtime_error("EVP_EncryptInit_ex failed");
+    }
+
+    if (EVP_EncryptUpdate(ctx,
+                          reinterpret_cast<unsigned char*>(ciphertext.data()),
+                          &outLen,
+                          reinterpret_cast<const unsigned char*>(privPem.constData()),
+                          privPem.size()) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw std::runtime_error("EVP_EncryptUpdate failed");
+    }
+    totalLen = outLen;
+
+    if (EVP_EncryptFinal_ex(ctx,
+                            reinterpret_cast<unsigned char*>(ciphertext.data()) + totalLen,
+                            &outLen) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw std::runtime_error("EVP_EncryptFinal_ex failed");
+    }
+    totalLen += outLen;
+    ciphertext.resize(totalLen);
+
+    QByteArray tag(PRIV_TAG_LEN, 0);
+    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, PRIV_TAG_LEN,
+                            tag.data()) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw std::runtime_error("EVP_CIPHER_CTX_ctrl GET_TAG failed");
+    }
+
+    EVP_CIPHER_CTX_free(ctx);
+
+    // 4) Construire le blob final
+    QByteArray blob;
+    blob.append(PRIV_MAGIC, PRIV_MAGIC_LEN);
+    blob.append(char(PRIV_VERSION));
+
+    // iter (uint32 big endian)
+    blob.append(char((PRIV_ITER >> 24) & 0xFF));
+    blob.append(char((PRIV_ITER >> 16) & 0xFF));
+    blob.append(char((PRIV_ITER >> 8) & 0xFF));
+    blob.append(char(PRIV_ITER & 0xFF));
+
+    blob.append(char(PRIV_SALT_LEN));
+    blob.append(char(PRIV_IV_LEN));
+
+    blob.append(salt);
+    blob.append(iv);
+    blob.append(tag);
+    blob.append(ciphertext);
+
+    EncryptedPrivateKeyBlob out;
+    out.raw = blob;
+    OPENSSL_cleanse(key.data(), key.size());
+    return out;
+}
+
+QByteArray FilesEncrypt::decryptPrivateKeyWithPassword(
+    const EncryptedPrivateKeyBlob& blob,
+    const QString& password)
+{
+    const QByteArray& in = blob.raw;
+
+    if (in.size() < PRIV_MAGIC_LEN + 1 + 4 + 1 + 1)
+        throw std::runtime_error("Encrypted blob too small");
+
+    int pos = 0;
+    if (memcmp(in.constData(), PRIV_MAGIC, PRIV_MAGIC_LEN) != 0)
+        throw std::runtime_error("Bad magic in encrypted private key");
+    pos += PRIV_MAGIC_LEN;
+
+    uint8_t version = uint8_t(in[pos++]);
+    if (version != PRIV_VERSION)
+        throw std::runtime_error("Unsupported private key blob version");
+
+    uint32_t iter = (uint8_t(in[pos]) << 24) |
+                    (uint8_t(in[pos+1]) << 16) |
+                    (uint8_t(in[pos+2]) << 8) |
+                    uint8_t(in[pos+3]);
+    pos += 4;
+
+    uint8_t saltLen = uint8_t(in[pos++]);
+    uint8_t ivLen   = uint8_t(in[pos++]);
+
+    if (saltLen != PRIV_SALT_LEN || ivLen != PRIV_IV_LEN)
+        throw std::runtime_error("Unexpected salt/iv length");
+
+    if (pos + saltLen + ivLen + PRIV_TAG_LEN >= in.size())
+        throw std::runtime_error("Encrypted blob truncated");
+
+    QByteArray salt = in.mid(pos, saltLen); pos += saltLen;
+    QByteArray iv   = in.mid(pos, ivLen);   pos += ivLen;
+    QByteArray tag  = in.mid(pos, PRIV_TAG_LEN); pos += PRIV_TAG_LEN;
+    QByteArray ciphertext = in.mid(pos);
+
+    // Dériver la clé
+    const int keyLen = 32;
+    QByteArray key(keyLen, 0);
+    if (!PKCS5_PBKDF2_HMAC(
+            password.toUtf8().constData(),
+            password.toUtf8().size(),
+            reinterpret_cast<unsigned char*>(salt.data()),
+            salt.size(),
+            iter,
+            EVP_sha256(),
+            keyLen,
+            reinterpret_cast<unsigned char*>(key.data()))) {
+        throw std::runtime_error("PKCS5_PBKDF2_HMAC failed");
+    }
+
+    // Déchiffrer AES-256-GCM
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) throw std::runtime_error("EVP_CIPHER_CTX_new failed");
+
+    QByteArray plaintext(ciphertext.size(), 0);
+    int outLen = 0, totalLen = 0;
+
+    if (EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), nullptr,
+                           reinterpret_cast<unsigned char*>(key.data()),
+                           reinterpret_cast<unsigned char*>(iv.data())) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw std::runtime_error("EVP_DecryptInit_ex failed");
+    }
+
+    if (EVP_DecryptUpdate(ctx,
+                          reinterpret_cast<unsigned char*>(plaintext.data()),
+                          &outLen,
+                          reinterpret_cast<const unsigned char*>(ciphertext.constData()),
+                          ciphertext.size()) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw std::runtime_error("EVP_DecryptUpdate failed");
+    }
+    totalLen = outLen;
+
+    if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, PRIV_TAG_LEN,
+                            const_cast<char*>(tag.constData())) != 1) {
+        EVP_CIPHER_CTX_free(ctx);
+        throw std::runtime_error("EVP_CTRL_GCM_SET_TAG failed");
+    }
+
+    int ret = EVP_DecryptFinal_ex(ctx,
+                                  reinterpret_cast<unsigned char*>(plaintext.data()) + totalLen,
+                                  &outLen);
+    EVP_CIPHER_CTX_free(ctx);
+
+    if (ret != 1) {
+        throw std::runtime_error("Decryption failed (bad password or corrupted data)");
+    }
+
+    totalLen += outLen;
+    plaintext.resize(totalLen);
+    OPENSSL_cleanse(key.data(), key.size());
+    return plaintext;
+}
+
+
+
+
+
 /**
  * Makes a 256 bits aes-cbc key encrypted with rsa by a password
  * Private key locked with a password and encrypted aes with public key are stored in the file
@@ -136,84 +339,93 @@ SecureMemBlock FilesEncrypt::getAES() const{
  * @param aes_copy If not nullptr, instead of generating a new aes, it copies it
  * @return true if everything happend right
  */
-bool FilesEncrypt::genKey(QString const& file, QString const& password, const unsigned char* aes_copy){
-	bool success = false;
+bool FilesEncrypt::genKey(QString const& file, QString const& password, const unsigned char* aes_copy)
+{
+    bool success = false;
+    bool error = false;
 
-	// Vars to be unallocated after
-	unsigned char* aes = nullptr;
-	unsigned char* aes_encrypted = nullptr;
-	char* rsaBuff = nullptr;
-	BIO *bio = nullptr;
-	EVP_PKEY* rsa = nullptr;
-	RSA* public_key = nullptr;
+    // allocations
+    unsigned char* aes = nullptr;
+    unsigned char* aes_encrypted = nullptr;
+    BIO* bio = nullptr;
+    EVP_PKEY* keypair = nullptr;
 
-	// Gen rsa, this has to be unallocated
-	rsa = Crypt::genRSA(4096);
-	public_key = Crypt::getRSAFromEVP_PKEY(rsa);
+    do {
+        // Generate an RSA keypair
+        keypair = Crypt::genRSA(4096);
 
-	// Write private key encrypted to <rsaStr>
-	bio = BIO_new(BIO_s_mem());
 
-	PEM_write_bio_PrivateKey(
-		bio,
-		rsa,
-		EVP_des_ede3_cbc(),
-		const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(password.toStdString().c_str())), // Might be dangerous
-		password.length(),
-		NULL,
-		NULL
-	);
+        bio = BIO_new(BIO_s_mem());
+        if (!bio) { error = true; break; }
 
-	constexpr unsigned bufSize = 16;
-	rsaBuff = reinterpret_cast<char*>(malloc(bufSize + 1));
-	std::string rsaStr;
-	while(BIO_read(bio, reinterpret_cast<char*>(rsaBuff), bufSize) > 0){
-		rsaBuff[bufSize] = '\0';
-		rsaStr += rsaBuff;
-		memset(rsaBuff, '\0', bufSize);
-	}
+        // Write rsa in pem format into bio
+        if (!PEM_write_bio_PrivateKey(bio, keypair, nullptr, nullptr, 0, nullptr, nullptr)) {
+            error = true;
+            break;
+        }
 
-	// Gen aes key
-	aes = reinterpret_cast<unsigned char*>(malloc(AESSIZE::S256));
-	if(aes_copy == nullptr){
-		Crypt::genAES(AESSIZE::S256, aes);
-	}else{
-		memcpy(aes, aes_copy, 32);
-	}
+        // Write PEM into a QByteArray for further encrypting
+        QByteArray privPem;
+        {
+            char buf[1024];
+            int n = 0;
+            while ((n = BIO_read(bio, buf, sizeof(buf))) > 0) {
+                privPem.append(buf, n);
+            }
+        }
+        BIO_free(bio);
+        bio = nullptr;
 
-	// Encrypt aes
-	aes_encrypted = reinterpret_cast<unsigned char*>(malloc(RSA_size(public_key)));
-	Crypt::encrypt(public_key, aes, AESSIZE::S256, aes_encrypted);
+        // Encrypt the pem into a blob
+        EncryptedPrivateKeyBlob encBlob =
+            FilesEncrypt::encryptPrivateKeyWithPassword(privPem, password);
 
-	QFile f(std::move(file));
-	if(f.open(QFile::WriteOnly)){
-		f.seek(0);
-		f.write(rsaStr.c_str());
-		f.write(&PRIVATE_ENCRYPT_AES_SEPARATOR, 1);
-		f.write(reinterpret_cast<char*>(aes_encrypted), RSA_size(public_key));
-		f.close();
-		Logging::Logger::debug("Key successfully created");
-		success = true;
-	}else{
-		Logging::Logger::debug("Can't write aes key to file");
-	}
+        // Allocate mem for AES key
+        aes = (unsigned char*)malloc(AESSIZE::S256);
+        if (!aes) { error = true; break; }
 
-	free(aes);
-	free(aes_encrypted);
-	free(rsaBuff);
+        if (!aes_copy)
+            Crypt::genAES(AESSIZE::S256, aes);
+        else
+            memcpy(aes, aes_copy, AESSIZE::S256);
 
-	if(bio != nullptr) {
-		BIO_free(bio);
-	}
-	if(rsa != nullptr) {
-		EVP_PKEY_free(rsa);
-	}
-	if(public_key != nullptr) {
-		RSA_free(public_key);
-	}
+        size_t cryptedSize = 0;
+        Crypt::encrypt(keypair, aes, AESSIZE::S256, nullptr, cryptedSize);
 
-	return success;
+        // Wrap AES into RSA
+        aes_encrypted = (unsigned char*)malloc(cryptedSize);
+        if (!aes_encrypted) { error = true; break; }
+
+        Crypt::encrypt(keypair, aes, AESSIZE::S256, aes_encrypted, cryptedSize);
+
+
+        // Écrire le fichier
+        QFile f(file);
+        if (!f.open(QFile::WriteOnly)) { error = true; break; }
+
+        quint32 privLen = encBlob.raw.size();
+        // Write blob size
+        f.write(reinterpret_cast<const char*>(&privLen), sizeof(privLen));
+        // Write blob
+        f.write(encBlob.raw.constData(), encBlob.raw.size());
+        // Write crypted aes
+        f.write(reinterpret_cast<const char*>(aes_encrypted), cryptedSize);
+        f.close();
+
+        success = true;
+
+    } while (false);
+
+    // cleanup
+    free(aes);
+    free(aes_encrypted);
+    if (bio) BIO_free(bio);
+    if (keypair) EVP_PKEY_free(keypair);
+    return success && !error;
 }
+
+
+
 
 
 /**
@@ -223,93 +435,162 @@ bool FilesEncrypt::genKey(QString const& file, QString const& password, const un
  * @return True if key was retrieved, either false
  */
 bool FilesEncrypt::readFromFile(){
-	QFile f(m_key_file.c_str());
-	if(!f.exists() || !f.open(QFile::ReadOnly)){
-		Logging::Logger::error("Cannot retrieve key");
-		f.close();
-		return false;
-	}
+    QFile f(m_key_file.c_str());
+    if (!f.exists() || !f.open(QFile::ReadOnly)) {
+        Logging::Logger::error("Cannot retrieve key");
+        f.close();
+        return false;
+    }
 
-	// Get separated the private key and the aes-crypted key
-	QByteArray arr{f.readAll()};
-	int split = arr.indexOf(PRIVATE_ENCRYPT_AES_SEPARATOR);
-	QByteArray private_key = arr.mid(0, split);
-	QByteArray aes_crypted = arr.mid(split + 1, -1);
+    QByteArray arr{f.readAll()};
+    f.close();
 
-	m_aes_crypted_length = aes_crypted.length();
+    if (arr.size() < 4) {
+        Logging::Logger::error("Key file too small");
+        return false;
+    }
 
-	memcpy(reinterpret_cast<void*>(m_aes_crypted), aes_crypted.constData(), aes_crypted.length()); // Save the crypted aes
-	m_private_key_crypted = private_key.toStdString(); // Save the crypted private key
+    const char* data = arr.constData();
+    quint32 privLen = 0;
+    memcpy(&privLen, data, sizeof(privLen));
 
-	Logging::Logger::debug("Crypted aes and crypted private key saved");
+    if (arr.size() < 4 + static_cast<int>(privLen)) {
+        Logging::Logger::error("Key file truncated (private key blob)");
+        return false;
+    }
 
-	f.close();
-	return true;
+    QByteArray private_key = QByteArray::fromRawData(data + 4, privLen);
+    QByteArray aes_crypted  = QByteArray::fromRawData(
+        data + 4 + privLen,
+        arr.size() - 4 - privLen
+        );
+
+    m_aes_crypted_length = aes_crypted.length();
+
+
+
+    memcpy(reinterpret_cast<void*>(m_aes_crypted),
+           aes_crypted.constData(),
+           aes_crypted.length());
+
+    m_private_key_crypted = private_key.toStdString();
+
+    Logging::Logger::debug("Crypted aes and crypted private key saved");
+    return true;
 }
+
 
 bool FilesEncrypt::isAesDecrypted() const{
 	return m_aes_decrypted_set;
 }
 
-bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk){
+bool FilesEncrypt::requestAesDecrypt(std::string const& password, bool* passOk)
+{
+    bool success = false;
+    BIO* bio = nullptr;
+    EVP_PKEY* container = nullptr;
 
-	bool success = false;
-	BIO* bio = nullptr;
-	EVP_PKEY* container = nullptr;
-	RSA* private_key = nullptr;
+    if (passOk) {
+        *passOk = false;
+    }
 
-	// Write rsa to RSA container (RSA_st)
-	bio = BIO_new(BIO_s_mem());
-	BIO_write(bio, m_private_key_crypted.c_str(), m_private_key_crypted.length());
-	container = PEM_read_bio_PrivateKey(bio, NULL, NULL, const_cast<char*>(password.c_str()));
-	if(container == nullptr){
-		if(passOk != nullptr)
-			*passOk = false;
-		Logging::Logger::error("Incorrect password or something else");
-		goto end;
-	}else{
-		if(passOk != nullptr)
-			*passOk = true;
-	}
+    // Construire le blob à partir de m_private_key_crypted
+    EncryptedPrivateKeyBlob encBlob;
+    encBlob.raw = QByteArray::fromRawData(
+        m_private_key_crypted.data(),
+        static_cast<int>(m_private_key_crypted.size())
+        );
 
-	if(!isAesDecrypted()){
-		private_key = Crypt::getRSAFromEVP_PKEY(container); // Save the private key
-		unsigned char aes_decrypted[32] = {0};
-		if(Crypt::decrypt(
-			private_key,
-			m_aes_crypted,
-			m_aes_crypted_length,
-			aes_decrypted
-		) != -1 ){
-			success = true;
-			setAES(reinterpret_cast<const char*>(aes_decrypted));
+    // 1) Déchiffrer la clé privée RSA à partir du password
+    QByteArray privPem;
+    try {
+        privPem = FilesEncrypt::decryptPrivateKeyWithPassword(
+            encBlob,
+            QString::fromStdString(password)
+            );
+    } catch (...) {
+        Logging::Logger::error("Incorrect password or corrupted private key blob");
+        // passOk déjà à false
+        goto cleanup;
+    }
+
+    // 2) Charger la clé privée dans un EVP_PKEY
+    bio = BIO_new(BIO_s_mem());
+    if (!bio) {
+        Logging::Logger::error("BIO_new failed");
+        goto cleanup;
+    }
+
+    if (BIO_write(bio, privPem.constData(), privPem.length()) <= 0) {
+        Logging::Logger::error("BIO_write failed");
+        goto cleanup;
+    }
+
+    container = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
+    if (container == nullptr) {
+        Logging::Logger::error("PEM_read_bio_PrivateKey failed");
+        goto cleanup;
+    }
+
+    if (passOk) {
+        *passOk = true;
+    }
+
+    // 3) Déchiffrer la clé AES symétrique si pas déjà en RAM
+    if (!isAesDecrypted()) {
+        unsigned char aes_decrypted[32] = {0};
+        size_t outlen;
+        int decRes = Crypt::decrypt(
+            container,
+            m_aes_crypted,
+            m_aes_crypted_length,
+            nullptr,
+            outlen
+        );
+
+        if(decRes != -1)
+            decRes = Crypt::decrypt(
+                container,
+                m_aes_crypted,
+                m_aes_crypted_length,
+                aes_decrypted,
+                outlen
+            );
+
+        if (decRes != -1 && outlen == AESSIZE::S256) {
+            success = true;
+            setAES(reinterpret_cast<const char*>(aes_decrypted));
             Q_EMIT keyDecrypted();
-			Logging::Logger::debug("AES successfully decrypted");
-			m_aes_decrypted_set = true;
-			startDeleteAesTimer();
+            Logging::Logger::debug("AES successfully decrypted");
+            m_aes_decrypted_set = true;
+            startDeleteAesTimer();
 
-		}else{
-			Logging::Logger::debug("AES not successfully decrypted");
-		}
-	}else{
-		Logging::Logger::error("AES already decrypted");
-		success = true;
-	}
+// Effacer la clé AES en clair sur la stack
+#ifdef Q_OS_WIN
+            SecureZeroMemory(aes_decrypted, sizeof(aes_decrypted));
+#else
+            memset(aes_decrypted, 0, sizeof(aes_decrypted));
+#endif
+        } else {
+            Logging::Logger::debug("AES not successfully decrypted");
+        }
+    } else {
+        Logging::Logger::error("AES already decrypted");
+        success = true;
+    }
 
-end:
-	if(bio != nullptr){
-		BIO_free(bio);
-	}
-	if(container != nullptr){
-		EVP_PKEY_free(container);
-	}
-	if(private_key != nullptr){
-		RSA_free(private_key);
-	}
+cleanup:
+    if (bio != nullptr) {
+        BIO_free(bio);
+    }
+    if (container != nullptr) {
+        EVP_PKEY_free(container);
+    }
+    // ⚠️ Ne pas RSA_free(private_key) ici si c'est un pointeur "emprunté" depuis EVP_PKEY
 
-	return success;
-
+    return success;
 }
+
 
 void FilesEncrypt::startDeleteAesTimer(){
 	m_deleteAESTimer.start(1000 * 60 * TIME_MIN_REMOVE_AES);

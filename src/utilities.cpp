@@ -3,6 +3,7 @@
 #include <QString>
 #include <fstream>
 #include "Logger.h"
+#include "openssl/err.h"
 #include <experimental/filesystem>
 #include <random>
 #include <QtDebug>
@@ -84,6 +85,17 @@ namespace utilities{
         );
 
         return formattedTime;
+    }
+
+    void logOpenSSLErrors()
+    {
+        ERR_print_errors_cb(
+            [](const char* str, size_t len, void* u) -> int {
+                Logging::Logger::error(QString::fromUtf8(str, int(len)).trimmed());
+                return 1;
+            },
+            nullptr
+            );
     }
 
 }

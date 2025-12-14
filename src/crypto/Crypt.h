@@ -14,10 +14,8 @@ class Crypt : public QObject
 	Q_OBJECT
 
 	public:
-		static RSA* getPrivateKeyFromFile(std::string const& filename);
-		static RSA* getPublicKeyFromFile(std::string const& filename);
-		static int encrypt(RSA* public_key, const unsigned char* message, int len, unsigned char* encrypted);
-		static int decrypt(RSA* private_key, const unsigned char* encrypted, int len, unsigned char* message);
+        static int encrypt(EVP_PKEY* public_key, const unsigned char* message, int len, unsigned char* encrypted, size_t& outlen);
+        static int decrypt(EVP_PKEY* private_key, const unsigned char* encrypted, int len, unsigned char* message, size_t& outlen);
 		static EVP_PKEY* genRSA(int keyLength);
 		void writePrivateKey(EVP_PKEY* x, char* password = NULL) const;
 		void writePublicKey(EVP_PKEY* x) const;
@@ -33,7 +31,6 @@ class Crypt : public QObject
 		int aes_decrypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
 		void aes_crypt(QFile* file, QFile* tmpFile, const unsigned char* key, unsigned char* iv);
 		static EVP_PKEY* getPublicKeyFromCertificate(X509* cert);
-		static RSA* getRSAFromEVP_PKEY(EVP_PKEY* pKey);
 		static void init();
 		static QByteArray userCrypt(const char *aes);
 		static QByteArray userDecrypt(const char *crypted_aes, size_t size);

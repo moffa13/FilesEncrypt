@@ -10,6 +10,11 @@
 #include <QTimer>
 #include "SecureMemBlock.h"
 
+struct EncryptedPrivateKeyBlob {
+    QByteArray raw; // tout le blob "PRIV1..."
+};
+
+
 class FilesEncrypt : public QObject
 {
 
@@ -58,6 +63,12 @@ private:
 	static void addPendingCrypt();
 	static void removePendingCrypt();
 	void startDeleteAesTimer();
+    static EncryptedPrivateKeyBlob encryptPrivateKeyWithPassword(
+        const QByteArray& privPem,
+        const QString& password);
+    static QByteArray decryptPrivateKeyWithPassword(
+        const EncryptedPrivateKeyBlob& blob,
+        const QString& password);
 Q_SIGNALS:
 	void encrypt_updated(qint32 progress);
 	void decrypt_updated(qint32 progress);
