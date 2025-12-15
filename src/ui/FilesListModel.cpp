@@ -40,7 +40,7 @@ QVariant FilesListModel::headerData(int section, Qt::Orientation orientation, in
 				case 1:
 					return tr("Taille");
 				case 2:
-					return tr("Encrypté");
+                    return tr("Chiffré");
 				case 3:
 					return tr("Nom");
 			}

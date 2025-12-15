@@ -120,7 +120,7 @@ void MainWindow::updateStatusBar(){
 	}else if(m_filesEncrypt->isAesDecrypted()){
 		m_statusBarLabel->setText(tr("Clé chargée, prêt"));
 	}else{
-		m_statusBarLabel->setText(tr("Clé chargée mais encryptée"));
+        m_statusBarLabel->setText(tr("Clé chargée mais chiffrée"));
 	}
 }
 
@@ -425,7 +425,7 @@ QPAIR_CRYPT_DEF MainWindow::guessEncrypted(QString const& file){
 	f.open(QFile::ReadOnly);
 	auto res = FilesEncrypt::guessEncrypted(f);
 	if(res.state == EncryptDecrypt::ENCRYPT){
-		Logging::Logger::debug(tr("Le fichier %1 est encrypté").arg(fInfo.absoluteFilePath()));
+        Logging::Logger::debug(tr("Le fichier %1 est chiffré").arg(fInfo.absoluteFilePath()));
 	}
 	return QPAIR_CRYPT_DEF{file, res};
 }

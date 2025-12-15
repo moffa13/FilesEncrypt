@@ -147,8 +147,8 @@ public:
         action_saveKey->setText(QCoreApplication::translate("MainWindow", "Sauvegarder la cl\303\251", nullptr));
         action_newKey->setText(QCoreApplication::translate("MainWindow", "Nouvelle cl\303\251", nullptr));
         action_saveSessionKey->setText(QCoreApplication::translate("MainWindow", "Cr\303\251er la cl\303\251 de session", nullptr));
-        cryptAll->setText(QCoreApplication::translate("MainWindow", "Crypter", nullptr));
-        decryptAll->setText(QCoreApplication::translate("MainWindow", "D\303\251crypter", nullptr));
+        cryptAll->setText(QCoreApplication::translate("MainWindow", "Chiffrer", nullptr));
+        decryptAll->setText(QCoreApplication::translate("MainWindow", "D\303\251chiffrer", nullptr));
         remove->setText(QCoreApplication::translate("MainWindow", "Supprimer", nullptr));
         importButton->setText(QCoreApplication::translate("MainWindow", "Ajouter", nullptr));
         menuOptions->setTitle(QCoreApplication::translate("MainWindow", "Options", nullptr));

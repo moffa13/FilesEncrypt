@@ -29,84 +29,92 @@
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="74"/>
-        <location filename="ui/ChooseKey.cpp" line="97"/>
+        <location filename="ui/ChooseKey.cpp" line="75"/>
+        <location filename="ui/ChooseKey.cpp" line="98"/>
         <source>Existe dejà</source>
         <translation>Already exists</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="74"/>
-        <location filename="ui/ChooseKey.cpp" line="97"/>
+        <location filename="ui/ChooseKey.cpp" line="75"/>
+        <location filename="ui/ChooseKey.cpp" line="98"/>
         <source>Un fichier existe déjà, voulez-vous écraser ?</source>
         <translation>A file already exists, do you want to overwrite it ?</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="119"/>
+        <location filename="ui/ChooseKey.cpp" line="121"/>
         <source>Introuvable</source>
         <translation>Not found</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="119"/>
+        <location filename="ui/ChooseKey.cpp" line="121"/>
         <source>La clé est introuvable</source>
         <translation>Key not found</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="139"/>
         <location filename="ui/ChooseKey.cpp" line="141"/>
+        <location filename="ui/ChooseKey.cpp" line="143"/>
         <source>Mot de passe</source>
         <translation>Password</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="139"/>
+        <location filename="ui/ChooseKey.cpp" line="141"/>
         <source>Entrez un mot de passe pour sécuriser la clé</source>
         <translation>Enter a password below to secure the key</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="141"/>
+        <location filename="ui/ChooseKey.cpp" line="143"/>
         <source>Entrez le mot de passe de la clé</source>
         <translation>Enter the key&apos;s password</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="152"/>
+        <location filename="ui/ChooseKey.cpp" line="154"/>
         <source>Emplacement de la clé</source>
         <translation>Key location</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="154"/>
+        <location filename="ui/ChooseKey.cpp" line="156"/>
         <source>Tous les fichiers (*)</source>
         <oldsource>All files (*)</oldsource>
         <translation>All files (*)</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="174"/>
+        <location filename="ui/ChooseKey.cpp" line="176"/>
         <source>Clé</source>
         <translation>Key</translation>
     </message>
     <message>
-        <location filename="ui/ChooseKey.cpp" line="174"/>
+        <location filename="ui/ChooseKey.cpp" line="176"/>
         <source>Entrez une clé AES-256 en hexadécimal (32 bytes, 64 caractères)</source>
         <translation>Enter a 256 bits hexadecimal key (32 bytes, 64 chars)</translation>
     </message>
 </context>
 <context>
+    <name>ContextualMenuToggler</name>
+    <message>
+        <location filename="ui/ContextualMenuToggler.cpp" line="24"/>
+        <source>Erreur</source>
+        <translation>Error</translation>
+    </message>
+</context>
+<context>
     <name>FilesListModel</name>
     <message>
-        <location filename="ui/FilesListModel.cpp" line="40"/>
+        <location filename="ui/FilesListModel.cpp" line="39"/>
         <source>Type</source>
         <translation>Type</translation>
     </message>
     <message>
-        <location filename="ui/FilesListModel.cpp" line="42"/>
+        <location filename="ui/FilesListModel.cpp" line="41"/>
         <source>Taille</source>
         <translation>Size</translation>
     </message>
     <message>
-        <location filename="ui/FilesListModel.cpp" line="44"/>
+        <location filename="ui/FilesListModel.cpp" line="43"/>
         <source>Encrypté</source>
         <translation>Encrypted</translation>
     </message>
     <message>
-        <location filename="ui/FilesListModel.cpp" line="46"/>
+        <location filename="ui/FilesListModel.cpp" line="45"/>
         <source>Nom</source>
         <translation>Name</translation>
     </message>
@@ -145,42 +153,47 @@
     </message>
     <message>
         <location filename="ui/MainWindow.ui" line="96"/>
-        <location filename="ui/MainWindow.cpp" line="514"/>
+        <location filename="ui/MainWindow.cpp" line="564"/>
         <source>Fichier</source>
         <translation>File</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.ui" line="107"/>
+        <location filename="ui/MainWindow.ui" line="108"/>
         <source>Obtenir la clé</source>
         <translation>Get the key</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.ui" line="112"/>
+        <location filename="ui/MainWindow.ui" line="113"/>
         <source>Paramètres</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.ui" line="117"/>
+        <location filename="ui/MainWindow.ui" line="118"/>
         <source>Vérifier les mises à jour</source>
         <translation>Check for updates</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.ui" line="122"/>
+        <location filename="ui/MainWindow.ui" line="123"/>
         <source>Sauvegarder la clé</source>
         <translation>Save the key</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.ui" line="127"/>
+        <location filename="ui/MainWindow.ui" line="128"/>
         <source>Nouvelle clé</source>
         <translation>New key</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="62"/>
+        <location filename="ui/MainWindow.ui" line="133"/>
+        <source>Créer la clé de session</source>
+        <translation>Create the session key</translation>
+    </message>
+    <message>
+        <location filename="main.cpp" line="150"/>
         <source>Mise à jour</source>
         <translation>Update</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="62"/>
+        <location filename="main.cpp" line="150"/>
         <source>La mise à jour a correctement été installée.</source>
         <translation>The update has successfully been installed.</translation>
     </message>
@@ -200,73 +213,87 @@
         <translation>Open directory</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="115"/>
+        <location filename="ui/MainWindow.cpp" line="117"/>
         <source>Clé non chargée</source>
         <translation>Key is not loaded</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="117"/>
+        <location filename="ui/MainWindow.cpp" line="119"/>
         <source>Clé aes brute chargée</source>
         <translation>Brute AES key loaded</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="119"/>
+        <location filename="ui/MainWindow.cpp" line="121"/>
         <source>Clé chargée, prêt</source>
         <translation>Key loaded, ready</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="121"/>
-        <source>Clé chargée mais encryptée</source>
-        <translation>Key loaded but encrypted</translation>
+        <location filename="ui/MainWindow.cpp" line="123"/>
+        <source>Clé chargée mais chiffrée</source>
+        <translation>Key loaded, but encrypted</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="254"/>
+        <location filename="ui/MainWindow.cpp" line="264"/>
         <source>Votre clé est </source>
         <translation>Your key is</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="385"/>
+        <location filename="ui/MainWindow.cpp" line="411"/>
         <source>Oui</source>
         <translation>Yes</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="388"/>
+        <location filename="ui/MainWindow.cpp" line="428"/>
+        <source>Le fichier %1 est chiffré</source>
+        <translation>The file %1 is encrypted</translation>
+    </message>
+    <message>
+        <location filename="ui/MainWindow.cpp" line="827"/>
+        <source>Non disponible</source>
+        <translation>Unavailable</translation>
+    </message>
+    <message>
+        <location filename="ui/MainWindow.cpp" line="827"/>
+        <source>Cette fonction n&apos;est uniquement disponible que pour les systemes Windows</source>
+        <translation>This function is available only with Windows systems</translation>
+    </message>
+    <message>
+        <location filename="ui/MainWindow.cpp" line="408"/>
         <source>Non</source>
         <translation>No</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="402"/>
         <source>Le fichier %1 est encrypté</source>
         <oldsource>File %1 is encrypted</oldsource>
-        <translation>The file %1 is encrypted</translation>
+        <translation type="vanished">The file %1 is encrypted</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="496"/>
+        <location filename="ui/MainWindow.cpp" line="546"/>
         <source>Dossier</source>
         <translation>Directory</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="533"/>
+        <location filename="ui/MainWindow.cpp" line="587"/>
         <source>Sélectionner des fichiers</source>
         <translation>Select files</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="547"/>
+        <location filename="ui/MainWindow.cpp" line="600"/>
         <source>Sélectionner des dossiers</source>
         <translation>Select directories</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="633"/>
+        <location filename="ui/MainWindow.cpp" line="694"/>
         <source>Write protection</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="634"/>
+        <location filename="ui/MainWindow.cpp" line="695"/>
         <source>Some files are write protected (perhaps privileges too low), they won&apos;t be encrypted/decrypted</source>
         <translation>Some files are write protected (perhaps privileges too low), they won&apos;t be encrypted/decrypted</translation>
     </message>
     <message>
-        <location filename="ui/MainWindow.cpp" line="653"/>
+        <location filename="ui/MainWindow.cpp" line="714"/>
         <source>En cours...</source>
         <translation>Working...</translation>
     </message>
@@ -309,37 +336,37 @@
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="ui/Progress.cpp" line="81"/>
+        <location filename="ui/Progress.cpp" line="82"/>
         <source>Fichier : </source>
         <translation>File : </translation>
     </message>
     <message>
-        <location filename="ui/Progress.cpp" line="82"/>
+        <location filename="ui/Progress.cpp" line="83"/>
         <source>Threads : </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="ui/Progress.cpp" line="83"/>
+        <location filename="ui/Progress.cpp" line="84"/>
         <source>Vitesse : </source>
         <translation>Speed : </translation>
     </message>
     <message>
-        <location filename="ui/Progress.cpp" line="84"/>
+        <location filename="ui/Progress.cpp" line="85"/>
         <source>Temps écoulé : </source>
         <translation>Elapsed time : </translation>
     </message>
     <message>
-        <location filename="ui/Progress.cpp" line="124"/>
+        <location filename="ui/Progress.cpp" line="125"/>
         <source>Arrêt</source>
         <translation>Stop</translation>
     </message>
     <message>
-        <location filename="ui/Progress.cpp" line="124"/>
+        <location filename="ui/Progress.cpp" line="125"/>
         <source>Etes-vous sur de vouloir arrêter l&apos;action en cours ?</source>
         <translation>Are you sure do you want to cancel the current action ?</translation>
     </message>
     <message>
-        <location filename="ui/Progress.cpp" line="138"/>
+        <location filename="ui/Progress.cpp" line="139"/>
         <source>Continuer</source>
         <translation>Continue</translation>
     </message>
@@ -352,6 +379,29 @@
     </message>
 </context>
 <context>
+    <name>SessionKeyBase</name>
+    <message>
+        <location filename="crypto/SessionKeyBase.cpp" line="38"/>
+        <source>Clé de session</source>
+        <translation>Session key</translation>
+    </message>
+    <message>
+        <location filename="crypto/SessionKeyBase.cpp" line="38"/>
+        <source>Vous ne pouvez pas modifier la clé de session</source>
+        <translation>You cannot modify the session key</translation>
+    </message>
+    <message>
+        <location filename="crypto/SessionKeyBase.cpp" line="61"/>
+        <source>Créer une clé de session</source>
+        <translation>Create a session key</translation>
+    </message>
+    <message>
+        <location filename="crypto/SessionKeyBase.cpp" line="61"/>
+        <source>Vous ne disposez pas encore de clé de session, merci de sélectionner une clé ou d&apos;en créer une</source>
+        <translation>You do not have a session key yet, please select or create one</translation>
+    </message>
+</context>
+<context>
     <name>SettingsWindow</name>
     <message>
         <location filename="ui/SettingsWindow.ui" line="14"/>
@@ -359,17 +409,22 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="ui/SettingsWindow.cpp" line="15"/>
+        <location filename="ui/SettingsWindow.cpp" line="17"/>
+        <source>Options du menu contextuel</source>
+        <translation>Contextual menu options</translation>
+    </message>
+    <message>
+        <location filename="ui/SettingsWindow.cpp" line="18"/>
         <source>Crypter les noms de fichiers</source>
         <translation>Encrypt filenamed</translation>
     </message>
     <message>
-        <location filename="ui/SettingsWindow.cpp" line="16"/>
+        <location filename="ui/SettingsWindow.cpp" line="19"/>
         <source>Autoriser les mises à jour beta (risqué)</source>
         <translation>Allow beta updates (risky)</translation>
     </message>
     <message>
-        <location filename="ui/SettingsWindow.cpp" line="28"/>
+        <location filename="ui/SettingsWindow.cpp" line="31"/>
         <source>Paramètres</source>
         <translation>Settings</translation>
     </message>
@@ -384,37 +439,39 @@
     </message>
     <message>
         <location filename="network/UpdateManager.cpp" line="22"/>
-        <source>Une mise à jour est disponible (v %1), voulez-vous l&apos;installer ?</source>
+        <source>Une mise à jour est disponible (v%1), voulez-vous l&apos;installer ?</source>
+        <oldsource>Une mise à jour est disponible (v %1), voulez-vous l&apos;installer ?</oldsource>
         <translation>A new update is available (v %1), do you want to install it now ?</translation>
     </message>
     <message>
         <location filename="network/UpdateManager.cpp" line="33"/>
-        <source>Vous possédez déjà la dernière mise à jour.</source>
-        <translation>Software is up to date.</translation>
+        <source>Vous possédez déjà la dernière mise à jour (v%1)</source>
+        <oldsource>Vous possédez déjà la dernière mise à jour.</oldsource>
+        <translation>Software is up to date (v%1)</translation>
     </message>
     <message>
-        <location filename="network/UpdateManager.cpp" line="120"/>
+        <location filename="network/UpdateManager.cpp" line="122"/>
         <source>Erreur de mise à jour</source>
         <translation>Update error</translation>
     </message>
     <message>
-        <location filename="network/UpdateManager.cpp" line="120"/>
+        <location filename="network/UpdateManager.cpp" line="122"/>
         <source>Les mises à jour ne sont pas encore possibles sur ce système</source>
         <translation>Updates are not currently available on this system</translation>
     </message>
     <message>
-        <location filename="network/UpdateManager.cpp" line="130"/>
-        <location filename="network/UpdateManager.cpp" line="150"/>
+        <location filename="network/UpdateManager.cpp" line="132"/>
+        <location filename="network/UpdateManager.cpp" line="152"/>
         <source>Erreur de télechargement</source>
         <translation>Download error</translation>
     </message>
     <message>
-        <location filename="network/UpdateManager.cpp" line="131"/>
+        <location filename="network/UpdateManager.cpp" line="133"/>
         <source>Nous n&apos;avons pas pu installer la mise à jour. Impossible d&apos;écrire dans le fichier</source>
         <translation>We were unable to install the new update. Could not write to file</translation>
     </message>
     <message>
-        <location filename="network/UpdateManager.cpp" line="151"/>
+        <location filename="network/UpdateManager.cpp" line="153"/>
         <source>Nous n&apos;avons pas pu installer la mise à jour. Veuillez réessayer plus tard</source>
         <translation>We were unable to install the new update. Please try again later</translation>
     </message>

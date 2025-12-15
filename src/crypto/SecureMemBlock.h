@@ -39,9 +39,8 @@ private:
 #else
 		static size_t getMultipleSize(size_t len, size_t multiple);
 #endif
+        size_t _len;
 		bool _encrypted;
-		size_t _len;
-
 };
 
 #endif // SECUREMEMBLOCK_H

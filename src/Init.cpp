@@ -12,7 +12,6 @@ void Init::init() {
 
 void Init::initOpenSSL(){
 	OpenSSL_add_all_algorithms();
-	ERR_load_BIO_strings();
 }
 
 void Init::deInitOpenSSL() {

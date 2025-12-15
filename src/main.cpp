@@ -1,6 +1,5 @@
 #include <QApplication>
 #include "ui/MainWindow.h"
-#include "Version.h"
 #include <QMessageBox>
 #include <QLibraryInfo>
 #include <QTranslator>
@@ -29,7 +28,7 @@ static int argcw;
 
 QString getArgv(int i){
 #ifdef Q_OS_WIN
-	return QString::fromUtf16(argvw[i]);
+    return QString::fromUtf16(reinterpret_cast<char16_t*>(argvw[i]));
 #else
 	return QString(argvw[i]);
 #endif
@@ -130,9 +129,12 @@ int main(int argc, char *argv[]){
 	}
 
 	QTranslator translator;
-	translator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
-	QTranslator translator2;
-    translator2.load(QLocale::system().name(), ":/lang");
+    if(!translator.load("qt_" + QLocale::system().name(), QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
+        qDebug() << "Qt own translations not loaded";
+
+    QTranslator translator2;
+    if(!translator2.load(QLocale::system().name(), ":/lang"))
+        qDebug() << "Translations not loaded";
 
     qApp->installTranslator(&translator);
     qApp->installTranslator(&translator2);

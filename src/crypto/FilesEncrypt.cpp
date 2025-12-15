@@ -706,7 +706,7 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 			);
 
 			QByteArray str(uncrypted_filename, nameSize);
-			name = fileInfo.absolutePath() + "/" + QString::fromUtf16(reinterpret_cast<const uint16_t*>(str.constData()), nameSize / 2);
+            name = fileInfo.absolutePath() + "/" + QString::fromUtf16(reinterpret_cast<const char16_t*>(str.constData()), nameSize / 2);
 			free(uncrypted_filename);
 		}
 	}
