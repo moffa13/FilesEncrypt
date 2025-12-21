@@ -48,10 +48,16 @@ QVariant FilesListModel::headerData(int section, Qt::Orientation orientation, in
 	}
 	return QVariant{};
 }
-
 void FilesListModel::update(const QString &name){
-	auto row{getIndex(name)};
+    auto row{getIndex(name)};
     Q_EMIT dataChanged(index(row, 0), index(row, 3));
+}
+void FilesListModel::update(const QString &name, CryptInfos c){
+    auto &e = m_dirs[name];
+    c.files.clear(); // Remove all recursive infos (from sub files/folders)
+    e = c;
+
+    update(name);
 }
 
 void FilesListModel::insert(QString const& key, CryptInfos const& infos){
@@ -65,19 +71,16 @@ void FilesListModel::remove(const QString &key){
 	m_dirs.remove(key);
 	endRemoveRows();
 }
-
-void FilesListModel::remove(int index){
-	if(index > m_dirs.size() - 1) return;
-	remove(m_dirs.keys().at(index));
+QString FilesListModel::removeLast(){
+    if(m_dirs.isEmpty()) return "-----";
+    auto elem = std::prev(m_dirs.constEnd()).key();
+    remove(elem);
+    return elem;
 }
 
-void FilesListModel::removeLast(){
-	if(m_dirs.isEmpty()) return;
-	remove(m_dirs.keys().at(m_dirs.size() - 1));
-}
-
-CryptInfos &FilesListModel::getDir(const QString &key){
-	return m_dirs[key];
+QString FilesListModel::get(int index) const
+{
+    return std::next(m_dirs.cbegin(), index).key();
 }
 
 long long FilesListModel::getIndex(const QString &name) const{

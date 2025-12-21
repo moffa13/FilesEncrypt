@@ -6,6 +6,7 @@
 #include <Logger.h>
 #include "Init.h"
 #include "crypto/SessionKey.h"
+#include "ui/FilesListModel.h"
 
 #ifdef Q_OS_WIN
 #include <Windows.h>
@@ -50,6 +51,7 @@ int main(int argc, char *argv[]){
 
 // If in debug mode, run unit tests before starting program
 #ifdef QT_DEBUG
+#ifndef QT_NO_UNIT_TEST
 	Logging::Logger::setLogLevel(Logging::DEBUG);
 	int result;
 	result = TestSecureMemBlock::runTests();
@@ -62,6 +64,7 @@ int main(int argc, char *argv[]){
 		Logging::Logger::error("Unit test has failed. Please fix errors");
 		return result;
 	}
+#endif
 #ifdef UNIT_TEST
 	Init::deInit();
 	return 0;

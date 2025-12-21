@@ -63,7 +63,7 @@ void Progress::addFile(){
 	QMutexLocker locker{&s_mutex};
 	++m_current_file;
 	renderLabels();
-	if(m_done >= m_max && FilesEncrypt::getPendingCrypt() == 0){
+    if(m_done >= m_max && FilesEncrypt::getPendingCrypt() == 0){
 		QTimer::singleShot(200, [this](){
 			close();
 			reset();

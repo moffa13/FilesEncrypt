@@ -42,9 +42,9 @@ class MainWindow : public QMainWindow
         bool allTasksDone(EncryptDecrypt action);
         inline EncryptDecrypt getLastAction() const { return _lastAction; }
 	Q_SIGNALS:
-		void root_done() const;
-		void file_done() const;
-		void finishedDiscover() const;
+        void root_done();
+        void file_done();
+        void finishedDiscover();
 	private Q_SLOTS:
 		void select_dir();
 		void select_file();
@@ -67,6 +67,7 @@ class MainWindow : public QMainWindow
 		void on_action_saveSessionKey_triggered();
 	private:
 		SessionKey *_sessionKey;
+        QMap<QString, CryptInfos> m_dirs;
 		Ui::MainWindow *ui;
 		Progress* m_progress = NULL;
 		ChooseKey* m_choose_key;
@@ -79,13 +80,12 @@ class MainWindow : public QMainWindow
 		QSettings* m_settings;
 		QMenu* m_addWhateverMenu;
 		QMenu* m_listRowMenu;
-		bool m_encrypting = false;
 		FilesListModel m_filesListModel;
 		EncryptDecrypt _lastAction = PARTIAL;
 		static QPAIR_CRYPT_DEF guessEncrypted(QString const& file);
 		finfo_s encrypt(QString const &file, EncryptDecrypt action) const;
-		void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item) const;
-		void changeRootState(CryptInfos &item, bool emitRootChanged = false) const;
+        void guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item);
+        void changeRootState(CryptInfos &item, bool emitRootChanged = false);
 		void action(EncryptDecrypt action);
 		QString get_base_dir() const;
 		void set_base_dir(QString const &dir);
@@ -100,7 +100,7 @@ class MainWindow : public QMainWindow
 		bool beSureKeyIsSelectedAndValid(std::function<void()> func, bool forceAskKey = false);
 		void updateAvailableButtons();
 		bool deleteKey();
-		void checkNoFilesProcessingToList() const;
+        void checkNoFilesProcessingToList();
 	public Q_SLOTS:
 		void updateStatusBar();
 	protected:

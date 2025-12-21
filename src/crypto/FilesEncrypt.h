@@ -11,7 +11,7 @@
 #include "SecureMemBlock.h"
 
 struct EncryptedPrivateKeyBlob {
-    QByteArray raw; // tout le blob "PRIV1..."
+    QByteArray raw;
 };
 
 
@@ -26,7 +26,7 @@ public:
 	FilesEncrypt(FilesEncrypt const&) = delete;
 	FilesEncrypt& operator =(FilesEncrypt const&) = delete;
 	~FilesEncrypt();
-	finfo_s encryptFile(QFile* file, EncryptDecrypt op, bool filenameNeedsEncryption) const;
+    finfo_s encryptFile(QFile* file, EncryptDecrypt op, bool filenameNeedsEncryption);
 	bool readFromFile();
 	static bool genKey(QString const& file, QString const& password, const unsigned char *aes_copy = nullptr);
 	static EncryptDecrypt_s guessEncrypted(QFile& f);
@@ -72,9 +72,9 @@ private:
 Q_SIGNALS:
 	void encrypt_updated(qint32 progress);
 	void decrypt_updated(qint32 progress);
-	void file_done() const;
-	void keyDecrypted() const;
-	void keyEncrypted() const;
+    void file_done();
+    void keyDecrypted();
+    void keyEncrypted();
 };
 
 #endif // FILESENCRYPT_H

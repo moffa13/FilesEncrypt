@@ -39,7 +39,7 @@ public:
     QVBoxLayout *verticalLayout_4;
     QTableView *filesList;
     QGridLayout *gridLayout;
-    QPushButton *cryptAll;
+    QPushButton *encryptAll;
     QPushButton *decryptAll;
     QPushButton *remove;
     QSpacerItem *horizontalSpacer;
@@ -79,10 +79,10 @@ public:
 
         gridLayout = new QGridLayout();
         gridLayout->setObjectName("gridLayout");
-        cryptAll = new QPushButton(centralwidget);
-        cryptAll->setObjectName("cryptAll");
+        encryptAll = new QPushButton(centralwidget);
+        encryptAll->setObjectName("cryptAll");
 
-        gridLayout->addWidget(cryptAll, 3, 1, 1, 1);
+        gridLayout->addWidget(encryptAll, 3, 1, 1, 1);
 
         decryptAll = new QPushButton(centralwidget);
         decryptAll->setObjectName("decryptAll");
@@ -147,7 +147,7 @@ public:
         action_saveKey->setText(QCoreApplication::translate("MainWindow", "Sauvegarder la cl\303\251", nullptr));
         action_newKey->setText(QCoreApplication::translate("MainWindow", "Nouvelle cl\303\251", nullptr));
         action_saveSessionKey->setText(QCoreApplication::translate("MainWindow", "Cr\303\251er la cl\303\251 de session", nullptr));
-        cryptAll->setText(QCoreApplication::translate("MainWindow", "Chiffrer", nullptr));
+        encryptAll->setText(QCoreApplication::translate("MainWindow", "Chiffrer", nullptr));
         decryptAll->setText(QCoreApplication::translate("MainWindow", "D\303\251chiffrer", nullptr));
         remove->setText(QCoreApplication::translate("MainWindow", "Supprimer", nullptr));
         importButton->setText(QCoreApplication::translate("MainWindow", "Ajouter", nullptr));

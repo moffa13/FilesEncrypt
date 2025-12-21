@@ -33,7 +33,7 @@ enum EncryptDecrypt{
 };
 
 typedef struct {
-	EncryptDecrypt *state;
+    EncryptDecrypt state;
 	quint8 offsetBeforeContent;
 } EncryptDecrypt_light;
 
@@ -60,7 +60,7 @@ struct CryptInfos{
 	QString name;
 	QString size;
 	unsigned sizeBytes;
-	EncryptDecrypt* state;
+    EncryptDecrypt state;
 	QString stateStr;
 	QFutureWatcher<QPAIR_CRYPT_DEF>* watcher;
 	QFutureWatcher<FilesAndSize>* recursiveWatcher;

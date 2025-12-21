@@ -604,7 +604,7 @@ void FilesEncrypt::startDeleteAesTimer(){
  * @param filenameNeedsEncryption
  * @return
  */
-finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameNeedsEncryption) const{
+finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameNeedsEncryption){
 
 	file->seek(0);
 
@@ -629,6 +629,19 @@ finfo_s FilesEncrypt::encryptFile(QFile* file, EncryptDecrypt op, bool filenameN
 	connect(&crypt, SIGNAL(aes_encrypt_updated(qint32)), this, SIGNAL(decrypt_updated(qint32)));
 
 	EncryptDecrypt_s fileState{guessEncrypted(*file)};
+
+    if(fileState.state == ENCRYPT && fileState.version != 2){
+        /*
+        // This is bad because we update the progress handler
+        // Telling it that we decrypted some bytes (the file) for it to close
+        // But result is used but should not becuase the  fileState version is supposedly bad
+        Q_EMIT decrypt_updated(file->size() - result.offsetBeforeContent);
+        Q_EMIT file_done();
+        result.state = ENCRYPT;
+        return result;
+        */
+        Logging::Logger::warn("The file version is unknown");
+    }
 
 	// If there is no action to do to the file
 	if(op == fileState.state){

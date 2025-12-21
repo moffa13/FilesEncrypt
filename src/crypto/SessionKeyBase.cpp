@@ -42,7 +42,7 @@ void SessionKeyBase::action(QStringList const& items, EncryptDecrypt action){
 		conn = connect(_mainWindow, &MainWindow::finishedDiscover, [this, action](){
 			_mainWindow->action(action);
 			emitIfNoMoreEncrypt();
-		});
+        });
 		_mainWindow->addWhateverToList(items);
 	}
 }

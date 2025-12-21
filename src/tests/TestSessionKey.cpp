@@ -70,8 +70,9 @@ void TestSessionKey::shouldEncryptDecryptWithSessionKey(){
 		loop2.exec();
 
 		QVERIFY(w.allTasksDone(DECRYPT));
-		// Clear the window
-		w.m_filesListModel.removeLast();
+
+        // Clear the file
+        w.on_remove_clicked();
 
 
 		SessionKey sessionKey2(&w, ".session.key.test");
@@ -81,15 +82,18 @@ void TestSessionKey::shouldEncryptDecryptWithSessionKey(){
 		w.m_filesEncrypt->encryptFile(&f, ENCRYPT, false);
 		f.close();
 
-		QEventLoop loop3;
+        QEventLoop loop3;
 		sessionKey2.action(f.fileName(), DECRYPT);
+
 		QTest::qWait(1000);
 		QTimer::singleShot(1, &loop3, SLOT(quit()));
-		loop3.exec();
+        loop3.exec();
 
-		f.open(QFile::ReadOnly);
+        f.open(QFile::ReadOnly);
 		QVERIFY(f.read(5) == "Hello");
-		f.close();
+        f.close();
+
+
 
 
 	f.remove();

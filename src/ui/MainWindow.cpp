@@ -199,9 +199,9 @@ void MainWindow::updateAvailableButtons(){
 	unsigned encrypted{0};
 
 	// If no entries, all buttons must be greyed out
-	if(m_filesListModel.rowCount() == 0){
+    if(m_filesListModel.rowCount() == 0 || FilesEncrypt::getPendingCrypt() > 0){
 		ui->remove->setEnabled(false);
-		ui->cryptAll->setEnabled(false);
+        ui->encryptAll->setEnabled(false);
 		ui->decryptAll->setEnabled(false);
 		return;
 	}
@@ -213,17 +213,17 @@ void MainWindow::updateAvailableButtons(){
 
 	unsigned totalSize = 0;
 
-	for(auto const& dir : m_filesListModel.getDirs()){
+    for(auto const& dir : m_dirs){
 		// If at least one entry is partially encrypted, all the buttons have to be enabled so we can return after
 		totalSize += dir.sizeBytes;
 
-		if(*dir.state == PARTIAL){
-			ui->cryptAll->setEnabled(true);
+        if(dir.state == PARTIAL){
+            ui->encryptAll->setEnabled(true);
 			ui->decryptAll->setEnabled(true);
 			return;
-		}else if(*dir.state == ENCRYPT){
+        }else if(dir.state == ENCRYPT){
 			encrypted++;
-		}else if(*dir.state == DECRYPT){
+        }else if(dir.state == DECRYPT){
 			decrypted++;
 		}else{
 			assert(false && "This function must be called only when the state of each entry is known");
@@ -232,18 +232,18 @@ void MainWindow::updateAvailableButtons(){
 
 	// All are encrypted
 	if(totalSize == 0){
-		ui->cryptAll->setEnabled(false);
+        ui->encryptAll->setEnabled(false);
 		ui->decryptAll->setEnabled(false);
 	}else if(decrypted == 0){
-		ui->cryptAll->setEnabled(false);
+        ui->encryptAll->setEnabled(false);
 		ui->decryptAll->setEnabled(true);
 	}else if(encrypted == 0){
 		// All are decrypted
-		ui->cryptAll->setEnabled(true);
+        ui->encryptAll->setEnabled(true);
 		ui->decryptAll->setEnabled(false);
 	}else{
 		// Some are encrypted, some are decrypted, no partial
-		ui->cryptAll->setEnabled(true);
+        ui->encryptAll->setEnabled(true);
 		ui->decryptAll->setEnabled(true);
 	}
 
@@ -281,8 +281,13 @@ void MainWindow::closeSettings(){
 void MainWindow::keySelected(){
 	updateStatusBar();
 	if(m_filesEncrypt == nullptr) return;
-	connect(m_filesEncrypt, SIGNAL(keyDecrypted()), this, SLOT(updateStatusBar()));
-	connect(m_filesEncrypt, SIGNAL(keyEncrypted()), this, SLOT(updateStatusBar()));
+    connect(m_filesEncrypt, &FilesEncrypt::keyDecrypted,
+            this, &MainWindow::updateStatusBar,
+            Qt::UniqueConnection);
+
+    connect(m_filesEncrypt, &FilesEncrypt::keyEncrypted,
+            this, &MainWindow::updateStatusBar,
+            Qt::UniqueConnection);
 	delete m_progress;
 	m_progress = new Progress(&m_filesEncrypt, this);
 	m_progress->setFixedSize(m_progress->size());
@@ -295,9 +300,7 @@ void MainWindow::closeEvent(QCloseEvent *event){
 		event->ignore();
 		return;
 	}
-	QMainWindow::closeEvent(event);
-	EVP_cleanup();
-	QApplication::quit();
+    event->accept();
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent * event){
@@ -361,7 +364,7 @@ void MainWindow::showEvent(QShowEvent *event){
 	correctResize();
 }
 
-void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item) const{
+void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher, CryptInfos &item){
 	// Retrieve results
 	QList<QPAIR_CRYPT_DEF> res{watcher->future().results()};
 
@@ -370,13 +373,13 @@ void MainWindow::guessEncryptedFinished(QFutureWatcher<QPAIR_CRYPT_DEF>* watcher
 		EncryptDecrypt_light& fInfo{item.files[i.first]};
 
 		fInfo.offsetBeforeContent = i.second.offsetBeforeContent;
-		*(fInfo.state) = i.second.state;
+        fInfo.state = i.second.state;
 	}
 
 	changeRootState(item);
 }
 
-void MainWindow::changeRootState(CryptInfos &item, bool fileModified) const{
+void MainWindow::changeRootState(CryptInfos &item, bool fileModified){
 
 	auto length = item.isFile ? 1 : item.files.size();
 
@@ -385,9 +388,9 @@ void MainWindow::changeRootState(CryptInfos &item, bool fileModified) const{
 
 	if(!item.isFile){
 		for(auto const& i : item.files){
-			if(*(i.state) == EncryptDecrypt::ENCRYPT){
+            if(i.state == EncryptDecrypt::ENCRYPT){
 				++crypted;
-			}else if(*(i.state) == EncryptDecrypt::DECRYPT){
+            }else if(i.state == EncryptDecrypt::DECRYPT){
 				++uncrypted;
 			}
 			if(crypted != 0 && uncrypted != 0){
@@ -397,22 +400,22 @@ void MainWindow::changeRootState(CryptInfos &item, bool fileModified) const{
 			}
 		}
 	}else{
-		if(*item.state == EncryptDecrypt::ENCRYPT){
+        if(item.state == EncryptDecrypt::ENCRYPT){
 			crypted = 1;
-		}else if(*item.state == EncryptDecrypt::DECRYPT){
+        }else if(item.state == EncryptDecrypt::DECRYPT){
 			uncrypted = 1;
 		}
 	}
 
 	if(length == 0 || uncrypted == length){
 		item.stateStr = tr("Non");
-		*item.state = DECRYPT;
+        item.state = DECRYPT;
 	}else if(crypted == length){
 		item.stateStr = tr("Oui");
-		*item.state = ENCRYPT;
+        item.state = ENCRYPT;
 	}else{
 		item.stateStr = "-";
-		*item.state = PARTIAL;
+        item.state = PARTIAL;
 	}
 
 	if(fileModified)
@@ -447,7 +450,7 @@ finfo_s MainWindow::encrypt(QString const &file, EncryptDecrypt action) const{
  * Emits finishedDiscover when all the files added with addWhateverToList have been processed
  * @brief MainWindow::checkNoFilesProcessingToList
  */
-void MainWindow::checkNoFilesProcessingToList() const{
+void MainWindow::checkNoFilesProcessingToList(){
 	if(_current_adding_items == 0){
         Q_EMIT finishedDiscover();
 	}
@@ -464,7 +467,7 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 
 	if(!fromMany) _current_adding_items++;
 
-    if(!item.isEmpty() && !m_filesListModel.getDirs().contains(item)){ // Pre-conditions
+    if(!item.isEmpty() && !m_dirs.contains(item)){ // Pre-conditions
 
 		CryptInfos infos; // All the informations about an entry (a complete recursive directory or a file)
 
@@ -499,10 +502,10 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 				_current_adding_items--;
 
 				if(!watcher->isCanceled()){
-					auto &infos{m_filesListModel.getDir(item)};
+                    auto &infos{m_dirs[item]};
 					guessEncryptedFinished(watcher, infos);
 
-					m_filesListModel.update(item);
+                    m_filesListModel.update(item, infos);
 
 					updateAvailableButtons();
 
@@ -519,21 +522,21 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 			connect(watcherRecursiveFilesDiscover, &QFutureWatcher<FilesAndSize>::finished, [this, item, watcher, watcherRecursiveFilesDiscover](){
 
 				if(!watcherRecursiveFilesDiscover->isCanceled()){
-					CryptInfos &infos{m_filesListModel.getDir(item)};
+                    CryptInfos &infos{m_dirs[item]};
 					FilesAndSize res{watcherRecursiveFilesDiscover->result()};
-					infos.size = utilities::speed_to_human(res.size);
+                    infos.size = utilities::speed_to_human(res.size);
 					infos.sizeBytes = res.size;
 					QStringList &files = res.files;
                     Q_FOREACH(auto const& file, files){
 						EncryptDecrypt_light state;
 						state.offsetBeforeContent = 0; // Will be set in guessEncryptedFinished
-						state.state = new EncryptDecrypt{NOT_FINISHED};
+                        state.state = EncryptDecrypt::NOT_FINISHED;
 						infos.files[file] = state;
 					}
 					QFuture<QPAIR_CRYPT_DEF> future = QtConcurrent::mapped(infos.files.keys(), &MainWindow::guessEncrypted);
 					watcher->setFuture(future);
 					infos.recursiveWatcher = nullptr;
-					m_filesListModel.update(item);
+                    m_filesListModel.update(item, infos);
 				}
 
 				watcherRecursiveFilesDiscover->deleteLater();
@@ -544,7 +547,7 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 			watcherRecursiveFilesDiscover->setFuture(future);
 
 			infos.type = tr("Dossier");
-			infos.state = new EncryptDecrypt(NOT_FINISHED);
+            infos.state = EncryptDecrypt{NOT_FINISHED};
 
 		}else{
 			infos.isFile = true;
@@ -554,10 +557,10 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 
 			EncryptDecrypt_light state;
 			state.offsetBeforeContent = guess.second.offsetBeforeContent;
-			state.state = new EncryptDecrypt{guess.second.state};
+            state.state = EncryptDecrypt{guess.second.state};
 
 			filesAndState[info.absoluteFilePath()] = state;
-			infos.state = new EncryptDecrypt{guess.second.state};
+            infos.state = EncryptDecrypt{guess.second.state};
 			changeRootState(infos);
 
 			// Show the type
@@ -568,8 +571,10 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 
 		infos.files = filesAndState;
 
+
 		m_filesListModel.insert(item, infos);
-		m_filesListModel.update(item);
+        m_filesListModel.update(item);
+        m_dirs.insert(item, infos);
 
 		if(infos.isFile){
 			updateAvailableButtons();
@@ -577,7 +582,8 @@ void MainWindow::addWhateverToList(QString const& item, bool fromMany){
 			checkNoFilesProcessingToList();
 		}
     }else{
-        Q_EMIT finishedDiscover();
+        _current_adding_items--;
+        checkNoFilesProcessingToList();
     }
 }
 
@@ -628,23 +634,21 @@ void MainWindow::on_cryptAll_clicked(){
 
 bool MainWindow::allTasksDone(EncryptDecrypt action){
 	if(action == PARTIAL) throw std::runtime_error("Action can not be partial");
-	for(QMap<QString, CryptInfos>::const_iterator it = m_filesListModel.getDirs().constBegin(); it != m_filesListModel.getDirs().constEnd(); ++it){
-		if(*(it.value().state) != action) return false;
+    for(QMap<QString, CryptInfos>::const_iterator it = m_dirs.constBegin(); it != m_dirs.constEnd(); ++it){
+        if(it.value().state != action) return false;
 	}
 	return true;
 }
 
 void MainWindow::action(EncryptDecrypt action){
 
-	if(m_encrypting || m_filesListModel.rowCount() == 0 || _current_adding_items > 0) return;
+    if(FilesEncrypt::getPendingCrypt() > 0 || m_dirs.size() == 0 || _current_adding_items > 0) return;
 
 	_lastAction = action;
 
 	if(!beSureKeyIsSelectedAndValid([this, action]{
 		this->action(action);
 	})) return;
-
-	m_encrypting = true;
 
 	qint64 max{0};
 	qint64 items_number{0};
@@ -661,7 +665,7 @@ void MainWindow::action(EncryptDecrypt action){
 		}
 	}
 
-	for(auto const& item : m_filesListModel.getDirs().values()){
+    for(auto const& item : m_dirs.values()){
 
 		bool problemWrite{false};
 
@@ -672,7 +676,7 @@ void MainWindow::action(EncryptDecrypt action){
 			EncryptDecrypt_light const& state{it.value()};
 			// If current state != from what you'd do
 
-			if(*state.state != action && f.isWritable()){
+            if(state.state != action && f.isWritable()){
 				if(action == EncryptDecrypt::ENCRYPT){
 					max += f.size();
 				}else{
@@ -704,85 +708,107 @@ void MainWindow::action(EncryptDecrypt action){
 		m_progress->setFileMax(items_number - item_does_not_need_action);
 		m_progress->setMax(max);
 
-		for(QMap<QString, CryptInfos>::const_iterator it{m_filesListModel.getDirs().constBegin()}; it != m_filesListModel.getDirs().constEnd(); ++it){
+        const auto keys = m_dirs.keys();
+        for (const QString& orig_name : keys) {
 
-			CryptInfos& item{m_filesListModel.getDir(it.key())};
-			QString orig_name{it.key()};
+            CryptInfos& item{m_dirs[orig_name]};
 
-			if(*item.state != action){ // Check again and avoid to do any action if it's not needed
+            if(item.state != action){ // Check again and avoid to do any action if it's not needed
 
 				item.stateStr = tr("En cours...");
+                m_filesListModel.update(orig_name, item);
 
 				QFutureWatcher<void>* watcher = new QFutureWatcher<void>;
 
 				QStringList const *l = new QStringList{item.files.keys()};
 
-				connect(watcher, &QFutureWatcher<void>::finished, [this, watcher, &item, l, orig_name](){
+                auto currentKey = QSharedPointer<QString>::create(orig_name);
+
+                connect(watcher, &QFutureWatcher<void>::finished, [this, watcher, l, currentKey](){
 					delete l;
-					changeRootState(item, true);
-					m_encrypting = false;
+                    const QString key = *currentKey;
+                    auto itDir = m_dirs.find(key);
+                    if (itDir != m_dirs.end()) {
+                        changeRootState(itDir.value(), true);
+                        m_filesListModel.update(key, itDir.value());
+                    }
                     Q_EMIT file_done();
 					if(FilesEncrypt::getPendingCrypt() == 0){
 						Crypt::setAborted(false);
 						Crypt::setPaused(false);
 						updateAvailableButtons();
 					}
-
-					m_filesListModel.update(orig_name);
 					watcher->deleteLater();
 				});
 
-				std::function<void(QString const &)> func = [this, action, &item](QString const &file){
+                std::function<void(QString const &)> func = [this, action, orig_name, currentKey](QString const &file) {
+                    finfo_s encrypt_result = encrypt(file, action);
 
-					s_encryptMutex.lock(); // Lock this
+                    QMetaObject::invokeMethod(this, [this, file, encrypt_result, currentKey]() {
+                        const QString key = *currentKey;
+                        auto itDir = m_dirs.find(key);
+                        if (itDir == m_dirs.end()) return;
+                        CryptInfos item = itDir.value();
 
-					EncryptDecrypt_light state = item.files[file]; // Current infos of the file
+                        auto itF = item.files.find(file);
+                        // File was found
+                        if (itF != item.files.end()){
+                            itF->state = encrypt_result.state;
+                            itF->offsetBeforeContent = encrypt_result.offsetBeforeContent;
+                        }
 
-					s_encryptMutex.unlock();
+                        // The final name is not the original
+                        // So we need to reinsert the file with good name
+                        if (encrypt_result.success && encrypt_result.name != file) {
+                            auto saved = item.files.take(file);
+                            item.files.insert(encrypt_result.name, saved);
+                        }
 
-					if(*state.state != action){
 
-						finfo_s encrypt_result = encrypt(file, action);
 
-						*state.state = encrypt_result.state;
+                        if (item.isFile)
+                            item.state = encrypt_result.state;
 
-						// If single file, also change global state
-						if(item.isFile)
-							*item.state = encrypt_result.state;
+                        if (item.isFile && encrypt_result.success && encrypt_result.name != key) {
+                            const QString newKey = encrypt_result.name;
 
-						if(encrypt_result.success){
-							s_encryptMutex.lock(); // Lock this
-							// Because the filename changed, we delete the concerned file and recreate it with the appropriate name
-							item.files.remove(file);
-							item.files.insert(encrypt_result.name, {state.state, encrypt_result.offsetBeforeContent});
-							if(item.isFile){
-								item.name = encrypt_result.name;
-							}
-							s_encryptMutex.unlock();
-						}
-					}
-				};
+                            item.name = newKey;
+                            m_dirs.erase(itDir);
+                            m_dirs.insert(newKey, item);
+                            *currentKey = newKey;
+                            m_filesListModel.remove(key);
+                            m_filesListModel.insert(newKey, item);
+                            m_filesListModel.update(newKey, item);
+                            return;
+                        }
+
+                        itDir.value() = item;
+                        m_filesListModel.update(key, item);
+
+
+                    }, Qt::QueuedConnection);
+                };
 
 				QFuture<void> future = QtConcurrent::map(*l, func);
 				watcher->setFuture(future);
 				m_progress->encryptionStarted();
-				m_progress->show();
+                if(isVisible())
+                    m_progress->show();
+                updateAvailableButtons();
 			}
 		}
-	}else{
-		m_encrypting = false;
-	}
+    }
 }
 
 QString MainWindow::getCurrentDir() const{
 	int const row{ui->filesList->currentIndex().row()};
-	return m_filesListModel.getDirs().keys().at(row);
+    return m_filesListModel.get(row);
 }
 
 void MainWindow::on_remove_clicked(){
 	int const row{ ui->filesList->currentIndex().row() };
 	if(row >= 0){
-		CryptInfos const& c{m_filesListModel.getDir(getCurrentDir())};
+        CryptInfos const& c{m_dirs[getCurrentDir()]};
 		if(c.recursiveWatcher != nullptr){
 			c.recursiveWatcher->cancel();
 			c.recursiveWatcher->waitForFinished();
@@ -792,15 +818,13 @@ void MainWindow::on_remove_clicked(){
 			c.watcher->waitForFinished();
 		}
 
-		for(QMap<QString, EncryptDecrypt_light>::const_iterator it{c.files.constBegin()}; it != c.files.constEnd(); ++it){
-			delete it.value().state;
-		}
-		delete c.state;
-
+        m_dirs.remove(getCurrentDir());
 		m_filesListModel.remove(getCurrentDir());
+
 		updateAvailableButtons();
-	}else if(m_filesListModel.getDirs().size() > 0){
-		m_filesListModel.removeLast();
+    }else if(m_dirs.size() > 0){ // No row is selected and there model not empty
+        QString elem = m_filesListModel.removeLast();
+        m_dirs.remove(elem);
 	}
 }
 
