@@ -15,9 +15,6 @@ class SessionKey : public SessionKeyBase
 		QByteArray readSessionKey() override;
 	private:
 		void encryptAndStoreSessionKey(const char *key) override;
-	Q_SIGNALS:
-		void finishedAction();
-		void keyReady();
 };
 
 #endif // SESSIONKEY_WIN_H

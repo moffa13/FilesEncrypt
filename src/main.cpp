@@ -174,9 +174,9 @@ int main(int argc, char *argv[]){
 			}else{
 				s.action(getArgv(2),  action);
 			}
-		});
+        });
 		QTimer::singleShot(0, [&s](){ // To be sure loop is executing
-			s.checkForSessionKey();
+            s.checkForSessionKey();
 		});
 		loop.exec();
 		QTimer::singleShot(0, [](){ // Tell the main event loop to exit
